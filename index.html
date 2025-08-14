@@ -255,6 +255,43 @@
                         </div>
                     </div>
 
+                    <!-- Pet Photo Upload Section -->
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border-2 border-purple-200">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <span class="text-2xl mr-2">📸</span>
+                            รูปภาพสัตว์เลี้ยง
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <!-- Upload Area -->
+                            <div class="relative">
+                                <input type="file" id="petPhoto" accept="image/*" capture="environment" 
+                                       class="hidden" onchange="handlePhotoUpload(this)">
+                                <div id="uploadArea" onclick="document.getElementById('petPhoto').click()" 
+                                     class="border-2 border-dashed border-purple-300 rounded-2xl p-8 text-center cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition-all duration-300">
+                                    <div class="text-6xl mb-4">📷</div>
+                                    <div class="text-lg font-semibold text-gray-700 mb-2">คลิกเพื่อถ่ายรูปหรือเลือกรูป</div>
+                                    <div class="text-sm text-gray-500">รองรับไฟล์ JPG, PNG, WEBP (ขนาดไม่เกิน 5MB)</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Photo Preview -->
+                            <div id="photoPreview" class="hidden">
+                                <div class="relative inline-block">
+                                    <img id="previewImage" src="" alt="Pet Photo" 
+                                         class="w-32 h-32 object-cover rounded-2xl border-4 border-white shadow-lg">
+                                    <button type="button" onclick="removePhoto()" 
+                                            class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition-colors">
+                                        ✕
+                                    </button>
+                                </div>
+                                <div class="mt-2 text-sm text-gray-600">
+                                    <span id="photoInfo"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Vaccination Section -->
                     <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 border-2 border-green-200">
                         <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
@@ -369,7 +406,7 @@
             enabled: false // เปลี่ยนเป็น true เมื่อตั้งค่าเสร็จ
         };
 
-        // Firebase Configuration
+        // Firebase Configuration - ตั้งค่าครั้งเดียวใช้ได้ยาว
         const FIREBASE_CONFIG = {
             apiKey: "",
             authDomain: "",
@@ -377,16 +414,22 @@
             storageBucket: "",
             messagingSenderId: "",
             appId: "",
-            enabled: false
+            enabled: false,
+            autoRetry: true,
+            maxRetries: 3,
+            retryDelay: 2000
         };
 
         let firebaseApp = null;
         let firestore = null;
+        let firebaseInitialized = false;
+        let connectionRetries = 0;
 
         let pets = JSON.parse(localStorage.getItem('marketPets')) || [];
         let petIdCounter = parseInt(localStorage.getItem('petIdCounter')) || 1;
         let isOnline = navigator.onLine;
         let syncQueue = JSON.parse(localStorage.getItem('syncQueue')) || [];
+        let currentPetPhoto = null;
 
         // ตรวจสอบสถานะอินเทอร์เน็ต
         window.addEventListener('online', () => {
@@ -400,78 +443,286 @@
             updateConnectionStatus();
         });
 
-        // Firebase Functions
-        function initializeFirebase() {
-            if (!FIREBASE_CONFIG.enabled) return false;
+        // Firebase Functions - ระบบเชื่อมต่อที่แข็งแกร่ง
+        async function initializeFirebase() {
+            if (!FIREBASE_CONFIG.enabled || firebaseInitialized) return firebaseInitialized;
             
             try {
-                firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
-                firestore = firebase.firestore();
+                // ตรวจสอบว่า Firebase SDK โหลดแล้วหรือยัง
+                if (typeof firebase === 'undefined') {
+                    console.warn('Firebase SDK not loaded yet, retrying...');
+                    if (connectionRetries < FIREBASE_CONFIG.maxRetries) {
+                        connectionRetries++;
+                        setTimeout(() => initializeFirebase(), FIREBASE_CONFIG.retryDelay);
+                    }
+                    return false;
+                }
+
+                // ลบ app เดิมถ้ามี (ป้องกัน duplicate app error)
+                try {
+                    const existingApp = firebase.app('pet-registration');
+                    await existingApp.delete();
+                } catch (e) {
+                    // ไม่มี app เดิม ไม่ต้องทำอะไร
+                }
+
+                // สร้าง Firebase app ใหม่
+                firebaseApp = firebase.initializeApp(FIREBASE_CONFIG, 'pet-registration');
+                firestore = firebase.firestore(firebaseApp);
+                
+                // ตั้งค่า Firestore settings สำหรับประสิทธิภาพ
+                firestore.settings({
+                    cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+                });
+
+                // ทดสอบการเชื่อมต่อ
+                await testFirebaseConnection();
+                
+                firebaseInitialized = true;
+                connectionRetries = 0;
                 console.log('Firebase initialized successfully');
+                
+                // ตั้งค่า offline persistence
+                try {
+                    await firestore.enablePersistence({ synchronizeTabs: true });
+                    console.log('Firebase offline persistence enabled');
+                } catch (err) {
+                    if (err.code === 'failed-precondition') {
+                        console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time');
+                    } else if (err.code === 'unimplemented') {
+                        console.warn('Browser doesn\'t support persistence');
+                    }
+                }
+                
                 return true;
             } catch (error) {
                 console.error('Firebase initialization error:', error);
+                firebaseInitialized = false;
+                
+                // Auto retry
+                if (FIREBASE_CONFIG.autoRetry && connectionRetries < FIREBASE_CONFIG.maxRetries) {
+                    connectionRetries++;
+                    console.log(`Retrying Firebase initialization (${connectionRetries}/${FIREBASE_CONFIG.maxRetries})...`);
+                    setTimeout(() => initializeFirebase(), FIREBASE_CONFIG.retryDelay);
+                }
+                
                 return false;
             }
         }
 
-        async function saveToFirebase(petData) {
-            if (!firestore) return false;
+        async function testFirebaseConnection() {
+            if (!firestore) throw new Error('Firestore not initialized');
+            
+            const testDoc = firestore.collection('_health').doc('connection-test');
+            await testDoc.set({
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                status: 'connected'
+            });
+            
+            const doc = await testDoc.get();
+            if (!doc.exists) {
+                throw new Error('Connection test failed');
+            }
+            
+            // ลบ test document
+            await testDoc.delete();
+        }
+
+        async function saveToFirebase(petData, retryCount = 0) {
+            if (!firestore || !firebaseInitialized) {
+                if (retryCount < FIREBASE_CONFIG.maxRetries) {
+                    await initializeFirebase();
+                    return saveToFirebase(petData, retryCount + 1);
+                }
+                return false;
+            }
             
             try {
-                await firestore.collection('pets').doc(petData.id).set({
+                const docRef = firestore.collection('pets').doc(petData.id);
+                await docRef.set({
                     ...petData,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    version: 1 // สำหรับ conflict resolution
+                }, { merge: true });
+                
+                console.log(`Pet ${petData.id} saved to Firebase successfully`);
                 return true;
             } catch (error) {
                 console.error('Firebase save error:', error);
+                
+                // Auto retry สำหรับ network errors
+                if (error.code === 'unavailable' && retryCount < FIREBASE_CONFIG.maxRetries) {
+                    console.log(`Retrying save operation (${retryCount + 1}/${FIREBASE_CONFIG.maxRetries})...`);
+                    await new Promise(resolve => setTimeout(resolve, FIREBASE_CONFIG.retryDelay));
+                    return saveToFirebase(petData, retryCount + 1);
+                }
+                
                 return false;
             }
         }
 
-        async function loadFromFirebase() {
-            if (!firestore) return [];
+        async function loadFromFirebase(retryCount = 0) {
+            if (!firestore || !firebaseInitialized) {
+                if (retryCount < FIREBASE_CONFIG.maxRetries) {
+                    await initializeFirebase();
+                    return loadFromFirebase(retryCount + 1);
+                }
+                return [];
+            }
             
             try {
-                const snapshot = await firestore.collection('pets').orderBy('createdAt', 'desc').get();
+                // ใช้ cache ก่อน แล้วค่อย sync จาก server
+                const snapshot = await firestore.collection('pets')
+                    .orderBy('createdAt', 'desc')
+                    .get({ source: 'cache' });
+                
                 const firebasePets = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    firebasePets.push({
-                        ...data,
-                        id: doc.id
-                    });
+                    // กรองข้อมูลที่เสียหาย
+                    if (data && data.id && data.petName && data.ownerName) {
+                        firebasePets.push({
+                            ...data,
+                            id: doc.id,
+                            fromCache: snapshot.metadata.fromCache
+                        });
+                    }
                 });
+                
+                // ถ้าได้ข้อมูลจาก cache แล้ว ให้ sync จาก server ในพื้นหลัง
+                if (snapshot.metadata.fromCache) {
+                    firestore.collection('pets')
+                        .orderBy('createdAt', 'desc')
+                        .get({ source: 'server' })
+                        .then(serverSnapshot => {
+                            if (!serverSnapshot.metadata.fromCache) {
+                                console.log('Firebase data synced from server');
+                                // อัพเดทข้อมูลใหม่ถ้าจำเป็น
+                                const serverPets = [];
+                                serverSnapshot.forEach(doc => {
+                                    const data = doc.data();
+                                    if (data && data.id && data.petName && data.ownerName) {
+                                        serverPets.push({ ...data, id: doc.id });
+                                    }
+                                });
+                                
+                                // เปรียบเทียบและอัพเดทถ้าข้อมูลต่างกัน
+                                if (JSON.stringify(serverPets) !== JSON.stringify(firebasePets)) {
+                                    console.log('Server data differs from cache, updating...');
+                                    // อัพเดทข้อมูลในระบบ
+                                    updateLocalDataFromFirebase(serverPets);
+                                }
+                            }
+                        })
+                        .catch(error => console.warn('Background sync failed:', error));
+                }
+                
+                console.log(`Loaded ${firebasePets.length} pets from Firebase`);
                 return firebasePets;
             } catch (error) {
                 console.error('Firebase load error:', error);
+                
+                // Auto retry สำหรับ network errors
+                if (error.code === 'unavailable' && retryCount < FIREBASE_CONFIG.maxRetries) {
+                    console.log(`Retrying load operation (${retryCount + 1}/${FIREBASE_CONFIG.maxRetries})...`);
+                    await new Promise(resolve => setTimeout(resolve, FIREBASE_CONFIG.retryDelay));
+                    return loadFromFirebase(retryCount + 1);
+                }
+                
                 return [];
             }
         }
 
-        async function deleteFromFirebase(petId) {
-            if (!firestore) return false;
+        async function deleteFromFirebase(petId, retryCount = 0) {
+            if (!firestore || !firebaseInitialized) {
+                if (retryCount < FIREBASE_CONFIG.maxRetries) {
+                    await initializeFirebase();
+                    return deleteFromFirebase(petId, retryCount + 1);
+                }
+                return false;
+            }
             
             try {
                 await firestore.collection('pets').doc(petId).delete();
+                console.log(`Pet ${petId} deleted from Firebase successfully`);
                 return true;
             } catch (error) {
                 console.error('Firebase delete error:', error);
+                
+                // Auto retry สำหรับ network errors
+                if (error.code === 'unavailable' && retryCount < FIREBASE_CONFIG.maxRetries) {
+                    console.log(`Retrying delete operation (${retryCount + 1}/${FIREBASE_CONFIG.maxRetries})...`);
+                    await new Promise(resolve => setTimeout(resolve, FIREBASE_CONFIG.retryDelay));
+                    return deleteFromFirebase(petId, retryCount + 1);
+                }
+                
                 return false;
+            }
+        }
+
+        function updateLocalDataFromFirebase(firebasePets) {
+            // อัพเดทข้อมูลในเครื่องด้วยข้อมูลจาก Firebase
+            const localPetIds = pets.map(pet => pet.id);
+            const newPets = firebasePets.filter(pet => !localPetIds.includes(pet.id));
+            
+            if (newPets.length > 0) {
+                pets = [...newPets, ...pets];
+                savePets();
+                renderPets();
+                updateTotalCount();
+                showSyncStatus(`อัพเดทข้อมูลจาก Firebase: ${newPets.length} รายการใหม่`, 'success');
+            }
+        }
+
+        // Real-time listener สำหรับ Firebase
+        function setupFirebaseListener() {
+            if (!firestore || !firebaseInitialized) return;
+            
+            try {
+                const unsubscribe = firestore.collection('pets')
+                    .orderBy('createdAt', 'desc')
+                    .onSnapshot(
+                        (snapshot) => {
+                            console.log('Firebase real-time update received');
+                            const firebasePets = [];
+                            snapshot.forEach(doc => {
+                                const data = doc.data();
+                                if (data && data.id && data.petName && data.ownerName) {
+                                    firebasePets.push({ ...data, id: doc.id });
+                                }
+                            });
+                            
+                            // อัพเดทข้อมูลในเครื่องแบบ real-time
+                            updateLocalDataFromFirebase(firebasePets);
+                        },
+                        (error) => {
+                            console.error('Firebase listener error:', error);
+                            // ลองตั้งค่า listener ใหม่หลังจาก 5 วินาที
+                            setTimeout(setupFirebaseListener, 5000);
+                        }
+                    );
+                
+                // เก็บ unsubscribe function ไว้ใช้ภายหลัง
+                window.firebaseUnsubscribe = unsubscribe;
+                console.log('Firebase real-time listener setup successfully');
+            } catch (error) {
+                console.error('Failed to setup Firebase listener:', error);
             }
         }
 
         function updateConnectionStatus() {
             const statusElement = document.getElementById('connectionStatus');
             
-            if (isOnline && FIREBASE_CONFIG.enabled) {
-                statusElement.innerHTML = '<span class="text-green-600">🟢 เชื่อมต่อ Firebase</span>';
+            if (isOnline && FIREBASE_CONFIG.enabled && firebaseInitialized) {
+                statusElement.innerHTML = '<span class="text-green-600">🟢 เชื่อมต่อ Firebase (Real-time)</span>';
                 statusElement.className = 'text-sm font-medium bg-green-50 px-3 py-1 rounded-full border border-green-200';
+            } else if (isOnline && FIREBASE_CONFIG.enabled && !firebaseInitialized) {
+                statusElement.innerHTML = '<span class="text-orange-600">🟠 กำลังเชื่อมต่อ Firebase...</span>';
+                statusElement.className = 'text-sm font-medium bg-orange-50 px-3 py-1 rounded-full border border-orange-200';
             } else if (isOnline && GOOGLE_SHEETS_CONFIG.enabled) {
-                statusElement.innerHTML = '<span class="text-green-600">🟢 เชื่อมต่อ Google Sheets</span>';
-                statusElement.className = 'text-sm font-medium bg-green-50 px-3 py-1 rounded-full border border-green-200';
+                statusElement.innerHTML = '<span class="text-blue-600">🔵 เชื่อมต่อ Google Sheets</span>';
+                statusElement.className = 'text-sm font-medium bg-blue-50 px-3 py-1 rounded-full border border-blue-200';
             } else if (isOnline && !GOOGLE_SHEETS_CONFIG.enabled && !FIREBASE_CONFIG.enabled) {
                 statusElement.innerHTML = '<span class="text-yellow-600">🟡 ออนไลน์ (ยังไม่ตั้งค่าฐานข้อมูล)</span>';
                 statusElement.className = 'text-sm font-medium bg-yellow-50 px-3 py-1 rounded-full border border-yellow-200';
@@ -566,6 +817,96 @@
             localStorage.setItem('petIdCounter', petIdCounter.toString());
         }
 
+        // Photo handling functions
+        function handlePhotoUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            // ตรวจสอบประเภทไฟล์
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('กรุณาเลือกไฟล์รูปภาพ (JPG, PNG, WEBP) เท่านั้น');
+                input.value = '';
+                return;
+            }
+            
+            // ตรวจสอบขนาดไฟล์ (5MB)
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert('ขนาดไฟล์ใหญ่เกินไป กรุณาเลือกไฟล์ที่มีขนาดไม่เกิน 5MB');
+                input.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // บีบอัดรูปภาพก่อนเก็บ
+                compressImage(e.target.result, 800, 0.8, function(compressedDataUrl) {
+                    currentPetPhoto = compressedDataUrl;
+                    showPhotoPreview(compressedDataUrl, file);
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function compressImage(dataUrl, maxWidth, quality, callback) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // คำนวณขนาดใหม่
+                let { width, height } = img;
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                // วาดรูปลงใน canvas
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // แปลงเป็น data URL
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                callback(compressedDataUrl);
+            };
+            img.src = dataUrl;
+        }
+        
+        function showPhotoPreview(dataUrl, file) {
+            const uploadArea = document.getElementById('uploadArea');
+            const photoPreview = document.getElementById('photoPreview');
+            const previewImage = document.getElementById('previewImage');
+            const photoInfo = document.getElementById('photoInfo');
+            
+            // ซ่อน upload area และแสดง preview
+            uploadArea.style.display = 'none';
+            photoPreview.classList.remove('hidden');
+            
+            // แสดงรูป
+            previewImage.src = dataUrl;
+            
+            // แสดงข้อมูลไฟล์
+            const sizeKB = Math.round(file.size / 1024);
+            photoInfo.textContent = `${file.name} (${sizeKB} KB)`;
+        }
+        
+        function removePhoto() {
+            const uploadArea = document.getElementById('uploadArea');
+            const photoPreview = document.getElementById('photoPreview');
+            const petPhotoInput = document.getElementById('petPhoto');
+            
+            // รีเซ็ตค่า
+            currentPetPhoto = null;
+            petPhotoInput.value = '';
+            
+            // แสดง upload area และซ่อน preview
+            uploadArea.style.display = 'block';
+            photoPreview.classList.add('hidden');
+        }
+
         function generatePetId() {
             const id = `PET${petIdCounter.toString().padStart(3, '0')}`;
             petIdCounter++;
@@ -652,9 +993,20 @@
                 <div class="pet-card rounded-2xl p-6 card-hover border-l-4 ${pet.petType === 'หมา' ? 'border-l-blue-500' : 'border-l-pink-500'}">
                     <div class="flex justify-between items-start mb-4">
                         <div class="flex items-center space-x-4">
-                            <div class="text-4xl ${pet.petType === 'หมา' ? 'bg-blue-100' : 'bg-pink-100'} rounded-full p-3">
-                                ${pet.petType === 'หมา' ? '🐕' : '🐱'}
-                            </div>
+                            ${pet.petPhoto ? `
+                                <div class="relative">
+                                    <img src="${pet.petPhoto}" alt="${pet.petName}" 
+                                         class="w-16 h-16 object-cover rounded-full border-4 ${pet.petType === 'หมา' ? 'border-blue-200' : 'border-pink-200'} shadow-lg cursor-pointer hover:scale-110 transition-transform duration-300"
+                                         onclick="showFullImage('${pet.petPhoto}', '${pet.petName}')">
+                                    <div class="absolute -bottom-1 -right-1 text-lg ${pet.petType === 'หมา' ? 'bg-blue-100' : 'bg-pink-100'} rounded-full p-1">
+                                        ${pet.petType === 'หมา' ? '🐕' : '🐱'}
+                                    </div>
+                                </div>
+                            ` : `
+                                <div class="text-4xl ${pet.petType === 'หมา' ? 'bg-blue-100' : 'bg-pink-100'} rounded-full p-3">
+                                    ${pet.petType === 'หมา' ? '🐕' : '🐱'}
+                                </div>
+                            `}
                             <div>
                                 <h3 class="font-bold text-xl text-gray-800 mb-1">${pet.petName}</h3>
                                 <div class="flex items-center space-x-2">
@@ -878,11 +1230,13 @@
                 vaccineDate: document.getElementById('vaccineDate').value,
                 vaccineLocation: document.getElementById('vaccineLocation').value,
                 otherVaccines: document.getElementById('otherVaccines').value,
-                petDescription: document.getElementById('petDescription').value
+                petDescription: document.getElementById('petDescription').value,
+                petPhoto: currentPetPhoto // เพิ่มรูปภาพ
             };
             
             addPet(petData);
             this.reset();
+            removePhoto(); // รีเซ็ตรูปภาพด้วย
             
             // Show success message
             const button = this.querySelector('button[type="submit"]');
@@ -1130,87 +1484,137 @@ function doGet(e) {
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto';
             modal.innerHTML = `
-                <div class="bg-white rounded-3xl p-8 max-w-2xl w-full my-8 max-h-screen overflow-y-auto">
+                <div class="bg-white rounded-3xl p-8 max-w-3xl w-full my-8 max-h-screen overflow-y-auto">
                     <div class="flex justify-between items-center mb-6 sticky top-0 bg-white pb-4 border-b">
-                        <h2 class="text-2xl font-bold text-gray-800">🔥 ตั้งค่า Firebase</h2>
+                        <h2 class="text-2xl font-bold text-gray-800">🔥 ตั้งค่า Firebase - ครั้งเดียวจบ!</h2>
                         <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 text-2xl font-bold hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center">&times;</button>
                     </div>
                     
                     <div class="space-y-6">
                         <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r-xl">
-                            <h3 class="font-bold text-orange-800 mb-2">🚀 ขั้นตอนการตั้งค่า Firebase:</h3>
+                            <h3 class="font-bold text-orange-800 mb-2">🚀 ขั้นตอนง่ายๆ เพียง 5 ขั้นตอน:</h3>
                             <ol class="list-decimal list-inside space-y-2 text-sm text-orange-700">
-                                <li><strong>สร้างโปรเจกต์:</strong> เปิด <a href="https://console.firebase.google.com" target="_blank" class="underline font-semibold">Firebase Console</a> → คลิก "Create a project"</li>
-                                <li><strong>ตั้งชื่อโปรเจกต์:</strong> ใส่ชื่อโปรเจกต์ เช่น "pet-registration-system"</li>
-                                <li><strong>เปิดใช้ Firestore:</strong> ไปที่ "Firestore Database" → คลิก "Create database" → เลือก "Start in test mode"</li>
-                                <li><strong>เพิ่ม Web App:</strong> ไปที่ "Project settings" → คลิก "Add app" → เลือก Web (</>) → ตั้งชื่อ App</li>
-                                <li><strong>คัดลอก Config:</strong> หลังสร้าง App จะได้ Firebase config object → คัดลอกค่าต่างๆ มาใส่ด้านล่าง</li>
-                                <li><strong>ตั้งค่า Security Rules:</strong> ไปที่ Firestore → Rules → แก้ไขเป็น allow read, write: if true; (สำหรับทดสอบ)</li>
+                                <li><strong>สร้างโปรเจกต์:</strong> เปิด <a href="https://console.firebase.google.com" target="_blank" class="underline font-semibold">Firebase Console</a> → คลิก "Create a project" → ตั้งชื่อโปรเจกต์</li>
+                                <li><strong>เปิดใช้ Firestore:</strong> ไปที่ "Firestore Database" → "Create database" → "Start in test mode" → เลือก location</li>
+                                <li><strong>เพิ่ม Web App:</strong> ไปที่ "Project settings" (⚙️) → "Add app" → เลือก Web (</>) → ตั้งชื่อ App</li>
+                                <li><strong>คัดลอก Config:</strong> หลังสร้าง App จะเห็น <code>const firebaseConfig = {...}</code> → <strong>คัดลอกทั้งหมดมาวางในช่องด้านล่าง</strong></li>
+                                <li><strong>ตั้งค่า Security Rules:</strong> ไปที่ Firestore → Rules → วางโค้ด Rules ด้านล่าง</li>
                             </ol>
                         </div>
                         
-                        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-xl">
-                            <h3 class="font-bold text-blue-800 mb-2">💡 ข้อดีของ Firebase:</h3>
-                            <ul class="list-disc list-inside space-y-1 text-sm text-blue-700">
-                                <li>ข้อมูลอัพเดทแบบ Real-time ทันที</li>
-                                <li>ไม่ต้องตั้งค่า Server ซับซ้อน</li>
-                                <li>มีระบบ Backup และ Security ในตัว</li>
-                                <li>สามารถเข้าถึงข้อมูลจากหลายอุปกรณ์</li>
-                                <li>ฟรีสำหรับการใช้งานระดับเล็ก</li>
-                            </ul>
+                        <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-xl">
+                            <h3 class="font-bold text-green-800 mb-2">✨ ฟีเจอร์ที่ได้:</h3>
+                            <div class="grid grid-cols-2 gap-2 text-sm text-green-700">
+                                <div>• Real-time Sync ทันที</div>
+                                <div>• ใช้งานได้แม้ออฟไลน์</div>
+                                <div>• เชื่อมต่อใหม่อัตโนมัติ</div>
+                                <div>• สำรองข้อมูลใน Cloud</div>
+                                <div>• เข้าถึงจากหลายเครื่อง</div>
+                                <div>• โหลดเร็วจาก Cache</div>
+                            </div>
                         </div>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">🔑 API Key:</label>
-                                <input type="text" id="firebaseApiKey" placeholder="AIzaSyC..." 
-                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-0 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">🌐 Auth Domain:</label>
-                                <input type="text" id="firebaseAuthDomain" placeholder="project-id.firebaseapp.com" 
-                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-0 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">📁 Project ID:</label>
-                                <input type="text" id="firebaseProjectId" placeholder="project-id" 
-                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-0 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">🗄️ Storage Bucket:</label>
-                                <input type="text" id="firebaseStorageBucket" placeholder="project-id.appspot.com" 
-                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-0 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">📨 Messaging Sender ID:</label>
-                                <input type="text" id="firebaseMessagingSenderId" placeholder="123456789" 
-                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-0 text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">📱 App ID:</label>
-                                <input type="text" id="firebaseAppId" placeholder="1:123:web:abc123" 
-                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-0 text-sm">
+                                <label class="block text-lg font-bold text-gray-800 mb-3">📋 วาง Firebase Config ทั้งหมดที่นี่:</label>
+                                
+                                <!-- ตัวอย่างแบบต่างๆ -->
+                                <div class="bg-gray-50 p-4 rounded-lg mb-3 space-y-3">
+                                    <p class="text-sm font-semibold text-gray-700">✅ รูปแบบที่รองรับ (เลือกแบบไหนก็ได้):</p>
+                                    
+                                    <div class="bg-white p-3 rounded border-l-4 border-green-400">
+                                        <p class="text-xs font-semibold text-green-700 mb-1">แบบที่ 1: คัดลอกทั้งบล็อก</p>
+                                        <code class="text-xs text-gray-600 block">
+                                            const firebaseConfig = {<br>
+                                            &nbsp;&nbsp;apiKey: "AIzaSyC...",<br>
+                                            &nbsp;&nbsp;authDomain: "project.firebaseapp.com",<br>
+                                            &nbsp;&nbsp;projectId: "project-id",<br>
+                                            &nbsp;&nbsp;storageBucket: "project.appspot.com",<br>
+                                            &nbsp;&nbsp;messagingSenderId: "123456789",<br>
+                                            &nbsp;&nbsp;appId: "1:123:web:abc123"<br>
+                                            };
+                                        </code>
+                                    </div>
+                                    
+                                    <div class="bg-white p-3 rounded border-l-4 border-blue-400">
+                                        <p class="text-xs font-semibold text-blue-700 mb-1">แบบที่ 2: เฉพาะ object</p>
+                                        <code class="text-xs text-gray-600 block">
+                                            {<br>
+                                            &nbsp;&nbsp;apiKey: "AIzaSyC...",<br>
+                                            &nbsp;&nbsp;authDomain: "project.firebaseapp.com",<br>
+                                            &nbsp;&nbsp;projectId: "project-id",<br>
+                                            &nbsp;&nbsp;storageBucket: "project.appspot.com",<br>
+                                            &nbsp;&nbsp;messagingSenderId: "123456789",<br>
+                                            &nbsp;&nbsp;appId: "1:123:web:abc123"<br>
+                                            }
+                                        </code>
+                                    </div>
+                                    
+                                    <div class="bg-white p-3 rounded border-l-4 border-purple-400">
+                                        <p class="text-xs font-semibold text-purple-700 mb-1">แบบที่ 3: แยกบรรทัด</p>
+                                        <code class="text-xs text-gray-600 block">
+                                            apiKey: "AIzaSyC..."<br>
+                                            authDomain: "project.firebaseapp.com"<br>
+                                            projectId: "project-id"<br>
+                                            storageBucket: "project.appspot.com"<br>
+                                            messagingSenderId: "123456789"<br>
+                                            appId: "1:123:web:abc123"
+                                        </code>
+                                    </div>
+                                </div>
+                                
+                                <textarea id="firebaseConfigText" rows="10" 
+                                          placeholder="วาง Firebase Config ที่นี่ (รูปแบบไหนก็ได้ตามตัวอย่างด้านบน)
+
+ตัวอย่าง:
+const firebaseConfig = {
+  apiKey: &quot;AIzaSyC...&quot;,
+  authDomain: &quot;project.firebaseapp.com&quot;,
+  projectId: &quot;project-id&quot;,
+  storageBucket: &quot;project.appspot.com&quot;,
+  messagingSenderId: &quot;123456789&quot;,
+  appId: &quot;1:123:web:abc123&quot;
+};"
+                                          class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-0 text-sm font-mono resize-none"></textarea>
+                                
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-lg">
+                                    <p class="text-xs text-yellow-800">
+                                        <strong>💡 เคล็ดลับ:</strong> คัดลอกทั้งหมดจาก Firebase Console มาวางได้เลย 
+                                        ระบบจะแยกข้อมูลให้อัตโนมัติ แม้จะมี comment หรือ code อื่นๆ ปนมาด้วย
+                                    </p>
+                                </div>
                             </div>
                         </div>
                         
                         <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-xl">
-                            <h3 class="font-bold text-yellow-800 mb-2">⚠️ Security Rules สำหรับทดสอบ:</h3>
-                            <textarea readonly class="w-full h-20 p-3 bg-gray-100 rounded-lg text-xs font-mono" onclick="this.select()">rules_version = '2';
+                            <h3 class="font-bold text-yellow-800 mb-2">🔒 Security Rules (คัดลอกไปใส่ใน Firestore Rules):</h3>
+                            <textarea readonly class="w-full h-32 p-3 bg-gray-100 rounded-lg text-xs font-mono" onclick="this.select()">rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
+    // อนุญาตให้อ่าน-เขียนข้อมูลสัตว์เลี้ยง
+    match /pets/{petId} {
       allow read, write: if true;
+    }
+    
+    // อนุญาตให้ทดสอบการเชื่อมต่อ
+    match /_health/{document} {
+      allow read, write: if true;
+    }
+    
+    // ป้องกันการเข้าถึงข้อมูลอื่นๆ
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }</textarea>
-                            <p class="text-xs text-yellow-700 mt-2">⚠️ <strong>คำเตือน:</strong> Rules นี้ใช้สำหรับทดสอบเท่านั้น ในการใช้งานจริงควรตั้งค่า Security ที่เข้มงวดกว่านี้</p>
+                            <p class="text-xs text-yellow-700 mt-2">🛡️ <strong>ปลอดภัย:</strong> Rules นี้อนุญาตเฉพาะข้อมูลสัตว์เลี้ยงและการทดสอบเท่านั้น</p>
                         </div>
                         
                         <div class="flex space-x-4">
-                            <button onclick="testFirebaseConnection()" class="flex-1 bg-orange-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-orange-600 transition-colors">
-                                🧪 ทดสอบการเชื่อมต่อ
+                            <button onclick="parseAndTestFirebaseConfig()" class="flex-1 bg-orange-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-orange-600 transition-colors">
+                                🧪 แยกข้อมูล + ทดสอบ
                             </button>
-                            <button onclick="saveFirebaseConfig()" class="flex-1 bg-green-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-green-600 transition-colors">
+                            <button onclick="saveFirebaseConfigFromText()" class="flex-1 bg-green-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-green-600 transition-colors">
                                 💾 บันทึกการตั้งค่า
                             </button>
                             <button onclick="loadFirebaseData()" class="flex-1 bg-blue-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-blue-600 transition-colors">
@@ -1219,6 +1623,12 @@ service cloud.firestore {
                         </div>
                         
                         <div id="firebaseSetupStatus" class="text-center" style="display: none;"></div>
+                        
+                        <!-- แสดงข้อมูลที่แยกได้ -->
+                        <div id="parsedConfig" class="hidden bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-xl">
+                            <h3 class="font-bold text-blue-800 mb-2">📊 ข้อมูลที่แยกได้:</h3>
+                            <div id="configDetails" class="text-sm text-blue-700 space-y-1"></div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1226,54 +1636,187 @@ service cloud.firestore {
             
             // โหลดค่าเดิมถ้ามี
             const savedConfig = JSON.parse(localStorage.getItem('firebaseConfig') || '{}');
-            if (savedConfig.apiKey) document.getElementById('firebaseApiKey').value = savedConfig.apiKey;
-            if (savedConfig.authDomain) document.getElementById('firebaseAuthDomain').value = savedConfig.authDomain;
-            if (savedConfig.projectId) document.getElementById('firebaseProjectId').value = savedConfig.projectId;
-            if (savedConfig.storageBucket) document.getElementById('firebaseStorageBucket').value = savedConfig.storageBucket;
-            if (savedConfig.messagingSenderId) document.getElementById('firebaseMessagingSenderId').value = savedConfig.messagingSenderId;
-            if (savedConfig.appId) document.getElementById('firebaseAppId').value = savedConfig.appId;
+            if (savedConfig.apiKey) {
+                const configText = `const firebaseConfig = {
+  apiKey: "${savedConfig.apiKey}",
+  authDomain: "${savedConfig.authDomain}",
+  projectId: "${savedConfig.projectId}",
+  storageBucket: "${savedConfig.storageBucket}",
+  messagingSenderId: "${savedConfig.messagingSenderId}",
+  appId: "${savedConfig.appId}"
+};`;
+                document.getElementById('firebaseConfigText').value = configText;
+            }
         }
 
-        async function testFirebaseConnection() {
+        function parseFirebaseConfig(configText) {
+            try {
+                console.log('Parsing config text:', configText.substring(0, 100) + '...');
+                
+                // ลบ comment และ whitespace ที่ไม่จำเป็น
+                let cleanText = configText.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+                
+                // ลองหาแบบต่างๆ
+                let config = null;
+                
+                // วิธีที่ 1: หา JSON object ใน text
+                let jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    let jsonStr = jsonMatch[0];
+                    
+                    try {
+                        // แปลง JavaScript object notation เป็น JSON
+                        jsonStr = jsonStr
+                            .replace(/(\w+)\s*:/g, '"$1":')  // เพิ่ม quotes รอบ keys
+                            .replace(/'/g, '"')              // เปลี่ยน single quotes เป็น double quotes
+                            .replace(/,(\s*[}\]])/g, '$1')   // ลบ trailing commas
+                            .replace(/\n/g, ' ')             // ลบ newlines
+                            .replace(/\s+/g, ' ');           // ลด whitespace
+                        
+                        config = JSON.parse(jsonStr);
+                    } catch (e) {
+                        console.log('JSON parse failed, trying alternative method');
+                    }
+                }
+                
+                // วิธีที่ 2: ใช้ regex แยกแต่ละ field
+                if (!config) {
+                    config = {};
+                    
+                    const patterns = {
+                        apiKey: /apiKey\s*:\s*["']([^"']+)["']/,
+                        authDomain: /authDomain\s*:\s*["']([^"']+)["']/,
+                        projectId: /projectId\s*:\s*["']([^"']+)["']/,
+                        storageBucket: /storageBucket\s*:\s*["']([^"']+)["']/,
+                        messagingSenderId: /messagingSenderId\s*:\s*["']([^"']+)["']/,
+                        appId: /appId\s*:\s*["']([^"']+)["']/
+                    };
+                    
+                    for (const [key, pattern] of Object.entries(patterns)) {
+                        const match = cleanText.match(pattern);
+                        if (match) {
+                            config[key] = match[1];
+                        }
+                    }
+                }
+                
+                // วิธีที่ 3: ลองใช้ eval (ปลอดภัยเพราะเป็น config เท่านั้น)
+                if (!config || Object.keys(config).length === 0) {
+                    try {
+                        // สร้าง sandbox สำหรับ eval
+                        const sandbox = {
+                            const: undefined,
+                            firebaseConfig: undefined
+                        };
+                        
+                        // ลองรัน code ใน sandbox
+                        const func = new Function('sandbox', `
+                            with(sandbox) {
+                                ${cleanText}
+                                return typeof firebaseConfig !== 'undefined' ? firebaseConfig : null;
+                            }
+                        `);
+                        
+                        const result = func(sandbox);
+                        if (result && typeof result === 'object') {
+                            config = result;
+                        }
+                    } catch (e) {
+                        console.log('Eval method failed:', e.message);
+                    }
+                }
+                
+                if (!config || Object.keys(config).length === 0) {
+                    throw new Error('ไม่สามารถแยกข้อมูล Firebase config ได้ กรุณาตรวจสอบรูปแบบข้อมูล');
+                }
+                
+                console.log('Parsed config:', config);
+                
+                // ตรวจสอบว่ามี required fields
+                const requiredFields = ['apiKey', 'projectId', 'appId'];
+                const missingFields = requiredFields.filter(field => !config[field]);
+                
+                if (missingFields.length > 0) {
+                    throw new Error(`ไม่พบข้อมูลที่จำเป็น: ${missingFields.join(', ')}`);
+                }
+                
+                // เติมค่าเริ่มต้นสำหรับ optional fields
+                if (!config.authDomain && config.projectId) {
+                    config.authDomain = `${config.projectId}.firebaseapp.com`;
+                }
+                if (!config.storageBucket && config.projectId) {
+                    config.storageBucket = `${config.projectId}.appspot.com`;
+                }
+                
+                return config;
+            } catch (error) {
+                console.error('Parse error:', error);
+                throw new Error(`ไม่สามารถแยกข้อมูล Firebase config ได้: ${error.message}`);
+            }
+        }
+
+        function parseAndTestFirebaseConfig() {
+            const configText = document.getElementById('firebaseConfigText').value.trim();
             const statusDiv = document.getElementById('firebaseSetupStatus');
+            const parsedDiv = document.getElementById('parsedConfig');
+            const detailsDiv = document.getElementById('configDetails');
             
-            const config = {
-                apiKey: document.getElementById('firebaseApiKey').value.trim(),
-                authDomain: document.getElementById('firebaseAuthDomain').value.trim(),
-                projectId: document.getElementById('firebaseProjectId').value.trim(),
-                storageBucket: document.getElementById('firebaseStorageBucket').value.trim(),
-                messagingSenderId: document.getElementById('firebaseMessagingSenderId').value.trim(),
-                appId: document.getElementById('firebaseAppId').value.trim()
-            };
-            
-            if (!config.apiKey || !config.projectId || !config.appId) {
-                statusDiv.innerHTML = '<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ กรุณากรอก API Key, Project ID และ App ID ให้ครบถ้วน</div>';
+            if (!configText) {
+                statusDiv.innerHTML = '<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ กรุณาวาง Firebase config ในช่องด้านบน</div>';
                 statusDiv.style.display = 'block';
                 return;
             }
+            
+            try {
+                // แยกข้อมูล config
+                const config = parseFirebaseConfig(configText);
+                
+                // แสดงข้อมูลที่แยกได้
+                detailsDiv.innerHTML = `
+                    <div><strong>🔑 API Key:</strong> ${config.apiKey.substring(0, 20)}...</div>
+                    <div><strong>🌐 Auth Domain:</strong> ${config.authDomain}</div>
+                    <div><strong>📁 Project ID:</strong> ${config.projectId}</div>
+                    <div><strong>🗄️ Storage Bucket:</strong> ${config.storageBucket}</div>
+                    <div><strong>📨 Messaging Sender ID:</strong> ${config.messagingSenderId || 'ไม่ระบุ'}</div>
+                    <div><strong>📱 App ID:</strong> ${config.appId}</div>
+                `;
+                parsedDiv.classList.remove('hidden');
+                
+                // ทดสอบการเชื่อมต่อ
+                testFirebaseConnectionWithConfig(config);
+                
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ ${error.message}</div>`;
+                statusDiv.style.display = 'block';
+                parsedDiv.classList.add('hidden');
+            }
+        }
+
+        async function testFirebaseConnectionWithConfig(config) {
+            const statusDiv = document.getElementById('firebaseSetupStatus');
             
             statusDiv.innerHTML = '<div class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg">🔄 กำลังทดสอบการเชื่อมต่อ Firebase...</div>';
             statusDiv.style.display = 'block';
             
             try {
                 // ลองเชื่อมต่อ Firebase
-                const testApp = firebase.initializeApp(config, 'test-app');
+                const testApp = firebase.initializeApp(config, 'test-app-' + Date.now());
                 const testFirestore = firebase.firestore(testApp);
                 
                 // ทดสอบเขียนข้อมูล
-                await testFirestore.collection('test').doc('connection-test').set({
+                await testFirestore.collection('_health').doc('connection-test').set({
                     message: 'Firebase connection test',
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
                 // ทดสอบอ่านข้อมูล
-                const doc = await testFirestore.collection('test').doc('connection-test').get();
+                const doc = await testFirestore.collection('_health').doc('connection-test').get();
                 
                 if (doc.exists) {
-                    statusDiv.innerHTML = '<div class="bg-green-100 text-green-700 px-4 py-2 rounded-lg">✅ เชื่อมต่อ Firebase สำเร็จ! ระบบพร้อมใช้งาน</div>';
+                    statusDiv.innerHTML = '<div class="bg-green-100 text-green-700 px-4 py-2 rounded-lg">✅ เชื่อมต่อ Firebase สำเร็จ! ระบบพร้อมใช้งาน<br><small>ข้อมูลทดสอบถูกเพิ่มลงใน Firestore แล้ว</small></div>';
                     
                     // ลบข้อมูลทดสอบ
-                    await testFirestore.collection('test').doc('connection-test').delete();
+                    await testFirestore.collection('_health').doc('connection-test').delete();
                 } else {
                     throw new Error('ไม่สามารถอ่านข้อมูลได้');
                 }
@@ -1298,46 +1841,53 @@ service cloud.firestore {
             }
         }
 
-        function saveFirebaseConfig() {
-            const config = {
-                apiKey: document.getElementById('firebaseApiKey').value.trim(),
-                authDomain: document.getElementById('firebaseAuthDomain').value.trim(),
-                projectId: document.getElementById('firebaseProjectId').value.trim(),
-                storageBucket: document.getElementById('firebaseStorageBucket').value.trim(),
-                messagingSenderId: document.getElementById('firebaseMessagingSenderId').value.trim(),
-                appId: document.getElementById('firebaseAppId').value.trim(),
-                enabled: true
-            };
-            
+        function saveFirebaseConfigFromText() {
+            const configText = document.getElementById('firebaseConfigText').value.trim();
             const statusDiv = document.getElementById('firebaseSetupStatus');
             
-            if (!config.apiKey || !config.projectId || !config.appId) {
-                statusDiv.innerHTML = '<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ กรุณากรอกข้อมูลให้ครบถ้วน</div>';
+            if (!configText) {
+                statusDiv.innerHTML = '<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ กรุณาวาง Firebase config ในช่องด้านบน</div>';
                 statusDiv.style.display = 'block';
                 return;
             }
             
-            // บันทึกการตั้งค่า
-            localStorage.setItem('firebaseConfig', JSON.stringify(config));
-            
-            // อัพเดทการตั้งค่าในระบบ
-            Object.assign(FIREBASE_CONFIG, config);
-            
-            // เริ่มต้น Firebase
-            if (initializeFirebase()) {
-                statusDiv.innerHTML = '<div class="bg-green-100 text-green-700 px-4 py-2 rounded-lg">✅ บันทึกการตั้งค่าสำเร็จ! Firebase พร้อมใช้งาน</div>';
-                updateConnectionStatus();
+            try {
+                // แยกข้อมูล config
+                const config = parseFirebaseConfig(configText);
+                config.enabled = true;
                 
-                // ปิด modal หลังจาก 2 วินาที
-                setTimeout(() => {
-                    document.querySelector('.fixed.inset-0').remove();
-                }, 2000);
-            } else {
-                statusDiv.innerHTML = '<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ ไม่สามารถเริ่มต้น Firebase ได้</div>';
+                // บันทึกการตั้งค่า
+                localStorage.setItem('firebaseConfig', JSON.stringify(config));
+                
+                // อัพเดทการตั้งค่าในระบบ
+                Object.assign(FIREBASE_CONFIG, config);
+                
+                // เริ่มต้น Firebase
+                initializeFirebase().then(success => {
+                    if (success) {
+                        statusDiv.innerHTML = '<div class="bg-green-100 text-green-700 px-4 py-2 rounded-lg">✅ บันทึกการตั้งค่าสำเร็จ! Firebase พร้อมใช้งาน</div>';
+                        updateConnectionStatus();
+                        
+                        // ตั้งค่า real-time listener
+                        setupFirebaseListener();
+                        
+                        // ปิด modal หลังจาก 2 วินาที
+                        setTimeout(() => {
+                            document.querySelector('.fixed.inset-0').remove();
+                        }, 2000);
+                    } else {
+                        statusDiv.innerHTML = '<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ ไม่สามารถเริ่มต้น Firebase ได้</div>';
+                    }
+                    statusDiv.style.display = 'block';
+                });
+                
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ ${error.message}</div>`;
+                statusDiv.style.display = 'block';
             }
-            
-            statusDiv.style.display = 'block';
         }
+
+
 
         async function loadFirebaseData() {
             if (!FIREBASE_CONFIG.enabled) {
@@ -1372,6 +1922,34 @@ service cloud.firestore {
             }
         }
 
+        // Show full image modal
+        function showFullImage(imageSrc, petName) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="relative max-w-4xl max-h-full">
+                    <img src="${imageSrc}" alt="${petName}" 
+                         class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl">
+                    <button onclick="this.closest('.fixed').remove()" 
+                            class="absolute top-4 right-4 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl font-bold backdrop-blur-sm transition-all">
+                        ✕
+                    </button>
+                    <div class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-4 py-2 rounded-xl backdrop-blur-sm">
+                        <div class="font-semibold">${petName}</div>
+                    </div>
+                </div>
+            `;
+            
+            // ปิด modal เมื่อคลิกพื้นหลัง
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+            
+            document.body.appendChild(modal);
+        }
+
         // Event Listeners
         document.getElementById('searchInput').addEventListener('input', filterPets);
         document.getElementById('typeFilter').addEventListener('change', filterPets);
@@ -1379,57 +1957,77 @@ service cloud.firestore {
         document.getElementById('setupBtn').addEventListener('click', showSetupModal);
         document.getElementById('firebaseBtn').addEventListener('click', showFirebaseSetupModal);
 
-        // Initialize
-        function initializeApp() {
+        // Initialize - เริ่มต้นระบบ
+        async function initializeApp() {
+            console.log('Initializing Pet Registration System...');
+            
             // โหลดการตั้งค่า Google Sheets
             const savedGoogleConfig = JSON.parse(localStorage.getItem('googleSheetsConfig') || '{}');
             if (savedGoogleConfig.enabled) {
                 GOOGLE_SHEETS_CONFIG.scriptUrl = savedGoogleConfig.scriptUrl;
                 GOOGLE_SHEETS_CONFIG.sheetId = savedGoogleConfig.sheetId;
                 GOOGLE_SHEETS_CONFIG.enabled = true;
+                console.log('Google Sheets config loaded');
             }
             
             // โหลดการตั้งค่า Firebase
             const savedFirebaseConfig = JSON.parse(localStorage.getItem('firebaseConfig') || '{}');
             if (savedFirebaseConfig.enabled) {
                 Object.assign(FIREBASE_CONFIG, savedFirebaseConfig);
-                initializeFirebase();
+                console.log('Firebase config loaded, initializing...');
+                
+                // เริ่มต้น Firebase แบบ async
+                initializeFirebase().then(success => {
+                    if (success) {
+                        console.log('Firebase initialized successfully');
+                        updateConnectionStatus();
+                        
+                        // ตั้งค่า real-time listener
+                        setupFirebaseListener();
+                        
+                        // โหลดข้อมูลจาก Firebase
+                        loadFromFirebase().then(firebasePets => {
+                            if (firebasePets.length > 0) {
+                                updateLocalDataFromFirebase(firebasePets);
+                            }
+                        }).catch(error => {
+                            console.error('Failed to load Firebase data:', error);
+                        });
+                    } else {
+                        console.warn('Firebase initialization failed');
+                        updateConnectionStatus();
+                    }
+                }).catch(error => {
+                    console.error('Firebase initialization error:', error);
+                    updateConnectionStatus();
+                });
             }
             
+            // อัพเดท UI
             updateConnectionStatus();
             renderPets();
             updateTotalCount();
             
-            // ลองซิงค์ข้อมูลที่ค้างอยู่
+            // ลองซิงค์ข้อมูลที่ค้างอยู่กับ Google Sheets
             if (GOOGLE_SHEETS_CONFIG.enabled && isOnline) {
                 setTimeout(syncWithGoogleSheets, 1000);
             }
             
-            // โหลดข้อมูลจาก Firebase ถ้าเปิดใช้งาน
-            if (FIREBASE_CONFIG.enabled && isOnline) {
-                setTimeout(async () => {
-                    try {
-                        const firebasePets = await loadFromFirebase();
-                        if (firebasePets.length > 0) {
-                            const localPetIds = pets.map(pet => pet.id);
-                            const newPets = firebasePets.filter(pet => !localPetIds.includes(pet.id));
-                            
-                            if (newPets.length > 0) {
-                                pets = [...newPets, ...pets];
-                                savePets();
-                                renderPets();
-                                updateTotalCount();
-                                showSyncStatus(`โหลดข้อมูลจาก Firebase สำเร็จ! พบข้อมูลใหม่ ${newPets.length} รายการ`, 'success');
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Auto-load Firebase data failed:', error);
-                    }
-                }, 2000);
+            console.log('App initialization completed');
+        }
+
+        // Cleanup function สำหรับปิดการเชื่อมต่อ
+        function cleanup() {
+            if (window.firebaseUnsubscribe) {
+                window.firebaseUnsubscribe();
+                console.log('Firebase listener unsubscribed');
             }
         }
 
+        // ปิดการเชื่อมต่อเมื่อปิดหน้าเว็บ
+        window.addEventListener('beforeunload', cleanup);
+
         initializeApp();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96ef0748a03afd3c',t:'MTc1NTE1OTU3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96ef39f1933913b2',t:'MTc1NTE2MTY1NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
