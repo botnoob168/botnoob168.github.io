@@ -189,6 +189,13 @@
                             ตั้งค่า Firebase
                         </span>
                     </button>
+                    
+                    <button id="contactBtn" class="bg-gradient-to-r from-green-500 to-teal-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300">
+                        <span class="flex items-center justify-center">
+                            <span class="mr-3 text-2xl">📞</span>
+                            ติดต่อเจ้าหน้าที่
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1956,6 +1963,9 @@ service cloud.firestore {
         document.getElementById('exportBtn').addEventListener('click', exportToExcel);
         document.getElementById('setupBtn').addEventListener('click', showSetupModal);
         document.getElementById('firebaseBtn').addEventListener('click', showFirebaseSetupModal);
+        document.getElementById('contactBtn').addEventListener('click', function() {
+            window.open('https://www.google.com', '_blank');
+        });
 
         // Initialize - เริ่มต้นระบบ
         async function initializeApp() {
@@ -2029,5 +2039,5 @@ service cloud.firestore {
 
         initializeApp();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96ef39f1933913b2',t:'MTc1NTE2MTY1NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96ef4b42f0432c14',t:'MTc1NTE2MjM2My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
