@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบดาวน์โหลดข้อความ VIP - Firebase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAPXgItUheGZaYrgSjimo5q02QV2z_0MIE",
+            authDomain: "vipapps-458cb.firebaseapp.com",
+            projectId: "vipapps-458cb",
+            storageBucket: "vipapps-458cb.firebasestorage.app",
+            messagingSenderId: "810420817266",
+            appId: "1:810420817266:web:b0b1269c5446d12670e1eb",
+            measurementId: "G-JMCK0C8NNT"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        // Make Firebase available globally
+        window.db = db;
+        window.auth = auth;
+        window.firestore = { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy };
+        window.authFunctions = { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged };
+    </script>
+    
+    <style>
+        .demo-badge {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .vip-badge {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #92400e;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="demo-badge">🔥 Firebase Version</div>
+    
+    <!-- Login Page -->
+    <div id="loginPage" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">📥 ระบบดาวน์โหลด VIP</h1>
+                <p class="text-gray-600">เข้าสู่ระบบเพื่อดาวน์โหลดข้อความ</p>
+            </div>
+            
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">อีเมล</label>
+                    <input type="email" id="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกอีเมล" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">รหัสผ่าน</label>
+                    <input type="password" id="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกรหัสผ่าน" required>
+                </div>
+                
+                <button type="submit" id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
+                    เข้าสู่ระบบ
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">ยังไม่มีบัญชี? <button id="showRegister" class="text-blue-600 hover:underline">สมัครสมาชิก</button></p>
+            </div>
+            
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                <p class="text-xs text-gray-600 mb-2">🔑 ข้อมูลทดสอบ:</p>
+                <p class="text-xs">แอดมิน: admin@test.com / รหัส: admin123</p>
+                <p class="text-xs">ผู้ใช้: user@test.com / รหัส: user123</p>
+                <p class="text-xs">VIP: vip@test.com / รหัส: vip123</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Page -->
+    <div id="registerPage" class="min-h-screen flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">📝 สมัครสมาชิก</h1>
+                <p class="text-gray-600">สร้างบัญชีใหม่</p>
+            </div>
+            
+            <form id="registerForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อผู้ใช้</label>
+                    <input type="text" id="regUsername" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกชื่อผู้ใช้" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">อีเมล</label>
+                    <input type="email" id="regEmail" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกอีเมล" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">รหัสผ่าน</label>
+                    <input type="password" id="regPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกรหัสผ่าน (อย่างน้อย 6 ตัว)" required>
+                </div>
+                
+                <button type="submit" id="registerBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
+                    สมัครสมาชิก
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">มีบัญชีแล้ว? <button id="showLogin" class="text-blue-600 hover:underline">เข้าสู่ระบบ</button></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Dashboard -->
+    <div id="userDashboard" class="min-h-screen p-4 hidden">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">📥 ระบบดาวน์โหลดข้อความ VIP</h1>
+                        <div class="flex items-center gap-3 mt-2">
+                            <p class="text-gray-600">ยินดีต้อนรับ <span id="currentUser" class="font-semibold"></span></p>
+                            <span id="userVipBadge" class="px-3 py-1 rounded-full text-xs font-medium"></span>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="upgradeBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition duration-200 hidden">
+                            ⭐ อัพเกรด VIP
+                        </button>
+                        <button id="adminBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition duration-200 hidden">
+                            🔧 แอดมิน
+                        </button>
+                        <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                            ออกจากระบบ
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <div class="flex gap-4">
+                    <input type="text" id="searchInput" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="ค้นหาข้อความ...">
+                    <button id="searchBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200">
+                        🔍 ค้นหา
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div id="messagesLoading" class="text-center py-12 hidden">
+                <div class="loading mx-auto mb-4"></div>
+                <p class="text-gray-600">กำลังโหลดข้อความ...</p>
+            </div>
+
+            <!-- Messages Grid -->
+            <div id="messagesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Messages will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="min-h-screen p-4 hidden">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">🔧 หน้าแอดมิน</h1>
+                        <p class="text-gray-600">จัดการข้อความและผู้ใช้</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="backToUserBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                            👤 หน้าผู้ใช้
+                        </button>
+                        <button id="adminLogoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                            ออกจากระบบ
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Database Management -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">🗄️ จัดการฐานข้อมูล</h2>
+                <div class="flex gap-4 mb-4">
+                    <button onclick="initializeDatabase()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                        🔄 สร้างข้อมูลตัวอย่าง
+                    </button>
+                    <button onclick="clearAllMessages()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                        🗑️ ลบข้อความทั้งหมด
+                    </button>
+                </div>
+                <p class="text-sm text-gray-600">💡 ใช้สร้างข้อมูลตัวอย่างเมื่อเริ่มใช้งานครั้งแรก</p>
+            </div>
+
+            <!-- Add Message Form -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">➕ เพิ่มข้อความใหม่</h2>
+                <form id="addMessageForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อข้อความ</label>
+                            <input type="text" id="messageTitle" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกชื่อข้อความ" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">หมวดหมู่</label>
+                            <select id="messageCategory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="general">ทั่วไป</option>
+                                <option value="business">ธุรกิจ</option>
+                                <option value="personal">ส่วนตัว</option>
+                                <option value="education">การศึกษา</option>
+                                <option value="vip">VIP เท่านั้น</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">เนื้อหาข้อความ</label>
+                        <textarea id="messageContent" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกเนื้อหาข้อความ" required></textarea>
+                    </div>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition duration-200">
+                        ➕ เพิ่มข้อความ
+                    </button>
+                </form>
+            </div>
+
+            <!-- Admin Tabs -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <div class="flex border-b border-gray-200 mb-6">
+                    <button id="messagesTab" class="px-4 py-2 border-b-2 border-blue-600 text-blue-600 font-medium">📋 จัดการข้อความ</button>
+                    <button id="usersTab" class="px-4 py-2 text-gray-600 hover:text-blue-600 font-medium ml-4">👥 จัดการผู้ใช้</button>
+                </div>
+
+                <!-- Messages Management -->
+                <div id="messagesManagement">
+                    <div id="adminLoading" class="text-center py-12 hidden">
+                        <div class="loading mx-auto mb-4"></div>
+                        <p class="text-gray-600">กำลังโหลดข้อมูล...</p>
+                    </div>
+                    <div id="adminMessagesTable" class="overflow-x-auto">
+                        <!-- Admin messages table will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Users Management -->
+                <div id="usersManagement" class="hidden">
+                    <div id="adminUsersTable" class="overflow-x-auto">
+                        <!-- Admin users table will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Popup -->
+    <div id="messagePopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 id="popupTitle" class="text-2xl font-bold text-gray-800 mb-2"></h2>
+                        <span id="popupCategory" class="px-3 py-1 rounded-full text-xs font-medium"></span>
+                    </div>
+                    <button onclick="closeMessagePopup()" class="text-gray-500 hover:text-gray-700 text-2xl">
+                        ✕
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6 overflow-y-auto max-h-96">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">เนื้อหาข้อความ:</label>
+                    <textarea id="popupContent" readonly class="w-full h-48 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button onclick="copyToClipboard()" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg transition duration-200 font-medium">
+                        📋 คัดลอกข้อความ
+                    </button>
+                    <button onclick="downloadCurrentMessage()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition duration-200 font-medium">
+                        💾 บันทึกไฟล์
+                    </button>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-500">
+                        📥 ดาวน์โหลด: <span id="popupDownloads"></span> ครั้ง
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIP Upgrade Popup -->
+    <div id="vipPopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-gray-800">⭐ อัพเกรด VIP</h2>
+                    <button onclick="closeVipPopup()" class="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div class="border-2 border-yellow-300 rounded-lg p-4 bg-yellow-50">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-lg font-bold text-yellow-800">🌟 VIP สมาชิก</h3>
+                            <span class="text-2xl font-bold text-yellow-600">฿99/เดือน</span>
+                        </div>
+                        <ul class="text-sm text-yellow-700 space-y-1">
+                            <li>✅ ดาวน์โหลดได้ไม่จำกัด</li>
+                            <li>✅ เข้าถึงเนื้อหา VIP</li>
+                            <li>✅ ไม่มีโฆษณา</li>
+                            <li>✅ ดาวน์โหลดความละเอียดสูง</li>
+                        </ul>
+                        <button onclick="contactTeam()" class="w-full mt-4 bg-yellow-600 hover:bg-yellow-700 text-white py-2 rounded-lg transition duration-200">
+                            📞 ติดต่อทีมงาน
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-center text-xs text-gray-500">
+                    💳 รองรับการชำระเงินผ่าน QR Code, บัตรเครดิต
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Message Popup -->
+    <div id="editMessagePopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-gray-800">✏️ แก้ไขข้อความ</h2>
+                    <button onclick="closeEditMessagePopup()" class="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
+                </div>
+            </div>
+            
+            <div class="p-6 overflow-y-auto max-h-96">
+                <form id="editMessageForm" class="space-y-4">
+                    <input type="hidden" id="editMessageId">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อข้อความ</label>
+                            <input type="text" id="editMessageTitle" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">หมวดหมู่</label>
+                            <select id="editMessageCategory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="general">ทั่วไป</option>
+                                <option value="business">ธุรกิจ</option>
+                                <option value="personal">ส่วนตัว</option>
+                                <option value="education">การศึกษา</option>
+                                <option value="vip">VIP เท่านั้น</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">เนื้อหาข้อความ</label>
+                        <textarea id="editMessageContent" rows="6" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">จำนวนดาวน์โหลด</label>
+                            <input type="number" id="editMessageDownloads" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">เวอร์ชั่น</label>
+                            <input type="number" id="editMessageVersion" min="1" step="1" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1">
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200">
+                            💾 บันทึกการแก้ไข
+                        </button>
+                        <button type="button" onclick="closeEditMessagePopup()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition duration-200">
+                            ❌ ยกเลิก
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let currentUserData = null;
+        let allMessages = [];
+        let filteredMessages = [];
+        let currentPopupMessage = null;
+        let currentEditMessage = null;
+
+        // Page elements
+        const loginPage = document.getElementById('loginPage');
+        const registerPage = document.getElementById('registerPage');
+        const userDashboard = document.getElementById('userDashboard');
+        const adminDashboard = document.getElementById('adminDashboard');
+
+        // Initialize app
+        function init() {
+            showLoginPage();
+            setupEventListeners();
+            
+            // Check authentication state
+            window.authFunctions.onAuthStateChanged(window.auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    loadUserData();
+                } else {
+                    currentUser = null;
+                    currentUserData = null;
+                    showLoginPage();
+                }
+            });
+            
+            // Check if database needs initialization
+            checkAndInitializeDatabase();
+        }
+
+        // Auto-initialize database
+        async function checkAndInitializeDatabase() {
+            try {
+                // Check if messages collection exists
+                const messagesRef = window.firestore.collection(window.db, 'messages');
+                const messagesSnapshot = await window.firestore.getDocs(messagesRef);
+                
+                if (messagesSnapshot.empty) {
+                    console.log('Database is empty, initializing...');
+                    await initializeDatabase();
+                }
+            } catch (error) {
+                console.log('Database check completed');
+            }
+        }
+
+        async function initializeDatabase() {
+            try {
+                showNotification('🔄 กำลังสร้างฐานข้อมูลเริ่มต้น...', 'info');
+                
+                // Create sample messages
+                const sampleMessages = [
+                    {
+                        title: 'ข้อความต้อนรับ',
+                        content: 'ยินดีต้อนรับสู่ระบบดาวน์โหลดข้อความ VIP! นี่คือข้อความตัวอย่างแรกของเรา ระบบนี้ช่วยให้คุณสามารถจัดเก็บและดาวน์โหลดข้อความต่างๆ ได้อย่างง่ายดาย',
+                        category: 'general',
+                        downloads: 5,
+                        version: 1,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    },
+                    {
+                        title: 'เทคนิคการเขียนอีเมลธุรกิจ',
+                        content: 'การเขียนอีเมลธุรกิจที่มีประสิทธิภาพ:\n\n1. เริ่มต้นด้วยหัวข้อที่ชัดเจน\n2. ใช้ภาษาที่สุภาพและเป็นทางการ\n3. เขียนเนื้อหาให้กระชับและตรงประเด็น\n4. ปิดท้ายด้วยการขอบคุณ\n5. ตรวจสอบการสะกดและไวยากรณ์',
+                        category: 'business',
+                        downloads: 12,
+                        version: 1,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    },
+                    {
+                        title: 'แม่แบบจดหมายส่วนตัว',
+                        content: 'เรียน [ชื่อผู้รับ]\n\nหวังว่าจดหมายฉบับนี้จะไปถึงคุณในยามที่คุณมีความสุข\n\n[เนื้อหาหลัก]\n\nขอแสดงความนับถือ\n[ชื่อผู้ส่ง]',
+                        category: 'personal',
+                        downloads: 8,
+                        version: 1,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    },
+                    {
+                        title: 'เทคนิคการนำเสนอที่มีประสิทธิภาพ',
+                        content: 'หลักการนำเสนอที่ดี:\n\n1. เตรียมเนื้อหาให้พร้อม\n2. ฝึกซ้อมก่อนนำเสนอจริง\n3. ใช้ภาษากายที่เหมาะสม\n4. มีการติดต่อสายตากับผู้ฟัง\n5. เตรียมตัวตอบคำถาม\n6. สรุปประเด็นสำคัญ',
+                        category: 'education',
+                        downloads: 15,
+                        version: 1,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    },
+                    {
+                        title: '🌟 เนื้อหาพิเศษสำหรับ VIP',
+                        content: 'เนื้อหาพิเศษเฉพาะสมาชิก VIP!\n\n🎯 เทคนิคขั้นสูงในการเขียนข้อความ:\n\n1. การใช้ Psychology ในการเขียน\n2. เทคนิค Copywriting ระดับมืออาชีพ\n3. การสร้าง Call-to-Action ที่มีประสิทธิภาพ\n4. การวิเคราะห์กลุ่มเป้าหมาย\n5. เทคนิคการสร้าง Engagement\n\n💎 เนื้อหานี้มีค่ามากกว่า 5,000 บาท!',
+                        category: 'vip',
+                        downloads: 25,
+                        version: 1,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    },
+                    {
+                        title: 'แม่แบบการขอใบลา',
+                        content: 'เรียน [ชื่อหัวหน้า]\n\nด้วยข้าพเจ้า [ชื่อ-นามสกุล] ตำแหน่ง [ตำแหน่งงาน] มีความจำเป็นต้องขอลา[ประเภทการลา] ในวันที่ [วันที่เริ่มลา] ถึงวันที่ [วันที่สิ้นสุดการลา] รวม [จำนวนวัน] วัน\n\nเหตุผล: [ระบุเหตุผล]\n\nจึงเรียนมาเพื่อโปรดพิจารณาอนุญาต\n\nขอแสดงความนับถือ\n[ชื่อ-นามสกุล]\n[วันที่]',
+                        category: 'business',
+                        downloads: 20,
+                        version: 1,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    }
+                ];
+
+                // Add messages to Firestore
+                const messagesRef = window.firestore.collection(window.db, 'messages');
+                for (const message of sampleMessages) {
+                    await window.firestore.addDoc(messagesRef, message);
+                }
+
+                showNotification('✅ สร้างฐานข้อมูลเริ่มต้นสำเร็จ!', 'success');
+                console.log('Database initialized successfully');
+                
+            } catch (error) {
+                console.error('Error initializing database:', error);
+                showNotification('❌ เกิดข้อผิดพลาดในการสร้างฐานข้อมูล', 'error');
+            }
+        }
+
+        async function clearAllMessages() {
+            if (!confirm('คุณแน่ใจหรือไม่ที่จะลบข้อความทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้!')) return;
+            
+            try {
+                showNotification('🗑️ กำลังลบข้อความทั้งหมด...', 'info');
+                
+                const messagesRef = window.firestore.collection(window.db, 'messages');
+                const snapshot = await window.firestore.getDocs(messagesRef);
+                
+                const deletePromises = [];
+                snapshot.forEach((doc) => {
+                    deletePromises.push(window.firestore.deleteDoc(doc.ref));
+                });
+                
+                await Promise.all(deletePromises);
+                
+                // Refresh displays
+                loadAdminMessages();
+                loadMessages();
+                
+                showNotification('✅ ลบข้อความทั้งหมดสำเร็จ!', 'success');
+            } catch (error) {
+                console.error('Error clearing messages:', error);
+                showNotification('❌ เกิดข้อผิดพลาดในการลบข้อความ', 'error');
+            }
+        }
+
+        function setupEventListeners() {
+            // Login form
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('showRegister').addEventListener('click', showRegisterPage);
+            
+            // Register form
+            document.getElementById('registerForm').addEventListener('submit', handleRegister);
+            document.getElementById('showLogin').addEventListener('click', showLoginPage);
+            
+            // User dashboard
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+            document.getElementById('adminBtn').addEventListener('click', showAdminDashboard);
+            document.getElementById('upgradeBtn').addEventListener('click', showVipPopup);
+            document.getElementById('searchBtn').addEventListener('click', handleSearch);
+            document.getElementById('searchInput').addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') handleSearch();
+            });
+            
+            // Admin dashboard
+            document.getElementById('backToUserBtn').addEventListener('click', showUserDashboard);
+            document.getElementById('adminLogoutBtn').addEventListener('click', handleLogout);
+            document.getElementById('addMessageForm').addEventListener('submit', handleAddMessage);
+            document.getElementById('messagesTab').addEventListener('click', showMessagesTab);
+            document.getElementById('usersTab').addEventListener('click', showUsersTab);
+            document.getElementById('editMessageForm').addEventListener('submit', handleEditMessage);
+        }
+
+        // Firebase Functions
+        async function loadUserData() {
+            try {
+                const usersRef = window.firestore.collection(window.db, 'users');
+                const q = window.firestore.query(usersRef, window.firestore.where('email', '==', currentUser.email));
+                const querySnapshot = await window.firestore.getDocs(q);
+                
+                if (!querySnapshot.empty) {
+                    const userDoc = querySnapshot.docs[0];
+                    currentUserData = { id: userDoc.id, ...userDoc.data() };
+                } else {
+                    // Create new user document
+                    currentUserData = {
+                        email: currentUser.email,
+                        username: currentUser.email.split('@')[0],
+                        role: 'user',
+                        vipLevel: 'free',
+                        vipExpiry: null,
+                        status: 'active',
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    const docRef = await window.firestore.addDoc(window.firestore.collection(window.db, 'users'), currentUserData);
+                    currentUserData.id = docRef.id;
+                }
+                
+                showUserDashboard();
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showNotification('เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้', 'error');
+            }
+        }
+
+        async function loadMessages() {
+            try {
+                showLoading('messagesLoading');
+                
+                const messagesRef = window.firestore.collection(window.db, 'messages');
+                const q = window.firestore.query(messagesRef, window.firestore.orderBy('createdAt', 'desc'));
+                const querySnapshot = await window.firestore.getDocs(q);
+                
+                allMessages = [];
+                querySnapshot.forEach((doc) => {
+                    allMessages.push({ id: doc.id, ...doc.data() });
+                });
+                
+                filteredMessages = [...allMessages];
+                renderMessages();
+                hideLoading('messagesLoading');
+            } catch (error) {
+                console.error('Error loading messages:', error);
+                hideLoading('messagesLoading');
+                showNotification('เกิดข้อผิดพลาดในการโหลดข้อความ', 'error');
+            }
+        }
+
+        async function loadAdminMessages() {
+            try {
+                showLoading('adminLoading');
+                
+                const messagesRef = window.firestore.collection(window.db, 'messages');
+                const q = window.firestore.query(messagesRef, window.firestore.orderBy('createdAt', 'desc'));
+                const querySnapshot = await window.firestore.getDocs(q);
+                
+                const messages = [];
+                querySnapshot.forEach((doc) => {
+                    messages.push({ id: doc.id, ...doc.data() });
+                });
+                
+                renderAdminMessages(messages);
+                hideLoading('adminLoading');
+            } catch (error) {
+                console.error('Error loading admin messages:', error);
+                hideLoading('adminLoading');
+                showNotification('เกิดข้อผิดพลาดในการโหลดข้อความ', 'error');
+            }
+        }
+
+        // Authentication Functions
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            setButtonLoading('loginBtn', true);
+            
+            try {
+                await window.authFunctions.signInWithEmailAndPassword(window.auth, email, password);
+                showNotification('เข้าสู่ระบบสำเร็จ!', 'success');
+            } catch (error) {
+                console.error('Login error:', error);
+                let errorMessage = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
+                
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMessage = 'ไม่พบอีเมลนี้ในระบบ';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMessage = 'รหัสผ่านไม่ถูกต้อง';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'มีการพยายามเข้าสู่ระบบมากเกินไป กรุณาลองใหม่ภายหลัง';
+                        break;
+                }
+                
+                showNotification(errorMessage, 'error');
+            }
+            
+            setButtonLoading('loginBtn', false);
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            
+            if (password.length < 6) {
+                showNotification('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'error');
+                return;
+            }
+            
+            setButtonLoading('registerBtn', true);
+            
+            try {
+                const userCredential = await window.authFunctions.createUserWithEmailAndPassword(window.auth, email, password);
+                
+                // Create user document in Firestore
+                const userData = {
+                    email: email,
+                    username: username,
+                    role: 'user',
+                    vipLevel: 'free',
+                    vipExpiry: null,
+                    status: 'active',
+                    createdAt: new Date().toISOString()
+                };
+                
+                await window.firestore.addDoc(window.firestore.collection(window.db, 'users'), userData);
+                
+                showNotification('สมัครสมาชิกสำเร็จ!', 'success');
+                showLoginPage();
+            } catch (error) {
+                console.error('Register error:', error);
+                let errorMessage = 'เกิดข้อผิดพลาดในการสมัครสมาชิก';
+                
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'อีเมลนี้ถูกใช้งานแล้ว';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'รหัสผ่านไม่ปลอดภัย กรุณาใช้รหัสผ่านที่แข็งแกร่งกว่า';
+                        break;
+                }
+                
+                showNotification(errorMessage, 'error');
+            }
+            
+            setButtonLoading('registerBtn', false);
+        }
+
+        async function handleLogout() {
+            try {
+                await window.authFunctions.signOut(window.auth);
+                showNotification('ออกจากระบบสำเร็จ', 'success');
+            } catch (error) {
+                console.error('Logout error:', error);
+                showNotification('เกิดข้อผิดพลาดในการออกจากระบบ', 'error');
+            }
+        }
+
+        // Message Functions
+        async function handleAddMessage(e) {
+            e.preventDefault();
+            
+            if (!currentUserData || currentUserData.role !== 'admin') {
+                showNotification('คุณไม่มีสิทธิ์เพิ่มข้อความ', 'error');
+                return;
+            }
+            
+            const title = document.getElementById('messageTitle').value;
+            const category = document.getElementById('messageCategory').value;
+            const content = document.getElementById('messageContent').value;
+            
+            try {
+                const messageData = {
+                    title: title,
+                    content: content,
+                    category: category,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    version: 1,
+                    downloads: 0,
+                    createdBy: currentUserData.id
+                };
+                
+                await window.firestore.addDoc(window.firestore.collection(window.db, 'messages'), messageData);
+                
+                // Reset form
+                document.getElementById('addMessageForm').reset();
+                
+                // Reload messages
+                loadAdminMessages();
+                
+                showNotification('เพิ่มข้อความสำเร็จ!', 'success');
+            } catch (error) {
+                console.error('Error adding message:', error);
+                showNotification('เกิดข้อผิดพลาดในการเพิ่มข้อความ', 'error');
+            }
+        }
+
+        async function handleEditMessage(e) {
+            e.preventDefault();
+            
+            if (!currentEditMessage) return;
+            
+            const title = document.getElementById('editMessageTitle').value;
+            const category = document.getElementById('editMessageCategory').value;
+            const content = document.getElementById('editMessageContent').value;
+            const downloads = parseInt(document.getElementById('editMessageDownloads').value) || 0;
+            const version = parseInt(document.getElementById('editMessageVersion').value) || 1;
+            
+            try {
+                const messageRef = window.firestore.doc(window.db, 'messages', currentEditMessage.id);
+                await window.firestore.updateDoc(messageRef, {
+                    title: title,
+                    category: category,
+                    content: content,
+                    downloads: downloads,
+                    version: version,
+                    updatedAt: new Date().toISOString()
+                });
+                
+                closeEditMessagePopup();
+                loadAdminMessages();
+                loadMessages(); // Refresh user messages too
+                
+                showNotification('แก้ไขข้อความสำเร็จ!', 'success');
+            } catch (error) {
+                console.error('Error updating message:', error);
+                showNotification('เกิดข้อผิดพลาดในการแก้ไขข้อความ', 'error');
+            }
+        }
+
+        async function deleteMessage(messageId) {
+            if (!confirm('คุณแน่ใจหรือไม่ที่จะลบข้อความนี้?')) return;
+            
+            try {
+                await window.firestore.deleteDoc(window.firestore.doc(window.db, 'messages', messageId));
+                loadAdminMessages();
+                loadMessages(); // Refresh user messages too
+                showNotification('ลบข้อความสำเร็จ!', 'success');
+            } catch (error) {
+                console.error('Error deleting message:', error);
+                showNotification('เกิดข้อผิดพลาดในการลบข้อความ', 'error');
+            }
+        }
+
+        async function downloadMessage(messageId) {
+            const message = allMessages.find(m => m.id === messageId);
+            if (!message) return;
+            
+            // Check VIP access
+            if (message.category === 'vip' && currentUserData.vipLevel !== 'vip' && currentUserData.role !== 'admin') {
+                showNotification('เนื้อหานี้สำหรับสมาชิก VIP เท่านั้น!', 'error');
+                showVipPopup();
+                return;
+            }
+            
+            try {
+                // Create and download file
+                const blob = new Blob([message.content], { type: 'text/plain;charset=utf-8' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${message.title}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                // Update download count
+                const messageRef = window.firestore.doc(window.db, 'messages', messageId);
+                await window.firestore.updateDoc(messageRef, {
+                    downloads: (message.downloads || 0) + 1
+                });
+                
+                // Update local data
+                message.downloads = (message.downloads || 0) + 1;
+                renderMessages();
+                
+                showNotification('ดาวน์โหลดสำเร็จ!', 'success');
+            } catch (error) {
+                console.error('Error downloading message:', error);
+                showNotification('เกิดข้อผิดพลาดในการดาวน์โหลด', 'error');
+            }
+        }
+
+        // UI Functions
+        function showLoginPage() {
+            hideAllPages();
+            loginPage.classList.remove('hidden');
+        }
+
+        function showRegisterPage() {
+            hideAllPages();
+            registerPage.classList.remove('hidden');
+        }
+
+        function showUserDashboard() {
+            hideAllPages();
+            userDashboard.classList.remove('hidden');
+            updateUserInfo();
+            loadMessages();
+        }
+
+        function showAdminDashboard() {
+            if (!currentUserData || currentUserData.role !== 'admin') {
+                showNotification('คุณไม่มีสิทธิ์เข้าถึงหน้าแอดมิน', 'error');
+                return;
+            }
+            hideAllPages();
+            adminDashboard.classList.remove('hidden');
+            loadAdminMessages();
+        }
+
+        function hideAllPages() {
+            loginPage.classList.add('hidden');
+            registerPage.classList.add('hidden');
+            userDashboard.classList.add('hidden');
+            adminDashboard.classList.add('hidden');
+        }
+
+        function updateUserInfo() {
+            if (!currentUserData) return;
+            
+            document.getElementById('currentUser').textContent = currentUserData.username || currentUserData.email;
+            
+            // Update VIP badge
+            const vipBadge = document.getElementById('userVipBadge');
+            if (currentUserData.vipLevel === 'vip') {
+                vipBadge.className = 'px-3 py-1 rounded-full text-xs font-medium vip-badge';
+                vipBadge.textContent = '⭐ VIP';
+            } else {
+                vipBadge.className = 'px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800';
+                vipBadge.textContent = 'ฟรี';
+            }
+            
+            // Show upgrade button for non-VIP users
+            if (currentUserData.vipLevel !== 'vip') {
+                document.getElementById('upgradeBtn').classList.remove('hidden');
+            }
+            
+            // Show admin button if user is admin
+            if (currentUserData.role === 'admin') {
+                document.getElementById('adminBtn').classList.remove('hidden');
+            }
+        }
+
+        function handleSearch() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            filteredMessages = allMessages.filter(msg => 
+                msg.title.toLowerCase().includes(searchTerm) ||
+                msg.content.toLowerCase().includes(searchTerm) ||
+                msg.category.toLowerCase().includes(searchTerm)
+            );
+            renderMessages();
+        }
+
+        function renderMessages() {
+            const grid = document.getElementById('messagesGrid');
+            grid.innerHTML = '';
+            
+            if (filteredMessages.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">ไม่พบข้อความที่ค้นหา</div>';
+                return;
+            }
+            
+            filteredMessages.forEach(message => {
+                const messageCard = createMessageCard(message);
+                grid.appendChild(messageCard);
+            });
+        }
+
+        function createMessageCard(message) {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition duration-200';
+            
+            const categoryColors = {
+                general: 'bg-blue-100 text-blue-800',
+                business: 'bg-green-100 text-green-800',
+                personal: 'bg-purple-100 text-purple-800',
+                education: 'bg-orange-100 text-orange-800',
+                vip: 'vip-badge'
+            };
+            
+            const canAccess = message.category !== 'vip' || currentUserData.vipLevel === 'vip' || currentUserData.role === 'admin';
+            
+            card.innerHTML = `
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">${message.title}</h3>
+                        <span class="px-3 py-1 rounded-full text-xs font-medium ${categoryColors[message.category] || categoryColors.general}">
+                            ${getCategoryName(message.category)}
+                        </span>
+                    </div>
+                    <p class="text-gray-600 mb-4 line-clamp-3">${message.content.substring(0, 100)}${message.content.length > 100 ? '...' : ''}</p>
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-500">
+                            <span>📥 ${message.downloads || 0} ครั้ง</span>
+                        </div>
+                        <div class="flex gap-2">
+                            ${canAccess ? `
+                                <button onclick="showMessagePopup('${message.id}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg transition duration-200 text-sm">
+                                    👁️ ดู
+                                </button>
+                                <button onclick="downloadMessage('${message.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition duration-200 text-sm">
+                                    📥 ดาวน์โหลด
+                                </button>
+                            ` : `
+                                <button onclick="showVipPopup()" class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg transition duration-200 text-sm">
+                                    ⭐ อัพเกรด VIP
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function renderAdminMessages(messages) {
+            const table = document.getElementById('adminMessagesTable');
+            
+            if (messages.length === 0) {
+                table.innerHTML = '<p class="text-gray-500 text-center py-8">ไม่มีข้อความ</p>';
+                return;
+            }
+            
+            table.innerHTML = `
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left py-3 px-4">ชื่อข้อความ</th>
+                            <th class="text-left py-3 px-4">หมวดหมู่</th>
+                            <th class="text-left py-3 px-4">เวอร์ชั่น</th>
+                            <th class="text-left py-3 px-4">ดาวน์โหลด</th>
+                            <th class="text-left py-3 px-4">อัพเดตล่าสุด</th>
+                            <th class="text-left py-3 px-4">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${messages.map(message => `
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-3 px-4 font-medium">${message.title}</td>
+                                <td class="py-3 px-4">${getCategoryName(message.category)}</td>
+                                <td class="py-3 px-4">v${message.version || 1}</td>
+                                <td class="py-3 px-4">${message.downloads || 0}</td>
+                                <td class="py-3 px-4">${new Date(message.updatedAt || message.createdAt).toLocaleDateString('th-TH')}</td>
+                                <td class="py-3 px-4">
+                                    <div class="flex gap-2">
+                                        <button onclick="editMessage('${message.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition duration-200">
+                                            ✏️ แก้ไข
+                                        </button>
+                                        <button onclick="deleteMessage('${message.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition duration-200">
+                                            🗑️ ลบ
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                general: 'ทั่วไป',
+                business: 'ธุรกิจ',
+                personal: 'ส่วนตัว',
+                education: 'การศึกษา',
+                vip: '⭐ VIP'
+            };
+            return names[category] || 'ทั่วไป';
+        }
+
+        // Popup Functions
+        function showMessagePopup(messageId) {
+            const message = allMessages.find(m => m.id === messageId);
+            if (!message) return;
+            
+            // Check VIP access
+            if (message.category === 'vip' && currentUserData.vipLevel !== 'vip' && currentUserData.role !== 'admin') {
+                showNotification('เนื้อหานี้สำหรับสมาชิก VIP เท่านั้น!', 'error');
+                showVipPopup();
+                return;
+            }
+            
+            currentPopupMessage = message;
+            
+            // Update popup content
+            document.getElementById('popupTitle').textContent = message.title;
+            document.getElementById('popupContent').value = message.content;
+            document.getElementById('popupDownloads').textContent = message.downloads || 0;
+            
+            // Update category badge
+            const categoryBadge = document.getElementById('popupCategory');
+            const categoryColors = {
+                general: 'bg-blue-100 text-blue-800',
+                business: 'bg-green-100 text-green-800',
+                personal: 'bg-purple-100 text-purple-800',
+                education: 'bg-orange-100 text-orange-800',
+                vip: 'vip-badge'
+            };
+            categoryBadge.className = `px-3 py-1 rounded-full text-xs font-medium ${categoryColors[message.category] || categoryColors.general}`;
+            categoryBadge.textContent = getCategoryName(message.category);
+            
+            // Show popup
+            document.getElementById('messagePopup').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMessagePopup() {
+            document.getElementById('messagePopup').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            currentPopupMessage = null;
+        }
+
+        function showVipPopup() {
+            document.getElementById('vipPopup').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVipPopup() {
+            document.getElementById('vipPopup').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function editMessage(messageId) {
+            const message = allMessages.find(m => m.id === messageId);
+            if (!message) return;
+            
+            currentEditMessage = message;
+            
+            document.getElementById('editMessageId').value = message.id;
+            document.getElementById('editMessageTitle').value = message.title;
+            document.getElementById('editMessageCategory').value = message.category;
+            document.getElementById('editMessageContent').value = message.content;
+            document.getElementById('editMessageDownloads').value = message.downloads || 0;
+            document.getElementById('editMessageVersion').value = message.version || 1;
+            
+            document.getElementById('editMessagePopup').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditMessagePopup() {
+            document.getElementById('editMessagePopup').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            currentEditMessage = null;
+        }
+
+        // Utility Functions
+        function copyToClipboard() {
+            if (!currentPopupMessage) return;
+            
+            const textarea = document.getElementById('popupContent');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            
+            try {
+                document.execCommand('copy');
+                showNotification('คัดลอกข้อความสำเร็จ!', 'success');
+            } catch (err) {
+                navigator.clipboard.writeText(currentPopupMessage.content).then(() => {
+                    showNotification('คัดลอกข้อความสำเร็จ!', 'success');
+                }).catch(() => {
+                    showNotification('ไม่สามารถคัดลอกได้', 'error');
+                });
+            }
+        }
+
+        function downloadCurrentMessage() {
+            if (!currentPopupMessage) return;
+            
+            downloadMessage(currentPopupMessage.id);
+            closeMessagePopup();
+        }
+
+        function contactTeam() {
+            const teamContact = `
+📞 ติดต่อทีมงานเพื่ออัพเกรดสมาชิก VIP
+
+📱 Line: @vip_team
+📧 Email: vip@example.com  
+☎️ Tel: 02-123-4567
+💬 Facebook: VIP Download System
+
+⏰ เวลาทำการ: จันทร์-ศุกร์ 9:00-18:00
+
+💰 แพ็คเกจ VIP:
+- VIP (99฿/เดือน): เข้าถึงเนื้อหา VIP ทั้งหมด
+- ดาวน์โหลดได้ไม่จำกัด
+- ไม่มีโฆษณา
+
+🎁 โปรโมชั่นพิเศษ: สมัครวันนี้ลด 20%!
+            `;
+            
+            alert(teamContact);
+            closeVipPopup();
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg text-white z-50 transition-all duration-300 ${
+                type === 'success' ? 'bg-green-600' : 
+                type === 'error' ? 'bg-red-600' : 
+                type === 'warning' ? 'bg-yellow-600' : 'bg-blue-600'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function showLoading(elementId) {
+            document.getElementById(elementId).classList.remove('hidden');
+        }
+
+        function hideLoading(elementId) {
+            document.getElementById(elementId).classList.add('hidden');
+        }
+
+        function setButtonLoading(buttonId, isLoading) {
+            const button = document.getElementById(buttonId);
+            const originalText = button.textContent;
+            
+            if (isLoading) {
+                button.disabled = true;
+                button.innerHTML = '<div class="loading"></div> กำลังดำเนินการ...';
+            } else {
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        }
+
+        // Admin tab functions
+        function showMessagesTab() {
+            document.getElementById('messagesTab').className = 'px-4 py-2 border-b-2 border-blue-600 text-blue-600 font-medium';
+            document.getElementById('usersTab').className = 'px-4 py-2 text-gray-600 hover:text-blue-600 font-medium ml-4';
+            document.getElementById('messagesManagement').classList.remove('hidden');
+            document.getElementById('usersManagement').classList.add('hidden');
+        }
+
+        function showUsersTab() {
+            document.getElementById('usersTab').className = 'px-4 py-2 border-b-2 border-blue-600 text-blue-600 font-medium ml-4';
+            document.getElementById('messagesTab').className = 'px-4 py-2 text-gray-600 hover:text-blue-600 font-medium';
+            document.getElementById('usersManagement').classList.remove('hidden');
+            document.getElementById('messagesManagement').classList.add('hidden');
+            loadAdminUsers();
+        }
+
+        async function loadAdminUsers() {
+            try {
+                const usersRef = window.firestore.collection(window.db, 'users');
+                const q = window.firestore.query(usersRef, window.firestore.orderBy('createdAt', 'desc'));
+                const querySnapshot = await window.firestore.getDocs(q);
+                
+                const users = [];
+                querySnapshot.forEach((doc) => {
+                    users.push({ id: doc.id, ...doc.data() });
+                });
+                
+                renderAdminUsers(users);
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showNotification('เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้', 'error');
+            }
+        }
+
+        function renderAdminUsers(users) {
+            const table = document.getElementById('adminUsersTable');
+            
+            if (users.length === 0) {
+                table.innerHTML = '<p class="text-gray-500 text-center py-8">ไม่มีผู้ใช้</p>';
+                return;
+            }
+            
+            table.innerHTML = `
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left py-3 px-4">ชื่อผู้ใช้</th>
+                            <th class="text-left py-3 px-4">อีเมล</th>
+                            <th class="text-left py-3 px-4">ระดับสมาชิก</th>
+                            <th class="text-left py-3 px-4">สถานะ</th>
+                            <th class="text-left py-3 px-4">วันที่สมัคร</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${users.map(user => `
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-3 px-4 font-medium">${user.username || user.email.split('@')[0]}</td>
+                                <td class="py-3 px-4">${user.email}</td>
+                                <td class="py-3 px-4">
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium ${user.vipLevel === 'vip' ? 'vip-badge' : 'bg-gray-100 text-gray-800'}">
+                                        ${user.vipLevel === 'vip' ? '⭐ VIP' : 'ฟรี'}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium ${user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                        ${user.status === 'active' ? '✅ ใช้งานได้' : '🚫 ถูกแบน'}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4">${new Date(user.createdAt).toLocaleDateString('th-TH')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // Event listeners for popups
+        document.addEventListener('click', function(e) {
+            // Close popups when clicking outside
+            if (e.target.id === 'messagePopup') closeMessagePopup();
+            if (e.target.id === 'vipPopup') closeVipPopup();
+            if (e.target.id === 'editMessagePopup') closeEditMessagePopup();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (!document.getElementById('messagePopup').classList.contains('hidden')) closeMessagePopup();
+                if (!document.getElementById('vipPopup').classList.contains('hidden')) closeVipPopup();
+                if (!document.getElementById('editMessagePopup').classList.contains('hidden')) closeEditMessagePopup();
+            }
+        });
+
+        // Initialize app when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9838354712bfa190',t:'MTc1ODYxMTI3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
