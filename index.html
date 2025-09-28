@@ -3,361 +3,503 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจดค่าไฟ - ตลาด</title>
+    <title>VPN Config Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             box-sizing: border-box;
         }
-        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
-        body {
-            font-family: 'Sarabun', sans-serif;
+        .file-card {
+            transition: all 0.3s ease;
+        }
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        .status-online {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        .upload-zone.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
         }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
     <div class="container mx-auto px-4 py-8">
         <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">🔐 VPN Config Manager</h1>
+            <p class="text-gray-600">จัดการไฟล์ VPN Configuration ของคุณ</p>
+        </div>
+
+        <!-- Admin Login Section -->
+        <div id="loginSection" class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">🔐 เข้าสู่ระบบแอดมิน</h2>
+            <div class="max-w-md mx-auto">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อผู้ใช้</label>
+                    <input type="text" id="adminUsername" placeholder="กรอกชื่อผู้ใช้" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">รหัสผ่าน</label>
+                    <input type="password" id="adminPassword" placeholder="กรอกรหัสผ่าน" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <button onclick="adminLogin()" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
+                    🔑 เข้าสู่ระบบ
+                </button>
+                <p class="text-xs text-gray-500 mt-2 text-center">Demo: admin / admin123</p>
+            </div>
+        </div>
+
+        <!-- Upload Section (Admin Only) -->
+        <div id="uploadSection" class="bg-white rounded-xl shadow-lg p-6 mb-8 hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">📁 อัปโหลดไฟล์ใหม่ (แอดมินเท่านั้น)</h2>
+                <button onclick="adminLogout()" class="px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors">
+                    🚪 ออกจากระบบ
+                </button>
+            </div>
+            <div id="uploadZone" class="upload-zone rounded-lg p-8 text-center cursor-pointer">
+                <div class="text-4xl mb-4">📤</div>
+                <p class="text-gray-600 mb-2">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+                <p class="text-sm text-gray-500">รองรับ .ovpn, .conf</p>
+                <input type="file" id="fileInput" class="hidden" accept=".ovpn,.conf" multiple>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
         <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">⚡ ระบบจดค่าไฟ</h1>
-            <p class="text-gray-600 text-center">สำหรับลูกค้าแผงในตลาด</p>
-        </div>
-
-        <div class="grid lg:grid-cols-2 gap-8">
-            <!-- ฟอร์มเพิ่มลูกค้าใหม่ -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                    👤 เพิ่มลูกค้าใหม่
-                </h2>
-                <form id="customerForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อลูกค้า</label>
-                        <input type="text" id="customerName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกชื่อลูกค้า" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">เลขที่แผง</label>
-                        <input type="text" id="stallNumber" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="เช่น A-01, B-15" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">อัตราค่าไฟ (บาท/หน่วย)</label>
-                        <input type="number" id="electricRate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="เช่น 4.50" step="0.01" value="4.50" required>
-                    </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 font-medium">
-                        เพิ่มลูกค้า
-                    </button>
-                </form>
-            </div>
-
-            <!-- ฟอร์มบันทึกค่าไฟ -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                    📊 บันทึกค่าไฟ
-                </h2>
-                <form id="meterForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">เลือกลูกค้า</label>
-                        <select id="customerSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                            <option value="">-- เลือกลูกค้า --</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">เดือน/ปี</label>
-                        <input type="month" id="recordMonth" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">เลขมิเตอร์เก่า</label>
-                            <input type="number" id="oldMeter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">เลขมิเตอร์ใหม่</label>
-                            <input type="number" id="newMeter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0" required>
-                        </div>
-                    </div>
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm text-gray-600">หน่วยที่ใช้:</span>
-                            <span id="unitsUsed" class="font-semibold text-gray-800">0 หน่วย</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">ค่าไฟรวม:</span>
-                            <span id="totalCost" class="font-bold text-green-600 text-lg">0.00 บาท</span>
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-200 font-medium">
-                        บันทึกค่าไฟ
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- รายการลูกค้า -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mt-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                📋 รายการลูกค้าทั้งหมด
-            </h2>
-            <div class="overflow-x-auto">
-                <table class="w-full table-auto">
-                    <thead>
-                        <tr class="bg-gray-50">
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">ชื่อลูกค้า</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">เลขที่แผง</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">อัตราค่าไฟ</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">การจัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="customerList" class="divide-y divide-gray-200">
-                        <!-- รายการลูกค้าจะแสดงที่นี่ -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- ประวัติการใช้ไฟ -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mt-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                📈 ประวัติการใช้ไฟ
-            </h2>
-            <div class="mb-4">
-                <select id="historyFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">-- ดูประวัติทั้งหมด --</option>
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <input type="text" id="searchInput" placeholder="🔍 ค้นหาไฟล์..." 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <select id="filterSelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option value="all">ทั้งหมด</option>
+                    <option value="online">ออนไลน์</option>
+                    <option value="offline">ออฟไลน์</option>
+                    <option value="premium">Premium</option>
                 </select>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full table-auto">
-                    <thead>
-                        <tr class="bg-gray-50">
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">ลูกค้า</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">เดือน/ปี</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">มิเตอร์เก่า</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">มิเตอร์ใหม่</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">หน่วยที่ใช้</th>
-                            <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">ค่าไฟ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historyList" class="divide-y divide-gray-200">
-                        <!-- ประวัติจะแสดงที่นี่ -->
-                    </tbody>
-                </table>
+        </div>
+
+        <!-- VPN Files Grid -->
+        <div id="fileGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Files will be populated here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-12 hidden">
+            <div class="text-6xl mb-4">📂</div>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">ไม่พบไฟล์</h3>
+            <p class="text-gray-500">อัปโหลดไฟล์ VPN config เพื่อเริ่มต้น</p>
+        </div>
+    </div>
+
+    <!-- Modal for File Details -->
+    <div id="fileModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 m-4 max-w-md w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">รายละเอียดไฟล์</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            <div id="modalContent">
+                <!-- Modal content will be populated here -->
             </div>
         </div>
     </div>
 
     <script>
-        // ข้อมูลลูกค้าและประวัติ
-        let customers = JSON.parse(localStorage.getItem('customers') || '[]');
-        let meterRecords = JSON.parse(localStorage.getItem('meterRecords') || '[]');
-
-        // ฟังก์ชันบันทึกข้อมูลลง localStorage
-        function saveData() {
-            localStorage.setItem('customers', JSON.stringify(customers));
-            localStorage.setItem('meterRecords', JSON.stringify(meterRecords));
-        }
-
-        // ฟังก์ชันแสดงรายการลูกค้า
-        function displayCustomers() {
-            const customerList = document.getElementById('customerList');
-            const customerSelect = document.getElementById('customerSelect');
-            const historyFilter = document.getElementById('historyFilter');
-            
-            customerList.innerHTML = '';
-            customerSelect.innerHTML = '<option value="">-- เลือกลูกค้า --</option>';
-            historyFilter.innerHTML = '<option value="">-- ดูประวัติทั้งหมด --</option>';
-
-            customers.forEach((customer, index) => {
-                // แสดงในตาราง
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="px-4 py-3 text-sm text-gray-900">${customer.name}</td>
-                    <td class="px-4 py-3 text-sm text-gray-900">${customer.stallNumber}</td>
-                    <td class="px-4 py-3 text-sm text-gray-900">${customer.rate} บาท/หน่วย</td>
-                    <td class="px-4 py-3 text-sm">
-                        <button onclick="deleteCustomer(${index})" class="text-red-600 hover:text-red-800 font-medium">ลบ</button>
-                    </td>
-                `;
-                customerList.appendChild(row);
-
-                // เพิ่มใน select
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = `${customer.name} (${customer.stallNumber})`;
-                customerSelect.appendChild(option);
-
-                // เพิ่มใน filter
-                const filterOption = document.createElement('option');
-                filterOption.value = index;
-                filterOption.textContent = `${customer.name} (${customer.stallNumber})`;
-                historyFilter.appendChild(filterOption);
-            });
-        }
-
-        // ฟังก์ชันลบลูกค้า
-        function deleteCustomer(index) {
-            if (confirm('คุณต้องการลบลูกค้านี้หรือไม่?')) {
-                customers.splice(index, 1);
-                // ลบประวัติที่เกี่ยวข้อง
-                meterRecords = meterRecords.filter(record => record.customerIndex !== index);
-                // อัพเดท index ของประวัติที่เหลือ
-                meterRecords = meterRecords.map(record => {
-                    if (record.customerIndex > index) {
-                        record.customerIndex--;
-                    }
-                    return record;
-                });
-                saveData();
-                displayCustomers();
-                displayHistory();
+        // Sample VPN files data
+        let vpnFiles = [
+            {
+                id: 1,
+                name: "Thailand-Bangkok-01.ovpn",
+                server: "Bangkok, Thailand",
+                status: "online",
+                type: "premium",
+                speed: "100 Mbps",
+                ping: "15ms",
+                uploadDate: "2024-01-15",
+                size: "2.1 KB"
+            },
+            {
+                id: 2,
+                name: "Singapore-Premium.ovpn",
+                server: "Singapore",
+                status: "online",
+                type: "premium",
+                speed: "150 Mbps",
+                ping: "8ms",
+                uploadDate: "2024-01-14",
+                size: "1.9 KB"
+            },
+            {
+                id: 3,
+                name: "Japan-Tokyo-Free.ovpn",
+                server: "Tokyo, Japan",
+                status: "offline",
+                type: "free",
+                speed: "50 Mbps",
+                ping: "25ms",
+                uploadDate: "2024-01-13",
+                size: "2.3 KB"
+            },
+            {
+                id: 4,
+                name: "USA-NewYork-VIP.ovpn",
+                server: "New York, USA",
+                status: "online",
+                type: "premium",
+                speed: "200 Mbps",
+                ping: "45ms",
+                uploadDate: "2024-01-12",
+                size: "2.0 KB"
+            },
+            {
+                id: 5,
+                name: "Germany-Berlin.conf",
+                server: "Berlin, Germany",
+                status: "online",
+                type: "premium",
+                speed: "120 Mbps",
+                ping: "30ms",
+                uploadDate: "2024-01-11",
+                size: "1.8 KB"
+            },
+            {
+                id: 6,
+                name: "Australia-Sydney.ovpn",
+                server: "Sydney, Australia",
+                status: "offline",
+                type: "free",
+                speed: "80 Mbps",
+                ping: "60ms",
+                uploadDate: "2024-01-10",
+                size: "2.2 KB"
             }
-        }
+        ];
 
-        // ฟังก์ชันแสดงประวัติ
-        function displayHistory() {
-            const historyList = document.getElementById('historyList');
-            const filterValue = document.getElementById('historyFilter').value;
-            
-            historyList.innerHTML = '';
+        // Admin state
+        let isAdminLoggedIn = false;
 
-            let filteredRecords = meterRecords;
-            if (filterValue !== '') {
-                filteredRecords = meterRecords.filter(record => record.customerIndex == filterValue);
+        // DOM elements
+        const fileGrid = document.getElementById('fileGrid');
+        const emptyState = document.getElementById('emptyState');
+        const searchInput = document.getElementById('searchInput');
+        const filterSelect = document.getElementById('filterSelect');
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileModal = document.getElementById('fileModal');
+        const modalContent = document.getElementById('modalContent');
+        const closeModal = document.getElementById('closeModal');
+        const loginSection = document.getElementById('loginSection');
+        const uploadSection = document.getElementById('uploadSection');
+        const adminUsername = document.getElementById('adminUsername');
+        const adminPassword = document.getElementById('adminPassword');
+
+        // Render files
+        function renderFiles(files = vpnFiles) {
+            if (files.length === 0) {
+                fileGrid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
             }
 
-            // เรียงตามวันที่ล่าสุด
-            filteredRecords.sort((a, b) => new Date(b.month) - new Date(a.month));
+            fileGrid.classList.remove('hidden');
+            emptyState.classList.add('hidden');
 
-            filteredRecords.forEach(record => {
-                const customer = customers[record.customerIndex];
-                if (customer) {
-                    const row = document.createElement('tr');
-                    const monthYear = new Date(record.month + '-01').toLocaleDateString('th-TH', { 
-                        year: 'numeric', 
-                        month: 'long' 
-                    });
+            fileGrid.innerHTML = files.map(file => `
+                <div class="file-card bg-white rounded-xl shadow-lg p-6 cursor-pointer" onclick="showFileDetails(${file.id})">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="text-2xl mr-3">${file.name.endsWith('.ovpn') ? '🔐' : '⚙️'}</div>
+                            <div>
+                                <h3 class="font-semibold text-gray-800 truncate">${file.name}</h3>
+                                <p class="text-sm text-gray-600">${file.server}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="status-${file.status} w-3 h-3 rounded-full ${file.status === 'online' ? 'bg-green-500' : 'bg-red-500'} mr-2"></span>
+                            <span class="text-xs px-2 py-1 rounded-full ${file.type === 'premium' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}">${file.type === 'premium' ? 'Premium' : 'Free'}</span>
+                        </div>
+                    </div>
                     
-                    row.innerHTML = `
-                        <td class="px-4 py-3 text-sm text-gray-900">${customer.name}</td>
-                        <td class="px-4 py-3 text-sm text-gray-900">${monthYear}</td>
-                        <td class="px-4 py-3 text-sm text-gray-900">${record.oldMeter.toLocaleString()}</td>
-                        <td class="px-4 py-3 text-sm text-gray-900">${record.newMeter.toLocaleString()}</td>
-                        <td class="px-4 py-3 text-sm text-gray-900 font-medium">${record.unitsUsed.toLocaleString()}</td>
-                        <td class="px-4 py-3 text-sm text-green-600 font-bold">${record.totalCost.toLocaleString()} บาท</td>
-                    `;
-                    historyList.appendChild(row);
-                }
-            });
+                    <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
+                        <div>
+                            <span class="font-medium">ความเร็ว:</span>
+                            <div>${file.speed}</div>
+                        </div>
+                        <div>
+                            <span class="font-medium">Ping:</span>
+                            <div>${file.ping}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">${file.size} • ${file.uploadDate}</span>
+                        <div class="flex gap-2">
+                            <button onclick="event.stopPropagation(); downloadFile(${file.id})" 
+                                    class="px-3 py-1 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-colors">
+                                📥 ดาวน์โหลด
+                            </button>
+                            ${isAdminLoggedIn ? `<button onclick="event.stopPropagation(); deleteFile(${file.id})" 
+                                    class="px-3 py-1 bg-red-500 text-white text-xs rounded-lg hover:bg-red-600 transition-colors">
+                                🗑️ ลบ
+                            </button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // ฟังก์ชันคำนวณค่าไฟ
-        function calculateCost() {
-            const customerIndex = document.getElementById('customerSelect').value;
-            const oldMeter = parseFloat(document.getElementById('oldMeter').value) || 0;
-            const newMeter = parseFloat(document.getElementById('newMeter').value) || 0;
+        // Show file details modal
+        function showFileDetails(fileId) {
+            const file = vpnFiles.find(f => f.id === fileId);
+            if (!file) return;
+
+            modalContent.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <div class="text-3xl mr-4">${file.name.endsWith('.ovpn') ? '🔐' : '⚙️'}</div>
+                        <div>
+                            <h4 class="font-semibold text-lg">${file.name}</h4>
+                            <p class="text-gray-600">${file.server}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="font-medium text-gray-700">สถานะ:</span>
+                            <div class="flex items-center mt-1">
+                                <span class="w-2 h-2 rounded-full ${file.status === 'online' ? 'bg-green-500' : 'bg-red-500'} mr-2"></span>
+                                ${file.status === 'online' ? 'ออนไลน์' : 'ออฟไลน์'}
+                            </div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">ประเภท:</span>
+                            <div class="mt-1">${file.type === 'premium' ? 'Premium' : 'Free'}</div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">ความเร็ว:</span>
+                            <div class="mt-1">${file.speed}</div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">Ping:</span>
+                            <div class="mt-1">${file.ping}</div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">ขนาดไฟล์:</span>
+                            <div class="mt-1">${file.size}</div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">วันที่อัปโหลด:</span>
+                            <div class="mt-1">${file.uploadDate}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3 pt-4">
+                        <button onclick="downloadFile(${file.id})" 
+                                class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                            📥 ดาวน์โหลด
+                        </button>
+                        ${isAdminLoggedIn ? `<button onclick="deleteFile(${file.id}); closeFileModal()" 
+                                class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                            🗑️ ลบ
+                        </button>` : ''}
+                    </div>
+                </div>
+            `;
             
-            if (customerIndex !== '' && newMeter >= oldMeter) {
-                const customer = customers[customerIndex];
-                const unitsUsed = newMeter - oldMeter;
-                const totalCost = unitsUsed * customer.rate;
+            fileModal.classList.remove('hidden');
+            fileModal.classList.add('flex');
+        }
+
+        // Close modal
+        function closeFileModal() {
+            fileModal.classList.add('hidden');
+            fileModal.classList.remove('flex');
+        }
+
+        // Download file
+        function downloadFile(fileId) {
+            const file = vpnFiles.find(f => f.id === fileId);
+            if (!file) return;
+
+            // Create sample VPN config content
+            const configContent = `# VPN Configuration: ${file.name}
+# Server: ${file.server}
+# Generated: ${new Date().toISOString()}
+
+client
+dev tun
+proto udp
+remote ${file.server.toLowerCase().replace(/[^a-z]/g, '')}.vpnserver.com 1194
+resolv-retry infinite
+nobind
+persist-key
+persist-tun
+ca ca.crt
+cert client.crt
+key client.key
+verb 3
+cipher AES-256-CBC
+auth SHA256
+comp-lzo
+`;
+
+            // Create and download file
+            const blob = new Blob([configContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            alert(`✅ ดาวน์โหลด ${file.name} เรียบร้อยแล้ว!`);
+        }
+
+        // Delete file
+        function deleteFile(fileId) {
+            if (!isAdminLoggedIn) {
+                alert('❌ เฉพาะแอดมินเท่านั้นที่สามารถลบไฟล์ได้');
+                return;
+            }
+            
+            if (confirm('คุณต้องการลบไฟล์นี้หรือไม่?')) {
+                vpnFiles = vpnFiles.filter(f => f.id !== fileId);
+                renderFiles(getFilteredFiles());
+                alert('✅ ลบไฟล์เรียบร้อยแล้ว!');
+            }
+        }
+
+        // Filter files
+        function getFilteredFiles() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filterType = filterSelect.value;
+
+            return vpnFiles.filter(file => {
+                const matchesSearch = file.name.toLowerCase().includes(searchTerm) || 
+                                    file.server.toLowerCase().includes(searchTerm);
                 
-                document.getElementById('unitsUsed').textContent = `${unitsUsed.toLocaleString()} หน่วย`;
-                document.getElementById('totalCost').textContent = `${totalCost.toLocaleString()} บาท`;
+                const matchesFilter = filterType === 'all' || 
+                                    (filterType === 'online' && file.status === 'online') ||
+                                    (filterType === 'offline' && file.status === 'offline') ||
+                                    (filterType === 'premium' && file.type === 'premium');
+
+                return matchesSearch && matchesFilter;
+            });
+        }
+
+        // Admin login functions
+        function adminLogin() {
+            const username = adminUsername.value.trim();
+            const password = adminPassword.value.trim();
+            
+            // Demo credentials - in real app, this would be server-side authentication
+            if (username === 'admin' && password === 'admin123') {
+                isAdminLoggedIn = true;
+                loginSection.classList.add('hidden');
+                uploadSection.classList.remove('hidden');
+                renderFiles(getFilteredFiles()); // Re-render to show/hide delete buttons
+                alert('✅ เข้าสู่ระบบแอดมินสำเร็จ!');
             } else {
-                document.getElementById('unitsUsed').textContent = '0 หน่วย';
-                document.getElementById('totalCost').textContent = '0.00 บาท';
+                alert('❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
             }
         }
 
-        // Event Listeners
-        document.getElementById('customerForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('customerName').value.trim();
-            const stallNumber = document.getElementById('stallNumber').value.trim();
-            const rate = parseFloat(document.getElementById('electricRate').value);
-            
-            // ตรวจสอบเลขที่แผงซ้ำ
-            if (customers.some(customer => customer.stallNumber === stallNumber)) {
-                alert('เลขที่แผงนี้มีอยู่แล้ว กรุณาใช้เลขที่แผงอื่น');
-                return;
+        function adminLogout() {
+            if (confirm('คุณต้องการออกจากระบบแอดมินหรือไม่?')) {
+                isAdminLoggedIn = false;
+                loginSection.classList.remove('hidden');
+                uploadSection.classList.add('hidden');
+                adminUsername.value = '';
+                adminPassword.value = '';
+                renderFiles(getFilteredFiles()); // Re-render to hide delete buttons
+                alert('✅ ออกจากระบบเรียบร้อยแล้ว');
             }
-            
-            customers.push({ name, stallNumber, rate });
-            saveData();
-            displayCustomers();
-            
-            // รีเซ็ตฟอร์ม
-            this.reset();
-            document.getElementById('electricRate').value = '4.50';
-            
-            alert('เพิ่มลูกค้าเรียบร้อยแล้ว!');
-        });
+        }
 
-        document.getElementById('meterForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const customerIndex = parseInt(document.getElementById('customerSelect').value);
-            const month = document.getElementById('recordMonth').value;
-            const oldMeter = parseFloat(document.getElementById('oldMeter').value);
-            const newMeter = parseFloat(document.getElementById('newMeter').value);
-            
-            if (newMeter < oldMeter) {
-                alert('เลขมิเตอร์ใหม่ต้องมากกว่าหรือเท่ากับเลขมิเตอร์เก่า');
+        // Upload functionality
+        function handleFileUpload(files) {
+            if (!isAdminLoggedIn) {
+                alert('❌ เฉพาะแอดมินเท่านั้นที่สามารถอัปโหลดไฟล์ได้');
                 return;
             }
             
-            // ตรวจสอบการบันทึกซ้ำ
-            const existingRecord = meterRecords.find(record => 
-                record.customerIndex === customerIndex && record.month === month
-            );
-            
-            if (existingRecord) {
-                if (!confirm('มีการบันทึกข้อมูลเดือนนี้แล้ว ต้องการแก้ไขหรือไม่?')) {
-                    return;
+            Array.from(files).forEach(file => {
+                if (file.name.endsWith('.ovpn') || file.name.endsWith('.conf')) {
+                    const newFile = {
+                        id: Date.now() + Math.random(),
+                        name: file.name,
+                        server: "Custom Server",
+                        status: "online",
+                        type: "premium",
+                        speed: "100 Mbps",
+                        ping: "20ms",
+                        uploadDate: new Date().toISOString().split('T')[0],
+                        size: (file.size / 1024).toFixed(1) + " KB"
+                    };
+                    vpnFiles.unshift(newFile);
                 }
-                // ลบข้อมูลเก่า
-                meterRecords = meterRecords.filter(record => 
-                    !(record.customerIndex === customerIndex && record.month === month)
-                );
-            }
-            
-            const customer = customers[customerIndex];
-            const unitsUsed = newMeter - oldMeter;
-            const totalCost = unitsUsed * customer.rate;
-            
-            meterRecords.push({
-                customerIndex,
-                month,
-                oldMeter,
-                newMeter,
-                unitsUsed,
-                totalCost,
-                recordDate: new Date().toISOString()
             });
-            
-            saveData();
-            displayHistory();
-            
-            // รีเซ็ตฟอร์ม
-            this.reset();
-            document.getElementById('unitsUsed').textContent = '0 หน่วย';
-            document.getElementById('totalCost').textContent = '0.00 บาท';
-            
-            alert('บันทึกค่าไฟเรียบร้อยแล้ว!');
+            renderFiles(getFilteredFiles());
+            alert(`✅ อัปโหลด ${files.length} ไฟล์เรียบร้อยแล้ว!`);
+        }
+
+        // Event listeners
+        searchInput.addEventListener('input', () => renderFiles(getFilteredFiles()));
+        filterSelect.addEventListener('change', () => renderFiles(getFilteredFiles()));
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            handleFileUpload(e.dataTransfer.files);
         });
 
-        // คำนวณค่าไฟแบบเรียลไทม์
-        ['customerSelect', 'oldMeter', 'newMeter'].forEach(id => {
-            document.getElementById(id).addEventListener('input', calculateCost);
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files);
+            }
         });
 
-        // กรองประวัติ
-        document.getElementById('historyFilter').addEventListener('change', displayHistory);
+        // Admin login with Enter key
+        adminUsername.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') adminLogin();
+        });
+        adminPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') adminLogin();
+        });
 
-        // ตั้งค่าเดือนปัจจุบัน
-        document.getElementById('recordMonth').value = new Date().toISOString().slice(0, 7);
+        closeModal.addEventListener('click', closeFileModal);
+        fileModal.addEventListener('click', (e) => {
+            if (e.target === fileModal) closeFileModal();
+        });
 
-        // โหลดข้อมูลเมื่อเริ่มต้น
-        displayCustomers();
-        displayHistory();
+        // Initial render
+        renderFiles();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985825f66117a066',t:'MTc1ODk0NjE5NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9860709dd3ee527e',t:'MTc1OTAzMzEzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
