@@ -218,7 +218,7 @@
         <div class="bg-white rounded-xl p-6 m-4 max-w-md w-full">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold">รายละเอียดไฟล์</h3>
-                <button id="closeModal" class="text-gray-500 hover:text-gray-700">✕</button>
+                <button onclick="closeFileModal()" class="text-gray-500 hover:text-gray-700">✕</button>
             </div>
             <div id="modalContent">
                 <!-- Modal content will be populated here -->
@@ -746,7 +746,7 @@
         const fileInput = document.getElementById('fileInput');
         const fileModal = document.getElementById('fileModal');
         const modalContent = document.getElementById('modalContent');
-        const closeModal = document.getElementById('closeModal');
+
         const loginSection = document.getElementById('loginSection');
         const uploadSection = document.getElementById('uploadSection');
         const adminUsername = document.getElementById('adminUsername');
@@ -767,16 +767,22 @@
             
             // Remove active class from all tab buttons
             document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('bg-blue-500', 'text-white');
+                btn.classList.remove('tab-active', 'bg-blue-500', 'text-white');
                 btn.classList.add('text-gray-600', 'hover:text-blue-500');
             });
             
             // Show selected tab
             document.getElementById(tabName + 'Tab').classList.remove('hidden');
             
-            // Add active class to clicked button
-            event.target.classList.remove('text-gray-600', 'hover:text-blue-500');
-            event.target.classList.add('bg-blue-500', 'text-white');
+            // Find and activate the correct button
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach((btn, index) => {
+                const tabNames = ['dashboard', 'files', 'admin'];
+                if (tabNames[index] === tabName) {
+                    btn.classList.remove('text-gray-600', 'hover:text-blue-500');
+                    btn.classList.add('tab-active', 'bg-blue-500', 'text-white');
+                }
+            });
             
             currentTab = tabName;
         }
@@ -897,7 +903,7 @@
                                 class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
                             📥 ดาวน์โหลด
                         </button>
-                        ${isAdminLoggedIn ? `<button onclick="deleteFile(${file.id}); closeModal()" 
+                        ${isAdminLoggedIn ? `<button onclick="deleteFile(${file.id}); closeFileModal()" 
                                 class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
                             🗑️ ลบ
                         </button>` : ''}
@@ -910,7 +916,7 @@
         }
 
         // Close modal
-        function closeModal() {
+        function closeFileModal() {
             fileModal.classList.add('hidden');
             fileModal.classList.remove('flex');
         }
@@ -1084,10 +1090,9 @@ comp-lzo
             if (e.key === 'Enter') adminLogin();
         });
 
-        closeModal.addEventListener('click', closeModal);
         fileModal.addEventListener('click', (e) => {
-            if (e.target === fileModal) closeModal();
+            if (e.target === fileModal) closeFileModal();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98608536e0f8d7ad',t:'MTc1OTAzMzk4Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'986088ff63adf91a',t:'MTc1OTAzNDEzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
