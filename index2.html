@@ -3,2041 +3,1091 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบลงทะเบียนหมาแมว - ตลาด</title>
+    <title>VPN Config Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha512-r22gChDnGvBylk90+2e/ycr3RVrDi8DIOkIGNhJlKfuyQM4tIRAI062MaV8sfjQKYVGjOBaZBOA87z+IhZE9DA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Sarabun', sans-serif; }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            position: relative;
+        body {
+            box-sizing: border-box;
         }
-        
-        .gradient-bg::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            animation: backgroundMove 40s linear infinite;
+        .file-card {
+            transition: all 0.3s ease;
         }
-        
-        @keyframes backgroundMove {
-            0% { transform: translateX(0) translateY(0); }
-            100% { transform: translateX(-30px) translateY(-30px); }
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
-        
-        .card-hover {
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        
-        .card-hover:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
-        }
-        
-        .floating-animation {
-            animation: float 8s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            25% { transform: translateY(-15px) rotate(5deg); }
-            50% { transform: translateY(-10px) rotate(0deg); }
-            75% { transform: translateY(-20px) rotate(-5deg); }
-        }
-        
-        .pulse-animation {
+        .status-online {
             animation: pulse 2s infinite;
         }
-        
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
-        
-        .pet-card {
-            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            position: relative;
-            overflow: hidden;
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
         }
-        
-        .pet-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transition: left 0.5s;
-        }
-        
-        .pet-card:hover::before {
-            left: 100%;
-        }
-        
-        .input-focus {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .input-focus:focus {
-            transform: scale(1.02);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1), 0 10px 25px rgba(0,0,0,0.1);
-        }
-        
-        .sparkle {
-            animation: sparkle 4s ease-in-out infinite;
-        }
-        
-        @keyframes sparkle {
-            0%, 100% { opacity: 0.8; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.05); }
-        }
-        
-        .rainbow-text {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .export-btn {
-            background: linear-gradient(45deg, #00c851, #007e33);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .export-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.3s;
-        }
-        
-        .export-btn:hover::before {
-            left: 100%;
+        .upload-zone.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
         }
     </style>
 </head>
-<body class="gradient-bg min-h-screen">
-    <!-- Decorative Elements -->
-    <div class="fixed top-10 left-10 text-6xl opacity-20 floating-animation">🐕</div>
-    <div class="fixed top-32 right-20 text-4xl opacity-20 floating-animation" style="animation-delay: -2s;">🐱</div>
-    <div class="fixed bottom-20 left-20 text-5xl opacity-20 floating-animation" style="animation-delay: -4s;">🦴</div>
-    <div class="fixed bottom-32 right-10 text-3xl opacity-20 floating-animation" style="animation-delay: -1s;">🐾</div>
-
-    <div class="container mx-auto px-4 py-8 relative z-10">
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
         <!-- Header -->
-        <div class="text-center mb-12">
-            <div class="inline-block glass-effect rounded-3xl px-8 py-6 mb-6">
-                <h1 class="text-6xl font-extrabold text-white mb-3 drop-shadow-2xl rainbow-text">
-                    🐕🐱 ระบบลงทะเบียนหมาแมว
-                </h1>
-                <p class="text-white/90 text-xl font-semibold drop-shadow-lg">สำหรับผู้ค้าในตลาด - ติดตามเจ้าของสัตว์เลี้ยง</p>
-                <div class="mt-4 flex justify-center space-x-4">
-                    <span class="sparkle text-2xl">✨</span>
-                    <span class="sparkle text-2xl" style="animation-delay: 0.5s;">⭐</span>
-                    <span class="sparkle text-2xl" style="animation-delay: 1s;">💫</span>
-                </div>
-            </div>
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">🔐 VPN Config Manager</h1>
+            <p class="text-gray-600">ระบบจัดการไฟล์ VPN Configuration</p>
             
-            <!-- Connection Status & Export Button -->
-            <div class="mb-6 space-y-4">
-                <div class="flex justify-center">
-                    <div id="connectionStatus" class="text-sm font-medium bg-yellow-50 px-3 py-1 rounded-full border border-yellow-200">
-                        <span class="text-yellow-600">🟡 ตรวจสอบการเชื่อมต่อ...</span>
+            <!-- Quick Guide -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4 text-left max-w-2xl mx-auto">
+                <h3 class="font-semibold text-blue-800 mb-2">📖 วิธีใช้งาน:</h3>
+                <ul class="text-sm text-blue-700 space-y-1">
+                    <li>• <strong>ดูไฟล์:</strong> คลิกแท็บ "📁 รายการไฟล์" เพื่อดูไฟล์ VPN ทั้งหมด</li>
+                    <li>• <strong>ดูรายละเอียด:</strong> คลิกที่การ์ดไฟล์เพื่อดูข้อมูลเซิร์ฟเวอร์</li>
+                    <li>• <strong>ดาวน์โหลด:</strong> คลิกปุ่ม 📥 เพื่อดาวน์โหลดไฟล์ config</li>
+                    <li>• <strong>ค้นหา:</strong> ใช้ช่องค้นหาและตัวกรองเพื่อหาไฟล์ที่ต้องการ</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="bg-white rounded-xl shadow-lg mb-8">
+            <div class="flex flex-wrap border-b">
+                <button onclick="switchTab('dashboard')" class="tab-button tab-active px-6 py-3 font-medium rounded-tl-xl bg-blue-500 text-white">📊 Dashboard</button>
+                <button onclick="switchTab('files')" class="tab-button px-6 py-3 font-medium text-gray-600 hover:text-blue-500">📁 รายการไฟล์</button>
+                <button onclick="switchTab('admin')" class="tab-button px-6 py-3 font-medium text-gray-600 hover:text-blue-500 rounded-tr-xl">🔐 แอดมิน</button>
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboardTab" class="tab-content">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center">
+                        <div class="text-3xl mr-4">📁</div>
+                        <div>
+                            <p class="text-sm text-gray-600">ไฟล์ทั้งหมด</p>
+                            <p class="text-2xl font-bold text-blue-600" id="totalFiles">0</p>
+                        </div>
                     </div>
                 </div>
-                
-                <div id="syncStatus" class="text-center" style="display: none;"></div>
-                
-                <div class="flex justify-center space-x-4 flex-wrap gap-4">
-                    <button id="exportBtn" class="export-btn text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300">
-                        <span class="flex items-center justify-center">
-                            <span class="mr-3 text-2xl">📊</span>
-                            ส่งออกข้อมูล Excel
-                        </span>
-                    </button>
-                    
-                    <button id="setupBtn" class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300">
-                        <span class="flex items-center justify-center">
-                            <span class="mr-3 text-2xl">⚙️</span>
-                            ตั้งค่า Google Sheets
-                        </span>
-                    </button>
-                    
-                    <button id="firebaseBtn" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300">
-                        <span class="flex items-center justify-center">
-                            <span class="mr-3 text-2xl">🔥</span>
-                            ตั้งค่า Firebase
-                        </span>
-                    </button>
-                    
-                    <button id="contactBtn" class="bg-gradient-to-r from-green-500 to-teal-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300">
-                        <span class="flex items-center justify-center">
-                            <span class="mr-3 text-2xl">📞</span>
-                            ติดต่อเจ้าหน้าที่
-                        </span>
-                    </button>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center">
+                        <div class="text-3xl mr-4">🟢</div>
+                        <div>
+                            <p class="text-sm text-gray-600">ออนไลน์</p>
+                            <p class="text-2xl font-bold text-green-600" id="onlineServers">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center">
+                        <div class="text-3xl mr-4">🔴</div>
+                        <div>
+                            <p class="text-sm text-gray-600">ออฟไลน์</p>
+                            <p class="text-2xl font-bold text-red-600" id="offlineServers">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Overview -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">📊 ภาพรวมระบบ</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-medium text-gray-700 mb-3">🌍 เซิร์ฟเวอร์ตามภูมิภาค</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm">🇦🇸 เอเชีย</span>
+                                <span class="text-sm font-medium">4 เซิร์ฟเวอร์</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm">🇪🇺 ยุโรป</span>
+                                <span class="text-sm font-medium">4 เซิร์ฟเวอร์</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm">🇺🇸 อเมริกา</span>
+                                <span class="text-sm font-medium">2 เซิร์ฟเวอร์</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm">🇦🇺 โอเชียเนีย</span>
+                                <span class="text-sm font-medium">1 เซิร์ฟเวอร์</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-medium text-gray-700 mb-3">⚡ เซิร์ฟเวอร์เร็วที่สุด</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm">🇸🇬 Singapore</span>
+                                <span class="text-sm font-medium text-green-600">8ms</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm">🇹🇭 Bangkok</span>
+                                <span class="text-sm font-medium text-green-600">15ms</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm">🇰🇷 Seoul</span>
+                                <span class="text-sm font-medium text-green-600">18ms</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="grid lg:grid-cols-2 gap-8">
-            <!-- Registration Form -->
-            <div class="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 card-hover">
-                <div class="flex items-center justify-center mb-8">
-                    <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-full p-4 mr-4">
-                        <span class="text-3xl">📝</span>
+        <!-- Files Tab -->
+        <div id="filesTab" class="tab-content hidden">
+            <!-- Search and Filter -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <input type="text" id="searchInput" placeholder="🔍 ค้นหาไฟล์..." 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
-                    <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                        ลงทะเบียนสัตว์เลี้ยงใหม่
-                    </h2>
-                </div>
-                
-                <form id="petForm" class="space-y-6">
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="relative">
-                            <label class="block text-sm font-semibold text-gray-700 mb-3">👤 ชื่อเจ้าของ *</label>
-                            <input type="text" id="ownerName" required 
-                                   class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl input-focus focus:border-purple-500 focus:ring-0 text-gray-800 font-medium">
-                        </div>
-                        <div class="relative">
-                            <label class="block text-sm font-semibold text-gray-700 mb-3">📱 เบอร์โทร *</label>
-                            <input type="tel" id="ownerPhone" required 
-                                   class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl input-focus focus:border-purple-500 focus:ring-0 text-gray-800 font-medium">
-                        </div>
-                    </div>
-
-                    <div class="relative">
-                        <label class="block text-sm font-semibold text-gray-700 mb-3">🏪 ร้านค้า/แผง</label>
-                        <input type="text" id="shopName" 
-                               class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl input-focus focus:border-purple-500 focus:ring-0 text-gray-800 font-medium">
-                    </div>
-
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="relative">
-                            <label class="block text-sm font-semibold text-gray-700 mb-3">🐾 ชื่อสัตว์เลี้ยง *</label>
-                            <input type="text" id="petName" required 
-                                   class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl input-focus focus:border-purple-500 focus:ring-0 text-gray-800 font-medium">
-                        </div>
-                        <div class="relative">
-                            <label class="block text-sm font-semibold text-gray-700 mb-3">🏷️ ประเภท *</label>
-                            <select id="petType" required 
-                                    class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl input-focus focus:border-purple-500 focus:ring-0 text-gray-800 font-medium">
-                                <option value="">เลือกประเภท</option>
-                                <option value="หมา">🐕 หมา</option>
-                                <option value="แมว">🐱 แมว</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div class="relative">
-                            <label class="block text-sm font-semibold text-gray-700 mb-3">🧬 สายพันธุ์</label>
-                            <input type="text" id="petBreed" 
-                                   class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl input-focus focus:border-purple-500 focus:ring-0 text-gray-800 font-medium">
-                        </div>
-                        <div class="relative">
-                            <label class="block text-sm font-semibold text-gray-700 mb-3">🎨 สี</label>
-                            <input type="text" id="petColor" 
-                                   class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl input-focus focus:border-purple-500 focus:ring-0 text-gray-800 font-medium">
-                        </div>
-                    </div>
-
-                    <!-- Pet Photo Upload Section -->
-                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border-2 border-purple-200">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                            <span class="text-2xl mr-2">📸</span>
-                            รูปภาพสัตว์เลี้ยง
-                        </h3>
-                        
-                        <div class="space-y-4">
-                            <!-- Upload Area -->
-                            <div class="relative">
-                                <input type="file" id="petPhoto" accept="image/*" capture="environment" 
-                                       class="hidden" onchange="handlePhotoUpload(this)">
-                                <div id="uploadArea" onclick="document.getElementById('petPhoto').click()" 
-                                     class="border-2 border-dashed border-purple-300 rounded-2xl p-8 text-center cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition-all duration-300">
-                                    <div class="text-6xl mb-4">📷</div>
-                                    <div class="text-lg font-semibold text-gray-700 mb-2">คลิกเพื่อถ่ายรูปหรือเลือกรูป</div>
-                                    <div class="text-sm text-gray-500">รองรับไฟล์ JPG, PNG, WEBP (ขนาดไม่เกิน 5MB)</div>
-                                </div>
-                            </div>
-                            
-                            <!-- Photo Preview -->
-                            <div id="photoPreview" class="hidden">
-                                <div class="relative inline-block">
-                                    <img id="previewImage" src="" alt="Pet Photo" 
-                                         class="w-32 h-32 object-cover rounded-2xl border-4 border-white shadow-lg">
-                                    <button type="button" onclick="removePhoto()" 
-                                            class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition-colors">
-                                        ✕
-                                    </button>
-                                </div>
-                                <div class="mt-2 text-sm text-gray-600">
-                                    <span id="photoInfo"></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Vaccination Section -->
-                    <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 border-2 border-green-200">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                            <span class="text-2xl mr-2">💉</span>
-                            ข้อมูลการฉีดวัคซีน
-                        </h3>
-                        
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <div class="relative">
-                                <label class="block text-sm font-semibold text-gray-700 mb-3">🦠 วัคซีนพิษสุนัขบ้า</label>
-                                <select id="rabiesVaccine" 
-                                        class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl input-focus focus:border-green-500 focus:ring-0 text-gray-800 font-medium">
-                                    <option value="">เลือกสถานะ</option>
-                                    <option value="ฉีดแล้ว">✅ ฉีดแล้ว</option>
-                                    <option value="ยังไม่ฉีด">❌ ยังไม่ฉีด</option>
-                                    <option value="ไม่ทราบ">❓ ไม่ทราบ</option>
-                                </select>
-                            </div>
-                            <div class="relative">
-                                <label class="block text-sm font-semibold text-gray-700 mb-3">📅 วันที่ฉีดล่าสุด</label>
-                                <input type="date" id="vaccineDate" 
-                                       class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl input-focus focus:border-green-500 focus:ring-0 text-gray-800 font-medium">
-                            </div>
-                        </div>
-                        
-                        <div class="grid md:grid-cols-2 gap-6 mt-4">
-                            <div class="relative">
-                                <label class="block text-sm font-semibold text-gray-700 mb-3">🏥 สถานที่ฉีด</label>
-                                <input type="text" id="vaccineLocation" 
-                                       placeholder="เช่น โรงพยาบาลสัตว์, คลินิก"
-                                       class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl input-focus focus:border-green-500 focus:ring-0 text-gray-800 font-medium">
-                            </div>
-                            <div class="relative">
-                                <label class="block text-sm font-semibold text-gray-700 mb-3">💊 วัคซีนอื่นๆ</label>
-                                <input type="text" id="otherVaccines" 
-                                       placeholder="เช่น 5 in 1, 7 in 1"
-                                       class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl input-focus focus:border-green-500 focus:ring-0 text-gray-800 font-medium">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="relative">
-                        <label class="block text-sm font-semibold text-gray-700 mb-3">✨ ลักษณะพิเศษ</label>
-                        <textarea id="petDescription" rows="4" 
-                                  class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl input-focus focus:border-purple-500 focus:ring-0 text-gray-800 font-medium resize-none"
-                                  placeholder="เช่น มีจุดดำที่หู, ขาหลังขาว, มีรอยแผลเป็น ฯลฯ"></textarea>
-                    </div>
-
-                    <button type="submit" 
-                            class="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-red-500 text-white py-4 px-8 rounded-2xl font-bold text-lg hover:from-purple-700 hover:via-pink-700 hover:to-red-600 transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl">
-                        <span class="flex items-center justify-center">
-                            <span class="mr-2">✅</span>
-                            ลงทะเบียนเลย!
-                        </span>
-                    </button>
-                </form>
-            </div>
-
-            <!-- Pet List -->
-            <div class="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 card-hover">
-                <div class="flex justify-between items-center mb-8">
-                    <div class="flex items-center">
-                        <div class="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full p-4 mr-4">
-                            <span class="text-3xl">📋</span>
-                        </div>
-                        <h2 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                            รายชื่อสัตว์เลี้ยง
-                        </h2>
-                    </div>
-                    <div class="bg-gradient-to-r from-green-400 to-blue-500 text-white px-6 py-3 rounded-2xl shadow-lg">
-                        <div class="text-sm font-medium">ทั้งหมด</div>
-                        <div class="text-2xl font-bold text-center" id="totalCount">0</div>
-                        <div class="text-sm font-medium">ตัว</div>
-                    </div>
-                </div>
-
-                <!-- Search -->
-                <div class="mb-6 relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <span class="text-2xl">🔍</span>
-                    </div>
-                    <input type="text" id="searchInput" placeholder="ค้นหาชื่อเจ้าของ, ชื่อสัตว์, หรือร้านค้า..." 
-                           class="w-full pl-16 pr-5 py-4 border-2 border-gray-200 rounded-2xl input-focus focus:border-blue-500 focus:ring-0 text-gray-800 font-medium">
-                </div>
-
-                <!-- Filter -->
-                <div class="mb-6">
-                    <select id="typeFilter" class="px-5 py-3 border-2 border-gray-200 rounded-2xl input-focus focus:border-blue-500 focus:ring-0 text-gray-800 font-medium">
-                        <option value="">🌟 ทุกประเภท</option>
-                        <option value="หมา">🐕 หมาเท่านั้น</option>
-                        <option value="แมว">🐱 แมวเท่านั้น</option>
+                    <select id="filterSelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="all">ทั้งหมด</option>
+                        <option value="online">ออนไลน์</option>
+                        <option value="offline">ออฟไลน์</option>
+                        <option value="premium">Premium</option>
+                        <option value="free">Free</option>
                     </select>
                 </div>
+            </div>
 
-                <!-- Pet List -->
-                <div id="petList" class="space-y-4 max-h-96 overflow-y-auto pr-2">
-                    <div class="text-center text-gray-500 py-12">
-                        <div class="text-6xl mb-4 opacity-50">🐾</div>
-                        <div class="text-lg font-medium">ยังไม่มีข้อมูลสัตว์เลี้ยง</div>
-                        <div class="text-sm">กรุณาลงทะเบียนสัตว์เลี้ยงตัวแรก</div>
+            <!-- VPN Files Grid -->
+            <div id="fileGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Files will be populated here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="text-center py-12 hidden">
+                <div class="text-6xl mb-4">📂</div>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">ไม่พบไฟล์</h3>
+                <p class="text-gray-500">อัปโหลดไฟล์ VPN config เพื่อเริ่มต้น</p>
+            </div>
+        </div>
+
+        <!-- Admin Tab -->
+        <div id="adminTab" class="tab-content hidden">
+            <!-- Admin Login Section -->
+            <div id="loginSection" class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">🔐 เข้าสู่ระบบแอดมิน</h2>
+                <div class="max-w-md mx-auto">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อผู้ใช้</label>
+                        <input type="text" id="adminUsername" placeholder="กรอกชื่อผู้ใช้" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">รหัสผ่าน</label>
+                        <input type="password" id="adminPassword" placeholder="กรอกรหัสผ่าน" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <button onclick="adminLogin()" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
+                        🔑 เข้าสู่ระบบ
+                    </button>
+                    <p class="text-xs text-gray-500 mt-2 text-center">Demo: admin / admin123</p>
+                </div>
+            </div>
+
+            <!-- Upload Section (Admin Only) -->
+            <div id="uploadSection" class="bg-white rounded-xl shadow-lg p-6 mb-8 hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">📁 อัปโหลดไฟล์ใหม่ (แอดมินเท่านั้น)</h2>
+                    <button onclick="adminLogout()" class="px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors">
+                        🚪 ออกจากระบบ
+                    </button>
+                </div>
+                <div id="uploadZone" class="upload-zone rounded-lg p-8 text-center cursor-pointer">
+                    <div class="text-4xl mb-4">📤</div>
+                    <p class="text-gray-600 mb-2">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+                    <p class="text-sm text-gray-500">รองรับ .ovpn, .conf</p>
+                    <input type="file" id="fileInput" class="hidden" accept=".ovpn,.conf" multiple>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Modal for File Details -->
+    <div id="fileModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 m-4 max-w-md w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">รายละเอียดไฟล์</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            <div id="modalContent">
+                <!-- Modal content will be populated here -->
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Google Sheets Configuration
-        const GOOGLE_SHEETS_CONFIG = {
-            scriptUrl: '', // จะใส่ URL ของ Google Apps Script ที่นี่
-            sheetId: '',   // จะใส่ ID ของ Google Sheets ที่นี่
-            enabled: false // เปลี่ยนเป็น true เมื่อตั้งค่าเสร็จ
-        };
+        // Sample VPN files data with more servers
+        let vpnFiles = [
+            // Asia-Pacific Servers
+            {
+                id: 1,
+                name: "Thailand-Bangkok-01.ovpn",
+                server: "Bangkok, Thailand",
+                status: "online",
+                type: "premium",
+                speed: "100 Mbps",
+                ping: "15ms",
+                uploadDate: "2024-01-15",
+                size: "2.1 KB"
+            },
+            {
+                id: 2,
+                name: "Singapore-Premium.ovpn",
+                server: "Singapore",
+                status: "online",
+                type: "premium",
+                speed: "150 Mbps",
+                ping: "8ms",
+                uploadDate: "2024-01-14",
+                size: "1.9 KB"
+            },
+            {
+                id: 3,
+                name: "Japan-Tokyo-Free.ovpn",
+                server: "Tokyo, Japan",
+                status: "online",
+                type: "free",
+                speed: "50 Mbps",
+                ping: "25ms",
+                uploadDate: "2024-01-13",
+                size: "2.3 KB"
+            },
+            {
+                id: 4,
+                name: "South-Korea-Seoul.ovpn",
+                server: "Seoul, South Korea",
+                status: "online",
+                type: "free",
+                speed: "90 Mbps",
+                ping: "18ms",
+                uploadDate: "2024-01-05",
+                size: "2.0 KB"
+            },
+            {
+                id: 5,
+                name: "Hong-Kong-Central.ovpn",
+                server: "Hong Kong",
+                status: "online",
+                type: "premium",
+                speed: "130 Mbps",
+                ping: "12ms",
+                uploadDate: "2024-01-20",
+                size: "1.8 KB"
+            },
+            {
+                id: 6,
+                name: "Taiwan-Taipei.ovpn",
+                server: "Taipei, Taiwan",
+                status: "online",
+                type: "premium",
+                speed: "110 Mbps",
+                ping: "20ms",
+                uploadDate: "2024-01-19",
+                size: "2.0 KB"
+            },
+            {
+                id: 7,
+                name: "Malaysia-KualaLumpur.ovpn",
+                server: "Kuala Lumpur, Malaysia",
+                status: "online",
+                type: "free",
+                speed: "70 Mbps",
+                ping: "22ms",
+                uploadDate: "2024-01-18",
+                size: "2.2 KB"
+            },
+            {
+                id: 8,
+                name: "Indonesia-Jakarta.ovpn",
+                server: "Jakarta, Indonesia",
+                status: "online",
+                type: "premium",
+                speed: "85 Mbps",
+                ping: "28ms",
+                uploadDate: "2024-01-17",
+                size: "2.1 KB"
+            },
+            {
+                id: 9,
+                name: "Philippines-Manila.ovpn",
+                server: "Manila, Philippines",
+                status: "offline",
+                type: "free",
+                speed: "60 Mbps",
+                ping: "35ms",
+                uploadDate: "2024-01-16",
+                size: "1.9 KB"
+            },
+            {
+                id: 10,
+                name: "Vietnam-HoChiMinh.ovpn",
+                server: "Ho Chi Minh City, Vietnam",
+                status: "online",
+                type: "premium",
+                speed: "95 Mbps",
+                ping: "18ms",
+                uploadDate: "2024-01-15",
+                size: "2.0 KB"
+            },
+            {
+                id: 11,
+                name: "Australia-Sydney.ovpn",
+                server: "Sydney, Australia",
+                status: "online",
+                type: "free",
+                speed: "80 Mbps",
+                ping: "60ms",
+                uploadDate: "2024-01-10",
+                size: "2.2 KB"
+            },
+            {
+                id: 12,
+                name: "Australia-Melbourne.ovpn",
+                server: "Melbourne, Australia",
+                status: "online",
+                type: "premium",
+                speed: "120 Mbps",
+                ping: "58ms",
+                uploadDate: "2024-01-09",
+                size: "2.1 KB"
+            },
+            {
+                id: 13,
+                name: "New-Zealand-Auckland.ovpn",
+                server: "Auckland, New Zealand",
+                status: "online",
+                type: "premium",
+                speed: "75 Mbps",
+                ping: "65ms",
+                uploadDate: "2024-01-08",
+                size: "1.8 KB"
+            },
+            {
+                id: 14,
+                name: "India-Mumbai.ovpn",
+                server: "Mumbai, India",
+                status: "online",
+                type: "free",
+                speed: "65 Mbps",
+                ping: "40ms",
+                uploadDate: "2024-01-07",
+                size: "2.3 KB"
+            },
+            {
+                id: 15,
+                name: "China-Shanghai.ovpn",
+                server: "Shanghai, China",
+                status: "offline",
+                type: "premium",
+                speed: "100 Mbps",
+                ping: "25ms",
+                uploadDate: "2024-01-06",
+                size: "2.0 KB"
+            },
 
-        // Firebase Configuration - ตั้งค่าครั้งเดียวใช้ได้ยาว
-        const FIREBASE_CONFIG = {
-            apiKey: "",
-            authDomain: "",
-            projectId: "",
-            storageBucket: "",
-            messagingSenderId: "",
-            appId: "",
-            enabled: false,
-            autoRetry: true,
-            maxRetries: 3,
-            retryDelay: 2000
-        };
+            // North America Servers
+            {
+                id: 16,
+                name: "USA-NewYork-VIP.ovpn",
+                server: "New York, USA",
+                status: "online",
+                type: "premium",
+                speed: "200 Mbps",
+                ping: "45ms",
+                uploadDate: "2024-01-12",
+                size: "2.0 KB"
+            },
+            {
+                id: 17,
+                name: "USA-LosAngeles.ovpn",
+                server: "Los Angeles, USA",
+                status: "online",
+                type: "premium",
+                speed: "180 Mbps",
+                ping: "50ms",
+                uploadDate: "2024-01-11",
+                size: "1.9 KB"
+            },
+            {
+                id: 18,
+                name: "USA-Chicago.ovpn",
+                server: "Chicago, USA",
+                status: "online",
+                type: "free",
+                speed: "120 Mbps",
+                ping: "48ms",
+                uploadDate: "2024-01-10",
+                size: "2.1 KB"
+            },
+            {
+                id: 19,
+                name: "USA-Miami.ovpn",
+                server: "Miami, USA",
+                status: "online",
+                type: "premium",
+                speed: "160 Mbps",
+                ping: "52ms",
+                uploadDate: "2024-01-09",
+                size: "2.0 KB"
+            },
+            {
+                id: 20,
+                name: "USA-Seattle.ovpn",
+                server: "Seattle, USA",
+                status: "online",
+                type: "premium",
+                speed: "170 Mbps",
+                ping: "47ms",
+                uploadDate: "2024-01-08",
+                size: "1.8 KB"
+            },
+            {
+                id: 21,
+                name: "Canada-Toronto.ovpn",
+                server: "Toronto, Canada",
+                status: "online",
+                type: "premium",
+                speed: "140 Mbps",
+                ping: "40ms",
+                uploadDate: "2024-01-08",
+                size: "1.9 KB"
+            },
+            {
+                id: 22,
+                name: "Canada-Vancouver.ovpn",
+                server: "Vancouver, Canada",
+                status: "online",
+                type: "free",
+                speed: "110 Mbps",
+                ping: "45ms",
+                uploadDate: "2024-01-07",
+                size: "2.2 KB"
+            },
+            {
+                id: 23,
+                name: "Mexico-MexicoCity.ovpn",
+                server: "Mexico City, Mexico",
+                status: "offline",
+                type: "premium",
+                speed: "90 Mbps",
+                ping: "55ms",
+                uploadDate: "2024-01-06",
+                size: "2.1 KB"
+            },
 
-        let firebaseApp = null;
-        let firestore = null;
-        let firebaseInitialized = false;
-        let connectionRetries = 0;
+            // Europe Servers
+            {
+                id: 24,
+                name: "Germany-Berlin.conf",
+                server: "Berlin, Germany",
+                status: "online",
+                type: "premium",
+                speed: "120 Mbps",
+                ping: "30ms",
+                uploadDate: "2024-01-11",
+                size: "1.8 KB"
+            },
+            {
+                id: 25,
+                name: "Germany-Frankfurt.ovpn",
+                server: "Frankfurt, Germany",
+                status: "online",
+                type: "premium",
+                speed: "150 Mbps",
+                ping: "28ms",
+                uploadDate: "2024-01-10",
+                size: "2.0 KB"
+            },
+            {
+                id: 26,
+                name: "UK-London-Pro.ovpn",
+                server: "London, UK",
+                status: "online",
+                type: "premium",
+                speed: "180 Mbps",
+                ping: "35ms",
+                uploadDate: "2024-01-09",
+                size: "2.0 KB"
+            },
+            {
+                id: 27,
+                name: "UK-Manchester.ovpn",
+                server: "Manchester, UK",
+                status: "online",
+                type: "free",
+                speed: "100 Mbps",
+                ping: "38ms",
+                uploadDate: "2024-01-08",
+                size: "1.9 KB"
+            },
+            {
+                id: 28,
+                name: "France-Paris.ovpn",
+                server: "Paris, France",
+                status: "online",
+                type: "premium",
+                speed: "160 Mbps",
+                ping: "28ms",
+                uploadDate: "2024-01-07",
+                size: "2.1 KB"
+            },
+            {
+                id: 29,
+                name: "France-Marseille.ovpn",
+                server: "Marseille, France",
+                status: "online",
+                type: "free",
+                speed: "95 Mbps",
+                ping: "32ms",
+                uploadDate: "2024-01-06",
+                size: "2.0 KB"
+            },
+            {
+                id: 30,
+                name: "Netherlands-Amsterdam.conf",
+                server: "Amsterdam, Netherlands",
+                status: "online",
+                type: "premium",
+                speed: "170 Mbps",
+                ping: "22ms",
+                uploadDate: "2024-01-06",
+                size: "1.7 KB"
+            },
+            {
+                id: 31,
+                name: "Switzerland-Zurich.ovpn",
+                server: "Zurich, Switzerland",
+                status: "online",
+                type: "premium",
+                speed: "140 Mbps",
+                ping: "25ms",
+                uploadDate: "2024-01-05",
+                size: "1.8 KB"
+            },
+            {
+                id: 32,
+                name: "Italy-Rome.ovpn",
+                server: "Rome, Italy",
+                status: "online",
+                type: "free",
+                speed: "85 Mbps",
+                ping: "35ms",
+                uploadDate: "2024-01-04",
+                size: "2.2 KB"
+            },
+            {
+                id: 33,
+                name: "Spain-Madrid.ovpn",
+                server: "Madrid, Spain",
+                status: "online",
+                type: "premium",
+                speed: "110 Mbps",
+                ping: "40ms",
+                uploadDate: "2024-01-03",
+                size: "2.0 KB"
+            },
+            {
+                id: 34,
+                name: "Sweden-Stockholm.ovpn",
+                server: "Stockholm, Sweden",
+                status: "online",
+                type: "premium",
+                speed: "130 Mbps",
+                ping: "30ms",
+                uploadDate: "2024-01-02",
+                size: "1.9 KB"
+            },
+            {
+                id: 35,
+                name: "Norway-Oslo.ovpn",
+                server: "Oslo, Norway",
+                status: "offline",
+                type: "free",
+                speed: "105 Mbps",
+                ping: "33ms",
+                uploadDate: "2024-01-01",
+                size: "2.1 KB"
+            },
+            {
+                id: 36,
+                name: "Russia-Moscow.ovpn",
+                server: "Moscow, Russia",
+                status: "offline",
+                type: "premium",
+                speed: "90 Mbps",
+                ping: "45ms",
+                uploadDate: "2023-12-30",
+                size: "2.3 KB"
+            },
 
-        let pets = JSON.parse(localStorage.getItem('marketPets')) || [];
-        let petIdCounter = parseInt(localStorage.getItem('petIdCounter')) || 1;
-        let isOnline = navigator.onLine;
-        let syncQueue = JSON.parse(localStorage.getItem('syncQueue')) || [];
-        let currentPetPhoto = null;
+            // South America & Others
+            {
+                id: 37,
+                name: "Brazil-SaoPaulo.ovpn",
+                server: "São Paulo, Brazil",
+                status: "offline",
+                type: "premium",
+                speed: "110 Mbps",
+                ping: "55ms",
+                uploadDate: "2024-01-04",
+                size: "2.3 KB"
+            },
+            {
+                id: 38,
+                name: "Brazil-RioDeJaneiro.ovpn",
+                server: "Rio de Janeiro, Brazil",
+                status: "online",
+                type: "free",
+                speed: "80 Mbps",
+                ping: "60ms",
+                uploadDate: "2024-01-03",
+                size: "2.1 KB"
+            },
+            {
+                id: 39,
+                name: "Argentina-BuenosAires.ovpn",
+                server: "Buenos Aires, Argentina",
+                status: "online",
+                type: "premium",
+                speed: "95 Mbps",
+                ping: "65ms",
+                uploadDate: "2024-01-02",
+                size: "2.0 KB"
+            },
+            {
+                id: 40,
+                name: "Chile-Santiago.ovpn",
+                server: "Santiago, Chile",
+                status: "online",
+                type: "free",
+                speed: "70 Mbps",
+                ping: "70ms",
+                uploadDate: "2024-01-01",
+                size: "1.9 KB"
+            },
+            {
+                id: 41,
+                name: "South-Africa-CapeTown.ovpn",
+                server: "Cape Town, South Africa",
+                status: "online",
+                type: "premium",
+                speed: "85 Mbps",
+                ping: "80ms",
+                uploadDate: "2023-12-31",
+                size: "2.2 KB"
+            },
+            {
+                id: 42,
+                name: "UAE-Dubai.ovpn",
+                server: "Dubai, UAE",
+                status: "online",
+                type: "premium",
+                speed: "120 Mbps",
+                ping: "50ms",
+                uploadDate: "2023-12-30",
+                size: "1.8 KB"
+            },
+            {
+                id: 43,
+                name: "Israel-TelAviv.ovpn",
+                server: "Tel Aviv, Israel",
+                status: "online",
+                type: "free",
+                speed: "90 Mbps",
+                ping: "55ms",
+                uploadDate: "2023-12-29",
+                size: "2.0 KB"
+            },
+            {
+                id: 44,
+                name: "Turkey-Istanbul.ovpn",
+                server: "Istanbul, Turkey",
+                status: "offline",
+                type: "premium",
+                speed: "100 Mbps",
+                ping: "45ms",
+                uploadDate: "2023-12-28",
+                size: "2.1 KB"
+            },
+            {
+                id: 45,
+                name: "Egypt-Cairo.ovpn",
+                server: "Cairo, Egypt",
+                status: "online",
+                type: "free",
+                speed: "75 Mbps",
+                ping: "60ms",
+                uploadDate: "2023-12-27",
+                size: "2.3 KB"
+            }
+        ];
 
-        // ตรวจสอบสถานะอินเทอร์เน็ต
-        window.addEventListener('online', () => {
-            isOnline = true;
-            updateConnectionStatus();
-            syncWithGoogleSheets();
+        // Global state
+        let isAdminLoggedIn = false;
+        let currentTab = 'dashboard';
+
+        // DOM elements
+        const fileGrid = document.getElementById('fileGrid');
+        const emptyState = document.getElementById('emptyState');
+        const searchInput = document.getElementById('searchInput');
+        const filterSelect = document.getElementById('filterSelect');
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileModal = document.getElementById('fileModal');
+        const modalContent = document.getElementById('modalContent');
+        const closeModal = document.getElementById('closeModal');
+        const loginSection = document.getElementById('loginSection');
+        const uploadSection = document.getElementById('uploadSection');
+        const adminUsername = document.getElementById('adminUsername');
+        const adminPassword = document.getElementById('adminPassword');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            renderFiles();
         });
 
-        window.addEventListener('offline', () => {
-            isOnline = false;
-            updateConnectionStatus();
-        });
-
-        // Firebase Functions - ระบบเชื่อมต่อที่แข็งแกร่ง
-        async function initializeFirebase() {
-            if (!FIREBASE_CONFIG.enabled || firebaseInitialized) return firebaseInitialized;
-            
-            try {
-                // ตรวจสอบว่า Firebase SDK โหลดแล้วหรือยัง
-                if (typeof firebase === 'undefined') {
-                    console.warn('Firebase SDK not loaded yet, retrying...');
-                    if (connectionRetries < FIREBASE_CONFIG.maxRetries) {
-                        connectionRetries++;
-                        setTimeout(() => initializeFirebase(), FIREBASE_CONFIG.retryDelay);
-                    }
-                    return false;
-                }
-
-                // ลบ app เดิมถ้ามี (ป้องกัน duplicate app error)
-                try {
-                    const existingApp = firebase.app('pet-registration');
-                    await existingApp.delete();
-                } catch (e) {
-                    // ไม่มี app เดิม ไม่ต้องทำอะไร
-                }
-
-                // สร้าง Firebase app ใหม่
-                firebaseApp = firebase.initializeApp(FIREBASE_CONFIG, 'pet-registration');
-                firestore = firebase.firestore(firebaseApp);
-                
-                // ตั้งค่า Firestore settings สำหรับประสิทธิภาพ
-                firestore.settings({
-                    cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
-                });
-
-                // ทดสอบการเชื่อมต่อ
-                await testFirebaseConnection();
-                
-                firebaseInitialized = true;
-                connectionRetries = 0;
-                console.log('Firebase initialized successfully');
-                
-                // ตั้งค่า offline persistence
-                try {
-                    await firestore.enablePersistence({ synchronizeTabs: true });
-                    console.log('Firebase offline persistence enabled');
-                } catch (err) {
-                    if (err.code === 'failed-precondition') {
-                        console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time');
-                    } else if (err.code === 'unimplemented') {
-                        console.warn('Browser doesn\'t support persistence');
-                    }
-                }
-                
-                return true;
-            } catch (error) {
-                console.error('Firebase initialization error:', error);
-                firebaseInitialized = false;
-                
-                // Auto retry
-                if (FIREBASE_CONFIG.autoRetry && connectionRetries < FIREBASE_CONFIG.maxRetries) {
-                    connectionRetries++;
-                    console.log(`Retrying Firebase initialization (${connectionRetries}/${FIREBASE_CONFIG.maxRetries})...`);
-                    setTimeout(() => initializeFirebase(), FIREBASE_CONFIG.retryDelay);
-                }
-                
-                return false;
-            }
-        }
-
-        async function testFirebaseConnection() {
-            if (!firestore) throw new Error('Firestore not initialized');
-            
-            const testDoc = firestore.collection('_health').doc('connection-test');
-            await testDoc.set({
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                status: 'connected'
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
             });
             
-            const doc = await testDoc.get();
-            if (!doc.exists) {
-                throw new Error('Connection test failed');
-            }
-            
-            // ลบ test document
-            await testDoc.delete();
-        }
-
-        async function saveToFirebase(petData, retryCount = 0) {
-            if (!firestore || !firebaseInitialized) {
-                if (retryCount < FIREBASE_CONFIG.maxRetries) {
-                    await initializeFirebase();
-                    return saveToFirebase(petData, retryCount + 1);
-                }
-                return false;
-            }
-            
-            try {
-                const docRef = firestore.collection('pets').doc(petData.id);
-                await docRef.set({
-                    ...petData,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    version: 1 // สำหรับ conflict resolution
-                }, { merge: true });
-                
-                console.log(`Pet ${petData.id} saved to Firebase successfully`);
-                return true;
-            } catch (error) {
-                console.error('Firebase save error:', error);
-                
-                // Auto retry สำหรับ network errors
-                if (error.code === 'unavailable' && retryCount < FIREBASE_CONFIG.maxRetries) {
-                    console.log(`Retrying save operation (${retryCount + 1}/${FIREBASE_CONFIG.maxRetries})...`);
-                    await new Promise(resolve => setTimeout(resolve, FIREBASE_CONFIG.retryDelay));
-                    return saveToFirebase(petData, retryCount + 1);
-                }
-                
-                return false;
-            }
-        }
-
-        async function loadFromFirebase(retryCount = 0) {
-            if (!firestore || !firebaseInitialized) {
-                if (retryCount < FIREBASE_CONFIG.maxRetries) {
-                    await initializeFirebase();
-                    return loadFromFirebase(retryCount + 1);
-                }
-                return [];
-            }
-            
-            try {
-                // ใช้ cache ก่อน แล้วค่อย sync จาก server
-                const snapshot = await firestore.collection('pets')
-                    .orderBy('createdAt', 'desc')
-                    .get({ source: 'cache' });
-                
-                const firebasePets = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    // กรองข้อมูลที่เสียหาย
-                    if (data && data.id && data.petName && data.ownerName) {
-                        firebasePets.push({
-                            ...data,
-                            id: doc.id,
-                            fromCache: snapshot.metadata.fromCache
-                        });
-                    }
-                });
-                
-                // ถ้าได้ข้อมูลจาก cache แล้ว ให้ sync จาก server ในพื้นหลัง
-                if (snapshot.metadata.fromCache) {
-                    firestore.collection('pets')
-                        .orderBy('createdAt', 'desc')
-                        .get({ source: 'server' })
-                        .then(serverSnapshot => {
-                            if (!serverSnapshot.metadata.fromCache) {
-                                console.log('Firebase data synced from server');
-                                // อัพเดทข้อมูลใหม่ถ้าจำเป็น
-                                const serverPets = [];
-                                serverSnapshot.forEach(doc => {
-                                    const data = doc.data();
-                                    if (data && data.id && data.petName && data.ownerName) {
-                                        serverPets.push({ ...data, id: doc.id });
-                                    }
-                                });
-                                
-                                // เปรียบเทียบและอัพเดทถ้าข้อมูลต่างกัน
-                                if (JSON.stringify(serverPets) !== JSON.stringify(firebasePets)) {
-                                    console.log('Server data differs from cache, updating...');
-                                    // อัพเดทข้อมูลในระบบ
-                                    updateLocalDataFromFirebase(serverPets);
-                                }
-                            }
-                        })
-                        .catch(error => console.warn('Background sync failed:', error));
-                }
-                
-                console.log(`Loaded ${firebasePets.length} pets from Firebase`);
-                return firebasePets;
-            } catch (error) {
-                console.error('Firebase load error:', error);
-                
-                // Auto retry สำหรับ network errors
-                if (error.code === 'unavailable' && retryCount < FIREBASE_CONFIG.maxRetries) {
-                    console.log(`Retrying load operation (${retryCount + 1}/${FIREBASE_CONFIG.maxRetries})...`);
-                    await new Promise(resolve => setTimeout(resolve, FIREBASE_CONFIG.retryDelay));
-                    return loadFromFirebase(retryCount + 1);
-                }
-                
-                return [];
-            }
-        }
-
-        async function deleteFromFirebase(petId, retryCount = 0) {
-            if (!firestore || !firebaseInitialized) {
-                if (retryCount < FIREBASE_CONFIG.maxRetries) {
-                    await initializeFirebase();
-                    return deleteFromFirebase(petId, retryCount + 1);
-                }
-                return false;
-            }
-            
-            try {
-                await firestore.collection('pets').doc(petId).delete();
-                console.log(`Pet ${petId} deleted from Firebase successfully`);
-                return true;
-            } catch (error) {
-                console.error('Firebase delete error:', error);
-                
-                // Auto retry สำหรับ network errors
-                if (error.code === 'unavailable' && retryCount < FIREBASE_CONFIG.maxRetries) {
-                    console.log(`Retrying delete operation (${retryCount + 1}/${FIREBASE_CONFIG.maxRetries})...`);
-                    await new Promise(resolve => setTimeout(resolve, FIREBASE_CONFIG.retryDelay));
-                    return deleteFromFirebase(petId, retryCount + 1);
-                }
-                
-                return false;
-            }
-        }
-
-        function updateLocalDataFromFirebase(firebasePets) {
-            // อัพเดทข้อมูลในเครื่องด้วยข้อมูลจาก Firebase
-            const localPetIds = pets.map(pet => pet.id);
-            const newPets = firebasePets.filter(pet => !localPetIds.includes(pet.id));
-            
-            if (newPets.length > 0) {
-                pets = [...newPets, ...pets];
-                savePets();
-                renderPets();
-                updateTotalCount();
-                showSyncStatus(`อัพเดทข้อมูลจาก Firebase: ${newPets.length} รายการใหม่`, 'success');
-            }
-        }
-
-        // Real-time listener สำหรับ Firebase
-        function setupFirebaseListener() {
-            if (!firestore || !firebaseInitialized) return;
-            
-            try {
-                const unsubscribe = firestore.collection('pets')
-                    .orderBy('createdAt', 'desc')
-                    .onSnapshot(
-                        (snapshot) => {
-                            console.log('Firebase real-time update received');
-                            const firebasePets = [];
-                            snapshot.forEach(doc => {
-                                const data = doc.data();
-                                if (data && data.id && data.petName && data.ownerName) {
-                                    firebasePets.push({ ...data, id: doc.id });
-                                }
-                            });
-                            
-                            // อัพเดทข้อมูลในเครื่องแบบ real-time
-                            updateLocalDataFromFirebase(firebasePets);
-                        },
-                        (error) => {
-                            console.error('Firebase listener error:', error);
-                            // ลองตั้งค่า listener ใหม่หลังจาก 5 วินาที
-                            setTimeout(setupFirebaseListener, 5000);
-                        }
-                    );
-                
-                // เก็บ unsubscribe function ไว้ใช้ภายหลัง
-                window.firebaseUnsubscribe = unsubscribe;
-                console.log('Firebase real-time listener setup successfully');
-            } catch (error) {
-                console.error('Failed to setup Firebase listener:', error);
-            }
-        }
-
-        function updateConnectionStatus() {
-            const statusElement = document.getElementById('connectionStatus');
-            
-            if (isOnline && FIREBASE_CONFIG.enabled && firebaseInitialized) {
-                statusElement.innerHTML = '<span class="text-green-600">🟢 เชื่อมต่อ Firebase (Real-time)</span>';
-                statusElement.className = 'text-sm font-medium bg-green-50 px-3 py-1 rounded-full border border-green-200';
-            } else if (isOnline && FIREBASE_CONFIG.enabled && !firebaseInitialized) {
-                statusElement.innerHTML = '<span class="text-orange-600">🟠 กำลังเชื่อมต่อ Firebase...</span>';
-                statusElement.className = 'text-sm font-medium bg-orange-50 px-3 py-1 rounded-full border border-orange-200';
-            } else if (isOnline && GOOGLE_SHEETS_CONFIG.enabled) {
-                statusElement.innerHTML = '<span class="text-blue-600">🔵 เชื่อมต่อ Google Sheets</span>';
-                statusElement.className = 'text-sm font-medium bg-blue-50 px-3 py-1 rounded-full border border-blue-200';
-            } else if (isOnline && !GOOGLE_SHEETS_CONFIG.enabled && !FIREBASE_CONFIG.enabled) {
-                statusElement.innerHTML = '<span class="text-yellow-600">🟡 ออนไลน์ (ยังไม่ตั้งค่าฐานข้อมูล)</span>';
-                statusElement.className = 'text-sm font-medium bg-yellow-50 px-3 py-1 rounded-full border border-yellow-200';
-            } else {
-                statusElement.innerHTML = '<span class="text-red-600">🔴 ออฟไลน์ (ข้อมูลเก็บในเครื่อง)</span>';
-                statusElement.className = 'text-sm font-medium bg-red-50 px-3 py-1 rounded-full border border-red-200';
-            }
-        }
-
-        async function syncWithGoogleSheets() {
-            if (!GOOGLE_SHEETS_CONFIG.enabled || !isOnline || syncQueue.length === 0) return;
-
-            try {
-                showSyncStatus('กำลังซิงค์ข้อมูล...');
-                
-                for (const action of syncQueue) {
-                    await sendToGoogleSheets(action);
-                }
-                
-                // ล้าง sync queue เมื่อซิงค์สำเร็จ
-                syncQueue = [];
-                localStorage.setItem('syncQueue', JSON.stringify(syncQueue));
-                showSyncStatus('ซิงค์สำเร็จ!', 'success');
-                
-            } catch (error) {
-                console.error('Sync error:', error);
-                showSyncStatus('ซิงค์ล้มเหลว จะลองใหม่ภายหลัง', 'error');
-            }
-        }
-
-        async function sendToGoogleSheets(data) {
-            if (!GOOGLE_SHEETS_CONFIG.enabled || !GOOGLE_SHEETS_CONFIG.scriptUrl) {
-                throw new Error('Google Sheets ยังไม่ได้ตั้งค่า');
-            }
-
-            const response = await fetch(GOOGLE_SHEETS_CONFIG.scriptUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('bg-blue-500', 'text-white');
+                btn.classList.add('text-gray-600', 'hover:text-blue-500');
             });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            return await response.json();
+            
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            
+            // Add active class to clicked button
+            event.target.classList.remove('text-gray-600', 'hover:text-blue-500');
+            event.target.classList.add('bg-blue-500', 'text-white');
+            
+            currentTab = tabName;
         }
 
-        function addToSyncQueue(action) {
-            syncQueue.push({
-                ...action,
-                timestamp: new Date().toISOString()
-            });
-            localStorage.setItem('syncQueue', JSON.stringify(syncQueue));
+        // Update statistics
+        function updateStats() {
+            const totalFiles = vpnFiles.length;
+            const onlineServers = vpnFiles.filter(f => f.status === 'online').length;
+            const offlineServers = vpnFiles.filter(f => f.status === 'offline').length;
             
-            // พยายามซิงค์ทันที
-            if (isOnline && GOOGLE_SHEETS_CONFIG.enabled) {
-                syncWithGoogleSheets();
-            }
+            document.getElementById('totalFiles').textContent = totalFiles;
+            document.getElementById('onlineServers').textContent = onlineServers;
+            document.getElementById('offlineServers').textContent = offlineServers;
         }
 
-        function showSyncStatus(message, type = 'info') {
-            const statusDiv = document.getElementById('syncStatus');
-            statusDiv.textContent = message;
-            
-            statusDiv.className = 'text-sm font-medium px-3 py-2 rounded-lg transition-all duration-300 ';
-            
-            switch(type) {
-                case 'success':
-                    statusDiv.className += 'bg-green-100 text-green-700 border border-green-200';
-                    break;
-                case 'error':
-                    statusDiv.className += 'bg-red-100 text-red-700 border border-red-200';
-                    break;
-                default:
-                    statusDiv.className += 'bg-blue-100 text-blue-700 border border-blue-200';
-            }
-            
-            statusDiv.style.display = 'block';
-            
-            if (type === 'success' || type === 'error') {
-                setTimeout(() => {
-                    statusDiv.style.display = 'none';
-                }, 3000);
-            }
-        }
-
-        function savePets() {
-            localStorage.setItem('marketPets', JSON.stringify(pets));
-            localStorage.setItem('petIdCounter', petIdCounter.toString());
-        }
-
-        // Photo handling functions
-        function handlePhotoUpload(input) {
-            const file = input.files[0];
-            if (!file) return;
-            
-            // ตรวจสอบประเภทไฟล์
-            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-            if (!allowedTypes.includes(file.type)) {
-                alert('กรุณาเลือกไฟล์รูปภาพ (JPG, PNG, WEBP) เท่านั้น');
-                input.value = '';
-                return;
-            }
-            
-            // ตรวจสอบขนาดไฟล์ (5MB)
-            const maxSize = 5 * 1024 * 1024;
-            if (file.size > maxSize) {
-                alert('ขนาดไฟล์ใหญ่เกินไป กรุณาเลือกไฟล์ที่มีขนาดไม่เกิน 5MB');
-                input.value = '';
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                // บีบอัดรูปภาพก่อนเก็บ
-                compressImage(e.target.result, 800, 0.8, function(compressedDataUrl) {
-                    currentPetPhoto = compressedDataUrl;
-                    showPhotoPreview(compressedDataUrl, file);
-                });
-            };
-            reader.readAsDataURL(file);
-        }
-        
-        function compressImage(dataUrl, maxWidth, quality, callback) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                // คำนวณขนาดใหม่
-                let { width, height } = img;
-                if (width > maxWidth) {
-                    height = (height * maxWidth) / width;
-                    width = maxWidth;
-                }
-                
-                canvas.width = width;
-                canvas.height = height;
-                
-                // วาดรูปลงใน canvas
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                // แปลงเป็น data URL
-                const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-                callback(compressedDataUrl);
-            };
-            img.src = dataUrl;
-        }
-        
-        function showPhotoPreview(dataUrl, file) {
-            const uploadArea = document.getElementById('uploadArea');
-            const photoPreview = document.getElementById('photoPreview');
-            const previewImage = document.getElementById('previewImage');
-            const photoInfo = document.getElementById('photoInfo');
-            
-            // ซ่อน upload area และแสดง preview
-            uploadArea.style.display = 'none';
-            photoPreview.classList.remove('hidden');
-            
-            // แสดงรูป
-            previewImage.src = dataUrl;
-            
-            // แสดงข้อมูลไฟล์
-            const sizeKB = Math.round(file.size / 1024);
-            photoInfo.textContent = `${file.name} (${sizeKB} KB)`;
-        }
-        
-        function removePhoto() {
-            const uploadArea = document.getElementById('uploadArea');
-            const photoPreview = document.getElementById('photoPreview');
-            const petPhotoInput = document.getElementById('petPhoto');
-            
-            // รีเซ็ตค่า
-            currentPetPhoto = null;
-            petPhotoInput.value = '';
-            
-            // แสดง upload area และซ่อน preview
-            uploadArea.style.display = 'block';
-            photoPreview.classList.add('hidden');
-        }
-
-        function generatePetId() {
-            const id = `PET${petIdCounter.toString().padStart(3, '0')}`;
-            petIdCounter++;
-            return id;
-        }
-
-        async function addPet(petData) {
-            const pet = {
-                id: generatePetId(),
-                ...petData,
-                registeredDate: new Date().toLocaleDateString('th-TH')
-            };
-            pets.unshift(pet);
-            savePets();
-            
-            // บันทึกลง Firebase ก่อน (ถ้าเปิดใช้งาน)
-            if (FIREBASE_CONFIG.enabled) {
-                try {
-                    await saveToFirebase(pet);
-                    showSyncStatus('บันทึกลง Firebase สำเร็จ!', 'success');
-                } catch (error) {
-                    console.error('Firebase save failed:', error);
-                    showSyncStatus('บันทึกลง Firebase ล้มเหลว', 'error');
-                }
-            }
-            
-            // เพิ่มลงใน Google Sheets sync queue (ถ้าเปิดใช้งาน)
-            if (GOOGLE_SHEETS_CONFIG.enabled) {
-                addToSyncQueue({
-                    action: 'add',
-                    data: pet
-                });
-            }
-            
-            renderPets();
-            updateTotalCount();
-        }
-
-        async function deletePet(petId) {
-            if (confirm('คุณแน่ใจหรือไม่ที่จะลบข้อมูลนี้?')) {
-                const petToDelete = pets.find(pet => pet.id === petId);
-                pets = pets.filter(pet => pet.id !== petId);
-                savePets();
-                
-                // ลบจาก Firebase ก่อน (ถ้าเปิดใช้งาน)
-                if (FIREBASE_CONFIG.enabled && petToDelete) {
-                    try {
-                        await deleteFromFirebase(petId);
-                        showSyncStatus('ลบจาก Firebase สำเร็จ!', 'success');
-                    } catch (error) {
-                        console.error('Firebase delete failed:', error);
-                        showSyncStatus('ลบจาก Firebase ล้มเหลว', 'error');
-                    }
-                }
-                
-                // เพิ่มลงใน Google Sheets sync queue (ถ้าเปิดใช้งาน)
-                if (GOOGLE_SHEETS_CONFIG.enabled && petToDelete) {
-                    addToSyncQueue({
-                        action: 'delete',
-                        data: { id: petId }
-                    });
-                }
-                
-                renderPets();
-                updateTotalCount();
-            }
-        }
-
-        function renderPets(petsToRender = pets) {
-            const petList = document.getElementById('petList');
-            
-            if (petsToRender.length === 0) {
-                petList.innerHTML = `
-                    <div class="text-center text-gray-500 py-12">
-                        <div class="text-6xl mb-4 opacity-50">🐾</div>
-                        <div class="text-lg font-medium">${pets.length === 0 ? 'ยังไม่มีข้อมูลสัตว์เลี้ยง' : 'ไม่พบข้อมูลที่ค้นหา'}</div>
-                        <div class="text-sm">${pets.length === 0 ? 'กรุณาลงทะเบียนสัตว์เลี้ยงตัวแรก' : 'ลองเปลี่ยนคำค้นหาหรือตัวกรอง'}</div>
-                    </div>
-                `;
+        // Render files
+        function renderFiles(files = vpnFiles) {
+            if (files.length === 0) {
+                fileGrid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
                 return;
             }
 
-            petList.innerHTML = petsToRender.map(pet => `
-                <div class="pet-card rounded-2xl p-6 card-hover border-l-4 ${pet.petType === 'หมา' ? 'border-l-blue-500' : 'border-l-pink-500'}">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex items-center space-x-4">
-                            ${pet.petPhoto ? `
-                                <div class="relative">
-                                    <img src="${pet.petPhoto}" alt="${pet.petName}" 
-                                         class="w-16 h-16 object-cover rounded-full border-4 ${pet.petType === 'หมา' ? 'border-blue-200' : 'border-pink-200'} shadow-lg cursor-pointer hover:scale-110 transition-transform duration-300"
-                                         onclick="showFullImage('${pet.petPhoto}', '${pet.petName}')">
-                                    <div class="absolute -bottom-1 -right-1 text-lg ${pet.petType === 'หมา' ? 'bg-blue-100' : 'bg-pink-100'} rounded-full p-1">
-                                        ${pet.petType === 'หมา' ? '🐕' : '🐱'}
-                                    </div>
-                                </div>
-                            ` : `
-                                <div class="text-4xl ${pet.petType === 'หมา' ? 'bg-blue-100' : 'bg-pink-100'} rounded-full p-3">
-                                    ${pet.petType === 'หมา' ? '🐕' : '🐱'}
-                                </div>
-                            `}
+            fileGrid.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+
+            fileGrid.innerHTML = files.map(file => `
+                <div class="file-card bg-white rounded-xl shadow-lg p-6 cursor-pointer" onclick="showFileDetails(${file.id})">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="text-2xl mr-3">${file.name.endsWith('.ovpn') ? '🔐' : '⚙️'}</div>
                             <div>
-                                <h3 class="font-bold text-xl text-gray-800 mb-1">${pet.petName}</h3>
-                                <div class="flex items-center space-x-2">
-                                    <span class="bg-gradient-to-r ${pet.petType === 'หมา' ? 'from-blue-500 to-blue-600' : 'from-pink-500 to-pink-600'} text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                        ${pet.id}
-                                    </span>
-                                    <span class="text-xs text-gray-500">${pet.registeredDate}</span>
-                                </div>
+                                <h3 class="font-semibold text-gray-800 truncate">${file.name}</h3>
+                                <p class="text-sm text-gray-600">${file.server}</p>
                             </div>
                         </div>
-                        <button onclick="deletePet('${pet.id}')" 
-                                class="bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:scale-105">
-                            🗑️ ลบ
-                        </button>
-                    </div>
-                    
-                    <div class="bg-gray-50 rounded-xl p-4 mb-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-blue-500">👤</span>
-                                <span class="font-semibold text-gray-700">เจ้าของ:</span>
-                                <span class="text-gray-800">${pet.ownerName}</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <span class="text-green-500">📱</span>
-                                <span class="font-semibold text-gray-700">โทร:</span>
-                                <span class="text-gray-800">${pet.ownerPhone}</span>
-                            </div>
-                            ${pet.shopName ? `
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-purple-500">🏪</span>
-                                    <span class="font-semibold text-gray-700">ร้าน:</span>
-                                    <span class="text-gray-800">${pet.shopName}</span>
-                                </div>
-                            ` : ''}
-                            ${pet.petBreed ? `
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-orange-500">🧬</span>
-                                    <span class="font-semibold text-gray-700">สายพันธุ์:</span>
-                                    <span class="text-gray-800">${pet.petBreed}</span>
-                                </div>
-                            ` : ''}
-                            ${pet.petColor ? `
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-pink-500">🎨</span>
-                                    <span class="font-semibold text-gray-700">สี:</span>
-                                    <span class="text-gray-800">${pet.petColor}</span>
-                                </div>
-                            ` : ''}
-                            ${pet.rabiesVaccine ? `
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-red-500">💉</span>
-                                    <span class="font-semibold text-gray-700">วัคซีนพิษสุนัขบ้า:</span>
-                                    <span class="text-gray-800">${pet.rabiesVaccine}</span>
-                                </div>
-                            ` : ''}
-                            ${pet.vaccineDate ? `
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-blue-500">📅</span>
-                                    <span class="font-semibold text-gray-700">วันที่ฉีดล่าสุด:</span>
-                                    <span class="text-gray-800">${new Date(pet.vaccineDate).toLocaleDateString('th-TH')}</span>
-                                </div>
-                            ` : ''}
+                        <div class="flex items-center">
+                            <span class="status-${file.status} w-3 h-3 rounded-full ${file.status === 'online' ? 'bg-green-500' : 'bg-red-500'} mr-2"></span>
+                            <span class="text-xs px-2 py-1 rounded-full ${file.type === 'premium' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}">${file.type === 'premium' ? 'Premium' : 'Free'}</span>
                         </div>
                     </div>
                     
-                    <!-- Vaccine Info Section -->
-                    ${(pet.vaccineLocation || pet.otherVaccines) ? `
-                        <div class="bg-green-50 border-l-4 border-green-400 p-3 rounded-r-xl mb-3">
-                            <div class="flex items-start space-x-2">
-                                <span class="text-green-500 mt-0.5">💉</span>
-                                <div class="w-full">
-                                    <span class="font-semibold text-gray-700 text-sm">ข้อมูลวัคซีนเพิ่มเติม:</span>
-                                    ${pet.vaccineLocation ? `<p class="text-gray-800 text-sm mt-1">🏥 สถานที่ฉีด: ${pet.vaccineLocation}</p>` : ''}
-                                    ${pet.otherVaccines ? `<p class="text-gray-800 text-sm mt-1">💊 วัคซีนอื่นๆ: ${pet.otherVaccines}</p>` : ''}
-                                </div>
-                            </div>
+                    <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
+                        <div>
+                            <span class="font-medium">ความเร็ว:</span>
+                            <div>${file.speed}</div>
                         </div>
-                    ` : ''}
-
-                    ${pet.petDescription ? `
-                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-xl">
-                            <div class="flex items-start space-x-2">
-                                <span class="text-yellow-500 mt-0.5">✨</span>
-                                <div>
-                                    <span class="font-semibold text-gray-700 text-sm">ลักษณะพิเศษ:</span>
-                                    <p class="text-gray-800 text-sm mt-1">${pet.petDescription}</p>
-                                </div>
-                            </div>
+                        <div>
+                            <span class="font-medium">Ping:</span>
+                            <div>${file.ping}</div>
                         </div>
-                    ` : ''}
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">${file.size} • ${file.uploadDate}</span>
+                        <div class="flex gap-1">
+                            <button onclick="event.stopPropagation(); downloadFile(${file.id})" 
+                                    class="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 transition-colors">
+                                📥
+                            </button>
+                            ${isAdminLoggedIn ? `<button onclick="event.stopPropagation(); deleteFile(${file.id})" 
+                                    class="px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 transition-colors">
+                                🗑️
+                            </button>` : ''}
+                        </div>
+                    </div>
                 </div>
             `).join('');
         }
 
-        function updateTotalCount() {
-            const countElement = document.getElementById('totalCount');
-            countElement.textContent = pets.length;
-            countElement.classList.add('pulse-animation');
-            setTimeout(() => {
-                countElement.classList.remove('pulse-animation');
-            }, 1000);
+        // Show file details modal
+        function showFileDetails(fileId) {
+            const file = vpnFiles.find(f => f.id === fileId);
+            if (!file) return;
+
+            modalContent.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <div class="text-3xl mr-4">${file.name.endsWith('.ovpn') ? '🔐' : '⚙️'}</div>
+                        <div>
+                            <h4 class="font-semibold text-lg">${file.name}</h4>
+                            <p class="text-gray-600">${file.server}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="font-medium text-gray-700">สถานะ:</span>
+                            <div class="flex items-center mt-1">
+                                <span class="w-2 h-2 rounded-full ${file.status === 'online' ? 'bg-green-500' : 'bg-red-500'} mr-2"></span>
+                                ${file.status === 'online' ? 'ออนไลน์' : 'ออฟไลน์'}
+                            </div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">ประเภท:</span>
+                            <div class="mt-1">${file.type === 'premium' ? 'Premium' : 'Free'}</div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">ความเร็ว:</span>
+                            <div class="mt-1">${file.speed}</div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">Ping:</span>
+                            <div class="mt-1">${file.ping}</div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">ขนาดไฟล์:</span>
+                            <div class="mt-1">${file.size}</div>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">วันที่อัปโหลด:</span>
+                            <div class="mt-1">${file.uploadDate}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3 pt-4">
+                        <button onclick="downloadFile(${file.id})" 
+                                class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                            📥 ดาวน์โหลด
+                        </button>
+                        ${isAdminLoggedIn ? `<button onclick="deleteFile(${file.id}); closeModal()" 
+                                class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                            🗑️ ลบ
+                        </button>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            fileModal.classList.remove('hidden');
+            fileModal.classList.add('flex');
         }
 
-        function filterPets() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const typeFilter = document.getElementById('typeFilter').value;
+        // Close modal
+        function closeModal() {
+            fileModal.classList.add('hidden');
+            fileModal.classList.remove('flex');
+        }
+
+        // Download file
+        function downloadFile(fileId) {
+            const file = vpnFiles.find(f => f.id === fileId);
+            if (!file) return;
+
+            // Create sample VPN config content
+            const configContent = `# VPN Configuration: ${file.name}
+# Server: ${file.server}
+# Generated: ${new Date().toISOString()}
+
+client
+dev tun
+proto udp
+remote ${file.server.toLowerCase().replace(/[^a-z]/g, '')}.vpnserver.com 1194
+resolv-retry infinite
+nobind
+persist-key
+persist-tun
+ca ca.crt
+cert client.crt
+key client.key
+verb 3
+cipher AES-256-CBC
+auth SHA256
+comp-lzo
+`;
+
+            // Create and download file
+            const blob = new Blob([configContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            alert(`✅ ดาวน์โหลด ${file.name} เรียบร้อยแล้ว!`);
+        }
+
+        // Delete file
+        function deleteFile(fileId) {
+            if (!isAdminLoggedIn) {
+                alert('❌ เฉพาะแอดมินเท่านั้นที่สามารถลบไฟล์ได้');
+                return;
+            }
             
-            let filteredPets = pets.filter(pet => {
-                const matchesSearch = !searchTerm || 
-                    pet.ownerName.toLowerCase().includes(searchTerm) ||
-                    pet.petName.toLowerCase().includes(searchTerm) ||
-                    (pet.shopName && pet.shopName.toLowerCase().includes(searchTerm)) ||
-                    pet.id.toLowerCase().includes(searchTerm);
+            if (confirm('คุณต้องการลบไฟล์นี้หรือไม่?')) {
+                const file = vpnFiles.find(f => f.id === fileId);
+                vpnFiles = vpnFiles.filter(f => f.id !== fileId);
+                renderFiles(getFilteredFiles());
+                updateStats();
+                alert(`✅ ลบไฟล์ ${file.name} เรียบร้อยแล้ว!`);
+            }
+        }
+
+        // Admin functions
+        function adminLogin() {
+            const username = adminUsername.value.trim();
+            const password = adminPassword.value.trim();
+            
+            if (username === 'admin' && password === 'admin123') {
+                isAdminLoggedIn = true;
+                loginSection.classList.add('hidden');
+                uploadSection.classList.remove('hidden');
+                renderFiles(getFilteredFiles());
+                alert('✅ เข้าสู่ระบบแอดมินสำเร็จ!');
+            } else {
+                alert('❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+            }
+        }
+
+        function adminLogout() {
+            if (confirm('คุณต้องการออกจากระบบแอดมินหรือไม่?')) {
+                isAdminLoggedIn = false;
+                loginSection.classList.remove('hidden');
+                uploadSection.classList.add('hidden');
+                adminUsername.value = '';
+                adminPassword.value = '';
+                renderFiles(getFilteredFiles());
+                alert('✅ ออกจากระบบเรียบร้อยแล้ว');
+            }
+        }
+
+        // Filter files
+        function getFilteredFiles() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filterType = filterSelect.value;
+
+            return vpnFiles.filter(file => {
+                const matchesSearch = file.name.toLowerCase().includes(searchTerm) || 
+                                    file.server.toLowerCase().includes(searchTerm);
                 
-                const matchesType = !typeFilter || pet.petType === typeFilter;
-                
-                return matchesSearch && matchesType;
+                const matchesFilter = filterType === 'all' || 
+                                    (filterType === 'online' && file.status === 'online') ||
+                                    (filterType === 'offline' && file.status === 'offline') ||
+                                    (filterType === 'premium' && file.type === 'premium') ||
+                                    (filterType === 'free' && file.type === 'free');
+
+                return matchesSearch && matchesFilter;
             });
-            
-            renderPets(filteredPets);
         }
 
-        function exportToExcel() {
-            if (pets.length === 0) {
-                alert('ไม่มีข้อมูลสำหรับส่งออก');
-                return;
-            }
-
-            try {
-                // Check if XLSX is loaded
-                if (typeof XLSX === 'undefined') {
-                    alert('กำลังโหลดไลบรารี Excel กรุณารอสักครู่แล้วลองใหม่');
-                    return;
-                }
-
-                // Prepare data for Excel
-                const excelData = pets.map((pet, index) => ({
-                    'ลำดับ': index + 1,
-                    'รหัสสัตว์เลี้ยง': pet.id,
-                    'ชื่อสัตว์เลี้ยง': pet.petName,
-                    'ประเภท': pet.petType,
-                    'สายพันธุ์': pet.petBreed || '-',
-                    'สี': pet.petColor || '-',
-                    'ชื่อเจ้าของ': pet.ownerName,
-                    'เบอร์โทร': pet.ownerPhone,
-                    'ร้านค้า/แผง': pet.shopName || '-',
-                    'วัคซีนพิษสุนัขบ้า': pet.rabiesVaccine || '-',
-                    'วันที่ฉีดวัคซีน': pet.vaccineDate ? new Date(pet.vaccineDate).toLocaleDateString('th-TH') : '-',
-                    'สถานที่ฉีดวัคซีน': pet.vaccineLocation || '-',
-                    'วัคซีนอื่นๆ': pet.otherVaccines || '-',
-                    'ลักษณะพิเศษ': pet.petDescription || '-',
-                    'วันที่ลงทะเบียน': pet.registeredDate
-                }));
-
-                // Create workbook and worksheet
-                const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.json_to_sheet(excelData);
-
-                // Set column widths
-                const colWidths = [
-                    { wch: 8 },   // ลำดับ
-                    { wch: 15 },  // รหัสสัตว์เลี้ยง
-                    { wch: 20 },  // ชื่อสัตว์เลี้ยง
-                    { wch: 10 },  // ประเภท
-                    { wch: 15 },  // สายพันธุ์
-                    { wch: 15 },  // สี
-                    { wch: 25 },  // ชื่อเจ้าของ
-                    { wch: 15 },  // เบอร์โทร
-                    { wch: 20 },  // ร้านค้า/แผง
-                    { wch: 18 },  // วัคซีนพิษสุนัขบ้า
-                    { wch: 18 },  // วันที่ฉีดวัคซีน
-                    { wch: 20 },  // สถานที่ฉีดวัคซีน
-                    { wch: 18 },  // วัคซีนอื่นๆ
-                    { wch: 30 },  // ลักษณะพิเศษ
-                    { wch: 15 }   // วันที่ลงทะเบียน
-                ];
-                ws['!cols'] = colWidths;
-
-                // Add worksheet to workbook
-                XLSX.utils.book_append_sheet(wb, ws, 'รายชื่อสัตว์เลี้ยง');
-
-                // Generate filename with current date
-                const now = new Date();
-                const day = now.getDate().toString().padStart(2, '0');
-                const month = (now.getMonth() + 1).toString().padStart(2, '0');
-                const year = (now.getFullYear() + 543).toString(); // Convert to Buddhist year
-                const dateStr = `${day}-${month}-${year}`;
-                const filename = `รายชื่อสัตว์เลี้ยง_${dateStr}.xlsx`;
-
-                // Save file
-                XLSX.writeFile(wb, filename);
-
-                // Show success message
-                const exportBtn = document.getElementById('exportBtn');
-                const originalText = exportBtn.innerHTML;
-                exportBtn.innerHTML = '<span class="flex items-center justify-center"><span class="mr-3 text-2xl">✅</span>ส่งออกสำเร็จ!</span>';
-                setTimeout(() => {
-                    exportBtn.innerHTML = originalText;
-                }, 3000);
-
-            } catch (error) {
-                console.error('Export error:', error);
-                alert('เกิดข้อผิดพลาดในการส่งออกไฟล์ กรุณาลองใหม่อีกครั้ง');
-            }
-        }
-
-        // Event Listeners
-        document.getElementById('petForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const petData = {
-                ownerName: document.getElementById('ownerName').value,
-                ownerPhone: document.getElementById('ownerPhone').value,
-                shopName: document.getElementById('shopName').value,
-                petName: document.getElementById('petName').value,
-                petType: document.getElementById('petType').value,
-                petBreed: document.getElementById('petBreed').value,
-                petColor: document.getElementById('petColor').value,
-                rabiesVaccine: document.getElementById('rabiesVaccine').value,
-                vaccineDate: document.getElementById('vaccineDate').value,
-                vaccineLocation: document.getElementById('vaccineLocation').value,
-                otherVaccines: document.getElementById('otherVaccines').value,
-                petDescription: document.getElementById('petDescription').value,
-                petPhoto: currentPetPhoto // เพิ่มรูปภาพ
-            };
-            
-            addPet(petData);
-            this.reset();
-            removePhoto(); // รีเซ็ตรูปภาพด้วย
-            
-            // Show success message
-            const button = this.querySelector('button[type="submit"]');
-            const originalText = button.innerHTML;
-            button.innerHTML = '<span class="flex items-center justify-center"><span class="mr-2">🎉</span>ลงทะเบียนสำเร็จแล้ว!</span>';
-            button.classList.add('from-green-500', 'to-green-600');
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.classList.remove('from-green-500', 'to-green-600');
-            }, 3000);
-        });
-
-        function showSetupModal() {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto';
-            modal.innerHTML = `
-                <div class="bg-white rounded-3xl p-8 max-w-2xl w-full my-8 max-h-screen overflow-y-auto">
-                    <div class="flex justify-between items-center mb-6 sticky top-0 bg-white pb-4 border-b">
-                        <h2 class="text-2xl font-bold text-gray-800">⚙️ ตั้งค่า Google Sheets</h2>
-                        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 text-2xl font-bold hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center">&times;</button>
-                    </div>
-                    
-                    <div class="space-y-6">
-                        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-xl">
-                            <h3 class="font-bold text-blue-800 mb-2">📋 ขั้นตอนการตั้งค่าแบบละเอียด:</h3>
-                            <ol class="list-decimal list-inside space-y-2 text-sm text-blue-700">
-                                <li><strong>สร้าง Google Sheets:</strong> เปิด <a href="https://sheets.google.com" target="_blank" class="underline font-semibold">sheets.google.com</a> → คลิก "+" สร้างไฟล์ใหม่</li>
-                                <li><strong>ตั้งชื่อไฟล์:</strong> คลิกที่ "Untitled spreadsheet" แล้วตั้งชื่อ เช่น "ระบบลงทะเบียนหมาแมว"</li>
-                                <li><strong>คัดลอก Sheet ID:</strong> ดู URL จะเป็น docs.google.com/spreadsheets/d/<span class="bg-yellow-200 px-1 rounded">ID_ตรงนี้</span>/edit</li>
-                                <li><strong>เปิด Apps Script:</strong> เปิดแท็บใหม่ไป <a href="https://script.google.com" target="_blank" class="underline font-semibold">script.google.com</a></li>
-                                <li><strong>สร้างโปรเจกต์:</strong> คลิก "New project" → ลบโค้ดเดิมออกหมด → วางโค้ดใหม่ที่ให้ไว้</li>
-                                <li><strong>แก้ไข Sheet ID:</strong> เปลี่ยน "YOUR_SHEET_ID" เป็น ID จริงที่คัดลอกมา</li>
-                                <li><strong>Deploy:</strong> คลิก "Deploy" → "New deployment" → เลือก type เป็น "Web app"</li>
-                                <li><strong>ตั้งค่า Permission:</strong> Execute as: "Me" และ Who has access: "Anyone"</li>
-                                <li><strong>คัดลอก URL:</strong> หลัง Deploy จะได้ Web app URL → คัดลอกมาใส่ด้านล่าง</li>
-                            </ol>
-                        </div>
-                        
-                        <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-xl">
-                            <h3 class="font-bold text-red-800 mb-2">🚨 สาเหตุที่เชื่อมต่อล้มเหลวบ่อย:</h3>
-                            <ul class="list-disc list-inside space-y-1 text-sm text-red-700">
-                                <li>ลืมเปลี่ยน "YOUR_SHEET_ID" ในโค้ด Apps Script</li>
-                                <li>ตั้งค่า Permission ผิด (ต้องเป็น "Anyone" ไม่ใช่ "Only myself")</li>
-                                <li>ใช้ URL ผิด (ต้องเป็น Web app URL ไม่ใช่ URL ของโปรเจกต์)</li>
-                                <li>Google Sheets ไม่ได้แชร์เป็น Public หรือ Anyone with link</li>
-                                <li>ยังไม่ได้กด "Deploy" หรือกด "Deploy" แล้วแต่ไม่ได้คัดลอก URL ใหม่</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-xl">
-                            <h3 class="font-bold text-yellow-800 mb-2">📝 Google Apps Script Code (คัดลอกโค้ดนี้):</h3>
-                            <textarea readonly class="w-full h-40 p-3 bg-gray-100 rounded-lg text-xs font-mono" onclick="this.select()">function doPost(e) {
-  try {
-    // เปลี่ยน YOUR_SHEET_ID เป็น ID ของ Google Sheets จริง
-    const sheet = SpreadsheetApp.openById('YOUR_SHEET_ID').getActiveSheet();
-    
-    // ตรวจสอบว่ามี header หรือยัง ถ้าไม่มีให้เพิ่ม
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        'รหัสสัตว์', 'ชื่อสัตว์', 'ประเภท', 'สายพันธุ์', 'สี', 
-        'ชื่อเจ้าของ', 'เบอร์โทร', 'ร้านค้า', 'วัคซีนพิษสุนัขบ้า', 
-        'วันที่ฉีดวัคซีน', 'สถานที่ฉีด', 'วัคซีนอื่นๆ', 'ลักษณะพิเศษ', 'วันที่ลงทะเบียน'
-      ]);
-    }
-    
-    const data = JSON.parse(e.postData.contents);
-    
-    if (data.action === 'add') {
-      const pet = data.data;
-      sheet.appendRow([
-        pet.id, pet.petName, pet.petType, pet.petBreed || '',
-        pet.petColor || '', pet.ownerName, pet.ownerPhone,
-        pet.shopName || '', pet.rabiesVaccine || '',
-        pet.vaccineDate || '', pet.vaccineLocation || '',
-        pet.otherVaccines || '', pet.petDescription || '',
-        pet.registeredDate
-      ]);
-    }
-    
-    return ContentService.createTextOutput(JSON.stringify({success: true, message: 'บันทึกข้อมูลสำเร็จ'}))
-      .setMimeType(ContentService.MimeType.JSON);
-      
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({success: false, error: error.toString()}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify({status: 'Google Apps Script is working!'}))
-    .setMimeType(ContentService.MimeType.JSON);
-}</textarea>
-                            <p class="text-xs text-yellow-700 mt-2">⚠️ <strong>สำคัญ:</strong> อย่าลืมเปลี่ยน YOUR_SHEET_ID เป็น ID ของ Google Sheets จริงในโค้ด!</p>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">🔗 Google Apps Script URL:</label>
-                                <input type="url" id="scriptUrl" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec" 
-                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0">
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">📊 Google Sheets ID:</label>
-                                <input type="text" id="sheetId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms" 
-                                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0">
-                                <p class="text-xs text-gray-500 mt-1">หา ID จาก URL ของ Google Sheets: https://docs.google.com/spreadsheets/d/<strong>ID_ตรงนี้</strong>/edit</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex space-x-4">
-                            <button onclick="testConnection()" class="flex-1 bg-blue-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-blue-600 transition-colors">
-                                🧪 ทดสอบการเชื่อมต่อ
-                            </button>
-                            <button onclick="saveGoogleSheetsConfig()" class="flex-1 bg-green-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-green-600 transition-colors">
-                                💾 บันทึกการตั้งค่า
-                            </button>
-                        </div>
-                        
-                        <div id="setupStatus" class="text-center" style="display: none;"></div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            // โหลดค่าเดิมถ้ามี
-            const savedConfig = JSON.parse(localStorage.getItem('googleSheetsConfig') || '{}');
-            if (savedConfig.scriptUrl) document.getElementById('scriptUrl').value = savedConfig.scriptUrl;
-            if (savedConfig.sheetId) document.getElementById('sheetId').value = savedConfig.sheetId;
-        }
-
-        async function testConnection() {
-            const scriptUrl = document.getElementById('scriptUrl').value.trim();
-            const sheetId = document.getElementById('sheetId').value.trim();
-            const statusDiv = document.getElementById('setupStatus');
-            
-            if (!scriptUrl || !sheetId) {
-                statusDiv.innerHTML = '<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ กรุณากรอก URL และ Sheet ID ให้ครบถ้วน</div>';
-                statusDiv.style.display = 'block';
+        // Upload functionality
+        function handleFileUpload(files) {
+            if (!isAdminLoggedIn) {
+                alert('❌ เฉพาะแอดมินเท่านั้นที่สามารถอัปโหลดไฟล์ได้');
                 return;
             }
             
-            // ตรวจสอบรูปแบบ URL
-            if (!scriptUrl.includes('script.google.com') || !scriptUrl.includes('/exec')) {
-                statusDiv.innerHTML = '<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ URL ไม่ถูกต้อง ต้องเป็น Web app URL ที่ลงท้ายด้วย /exec</div>';
-                statusDiv.style.display = 'block';
-                return;
-            }
-            
-            statusDiv.innerHTML = '<div class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg">🔄 กำลังทดสอบการเชื่อมต่อ...</div>';
-            statusDiv.style.display = 'block';
-            
-            try {
-                // ทดสอบด้วย GET request ก่อน
-                const getResponse = await fetch(scriptUrl + '?test=1', {
-                    method: 'GET',
-                    mode: 'cors'
-                });
-                
-                if (!getResponse.ok) {
-                    throw new Error(`GET request failed: ${getResponse.status} - ตรวจสอบว่า Deploy แล้วและตั้งค่า Permission เป็น "Anyone"`);
-                }
-                
-                // ทดสอบด้วย POST request
-                const testData = {
-                    action: 'add',
-                    data: {
-                        id: 'TEST001',
-                        petName: 'ทดสอบ',
-                        petType: 'หมา',
-                        ownerName: 'ทดสอบระบบ',
-                        ownerPhone: '000-000-0000',
-                        registeredDate: new Date().toLocaleDateString('th-TH')
-                    }
-                };
-                
-                const postResponse = await fetch(scriptUrl, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(testData)
-                });
-                
-                const result = await postResponse.json();
-                
-                if (postResponse.ok && result.success) {
-                    statusDiv.innerHTML = '<div class="bg-green-100 text-green-700 px-4 py-2 rounded-lg">✅ เชื่อมต่อสำเร็จ! ระบบพร้อมใช้งาน<br><small>ข้อมูลทดสอบถูกเพิ่มลงใน Google Sheets แล้ว</small></div>';
-                } else {
-                    throw new Error(result.error || `HTTP ${postResponse.status}`);
-                }
-                
-            } catch (error) {
-                let errorMessage = '❌ เชื่อมต่อล้มเหลว: ';
-                
-                if (error.message.includes('CORS')) {
-                    errorMessage += 'ปัญหา CORS - ตรวจสอบว่าตั้งค่า "Who has access" เป็น "Anyone"';
-                } else if (error.message.includes('404')) {
-                    errorMessage += 'ไม่พบ URL - ตรวจสอบว่า Deploy แล้วและใช้ Web app URL ที่ถูกต้อง';
-                } else if (error.message.includes('403')) {
-                    errorMessage += 'ไม่มีสิทธิ์เข้าถึง - ตรวจสอบการตั้งค่า Permission';
-                } else if (error.message.includes('YOUR_SHEET_ID')) {
-                    errorMessage += 'ลืมเปลี่ยน YOUR_SHEET_ID ในโค้ด Apps Script';
-                } else {
-                    errorMessage += error.message;
-                }
-                
-                statusDiv.innerHTML = `<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">${errorMessage}</div>`;
-            }
-        }
-
-        function saveGoogleSheetsConfig() {
-            const scriptUrl = document.getElementById('scriptUrl').value;
-            const sheetId = document.getElementById('sheetId').value;
-            const statusDiv = document.getElementById('setupStatus');
-            
-            if (!scriptUrl || !sheetId) {
-                statusDiv.innerHTML = '<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">กรุณากรอกข้อมูลให้ครบถ้วน</div>';
-                statusDiv.style.display = 'block';
-                return;
-            }
-            
-            // บันทึกการตั้งค่า
-            const config = { scriptUrl, sheetId, enabled: true };
-            localStorage.setItem('googleSheetsConfig', JSON.stringify(config));
-            
-            // อัพเดทการตั้งค่าในระบบ
-            GOOGLE_SHEETS_CONFIG.scriptUrl = scriptUrl;
-            GOOGLE_SHEETS_CONFIG.sheetId = sheetId;
-            GOOGLE_SHEETS_CONFIG.enabled = true;
-            
-            statusDiv.innerHTML = '<div class="bg-green-100 text-green-700 px-4 py-2 rounded-lg">✅ บันทึกการตั้งค่าสำเร็จ!</div>';
-            statusDiv.style.display = 'block';
-            
-            updateConnectionStatus();
-            
-            // ปิด modal หลังจาก 2 วินาที
-            setTimeout(() => {
-                document.querySelector('.fixed.inset-0').remove();
-            }, 2000);
-        }
-
-        function showFirebaseSetupModal() {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto';
-            modal.innerHTML = `
-                <div class="bg-white rounded-3xl p-8 max-w-3xl w-full my-8 max-h-screen overflow-y-auto">
-                    <div class="flex justify-between items-center mb-6 sticky top-0 bg-white pb-4 border-b">
-                        <h2 class="text-2xl font-bold text-gray-800">🔥 ตั้งค่า Firebase - ครั้งเดียวจบ!</h2>
-                        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 text-2xl font-bold hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center">&times;</button>
-                    </div>
-                    
-                    <div class="space-y-6">
-                        <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r-xl">
-                            <h3 class="font-bold text-orange-800 mb-2">🚀 ขั้นตอนง่ายๆ เพียง 5 ขั้นตอน:</h3>
-                            <ol class="list-decimal list-inside space-y-2 text-sm text-orange-700">
-                                <li><strong>สร้างโปรเจกต์:</strong> เปิด <a href="https://console.firebase.google.com" target="_blank" class="underline font-semibold">Firebase Console</a> → คลิก "Create a project" → ตั้งชื่อโปรเจกต์</li>
-                                <li><strong>เปิดใช้ Firestore:</strong> ไปที่ "Firestore Database" → "Create database" → "Start in test mode" → เลือก location</li>
-                                <li><strong>เพิ่ม Web App:</strong> ไปที่ "Project settings" (⚙️) → "Add app" → เลือก Web (</>) → ตั้งชื่อ App</li>
-                                <li><strong>คัดลอก Config:</strong> หลังสร้าง App จะเห็น <code>const firebaseConfig = {...}</code> → <strong>คัดลอกทั้งหมดมาวางในช่องด้านล่าง</strong></li>
-                                <li><strong>ตั้งค่า Security Rules:</strong> ไปที่ Firestore → Rules → วางโค้ด Rules ด้านล่าง</li>
-                            </ol>
-                        </div>
-                        
-                        <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-xl">
-                            <h3 class="font-bold text-green-800 mb-2">✨ ฟีเจอร์ที่ได้:</h3>
-                            <div class="grid grid-cols-2 gap-2 text-sm text-green-700">
-                                <div>• Real-time Sync ทันที</div>
-                                <div>• ใช้งานได้แม้ออฟไลน์</div>
-                                <div>• เชื่อมต่อใหม่อัตโนมัติ</div>
-                                <div>• สำรองข้อมูลใน Cloud</div>
-                                <div>• เข้าถึงจากหลายเครื่อง</div>
-                                <div>• โหลดเร็วจาก Cache</div>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-lg font-bold text-gray-800 mb-3">📋 วาง Firebase Config ทั้งหมดที่นี่:</label>
-                                
-                                <!-- ตัวอย่างแบบต่างๆ -->
-                                <div class="bg-gray-50 p-4 rounded-lg mb-3 space-y-3">
-                                    <p class="text-sm font-semibold text-gray-700">✅ รูปแบบที่รองรับ (เลือกแบบไหนก็ได้):</p>
-                                    
-                                    <div class="bg-white p-3 rounded border-l-4 border-green-400">
-                                        <p class="text-xs font-semibold text-green-700 mb-1">แบบที่ 1: คัดลอกทั้งบล็อก</p>
-                                        <code class="text-xs text-gray-600 block">
-                                            const firebaseConfig = {<br>
-                                            &nbsp;&nbsp;apiKey: "AIzaSyC...",<br>
-                                            &nbsp;&nbsp;authDomain: "project.firebaseapp.com",<br>
-                                            &nbsp;&nbsp;projectId: "project-id",<br>
-                                            &nbsp;&nbsp;storageBucket: "project.appspot.com",<br>
-                                            &nbsp;&nbsp;messagingSenderId: "123456789",<br>
-                                            &nbsp;&nbsp;appId: "1:123:web:abc123"<br>
-                                            };
-                                        </code>
-                                    </div>
-                                    
-                                    <div class="bg-white p-3 rounded border-l-4 border-blue-400">
-                                        <p class="text-xs font-semibold text-blue-700 mb-1">แบบที่ 2: เฉพาะ object</p>
-                                        <code class="text-xs text-gray-600 block">
-                                            {<br>
-                                            &nbsp;&nbsp;apiKey: "AIzaSyC...",<br>
-                                            &nbsp;&nbsp;authDomain: "project.firebaseapp.com",<br>
-                                            &nbsp;&nbsp;projectId: "project-id",<br>
-                                            &nbsp;&nbsp;storageBucket: "project.appspot.com",<br>
-                                            &nbsp;&nbsp;messagingSenderId: "123456789",<br>
-                                            &nbsp;&nbsp;appId: "1:123:web:abc123"<br>
-                                            }
-                                        </code>
-                                    </div>
-                                    
-                                    <div class="bg-white p-3 rounded border-l-4 border-purple-400">
-                                        <p class="text-xs font-semibold text-purple-700 mb-1">แบบที่ 3: แยกบรรทัด</p>
-                                        <code class="text-xs text-gray-600 block">
-                                            apiKey: "AIzaSyC..."<br>
-                                            authDomain: "project.firebaseapp.com"<br>
-                                            projectId: "project-id"<br>
-                                            storageBucket: "project.appspot.com"<br>
-                                            messagingSenderId: "123456789"<br>
-                                            appId: "1:123:web:abc123"
-                                        </code>
-                                    </div>
-                                </div>
-                                
-                                <textarea id="firebaseConfigText" rows="10" 
-                                          placeholder="วาง Firebase Config ที่นี่ (รูปแบบไหนก็ได้ตามตัวอย่างด้านบน)
-
-ตัวอย่าง:
-const firebaseConfig = {
-  apiKey: &quot;AIzaSyC...&quot;,
-  authDomain: &quot;project.firebaseapp.com&quot;,
-  projectId: &quot;project-id&quot;,
-  storageBucket: &quot;project.appspot.com&quot;,
-  messagingSenderId: &quot;123456789&quot;,
-  appId: &quot;1:123:web:abc123&quot;
-};"
-                                          class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-0 text-sm font-mono resize-none"></textarea>
-                                
-                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-lg">
-                                    <p class="text-xs text-yellow-800">
-                                        <strong>💡 เคล็ดลับ:</strong> คัดลอกทั้งหมดจาก Firebase Console มาวางได้เลย 
-                                        ระบบจะแยกข้อมูลให้อัตโนมัติ แม้จะมี comment หรือ code อื่นๆ ปนมาด้วย
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-xl">
-                            <h3 class="font-bold text-yellow-800 mb-2">🔒 Security Rules (คัดลอกไปใส่ใน Firestore Rules):</h3>
-                            <textarea readonly class="w-full h-32 p-3 bg-gray-100 rounded-lg text-xs font-mono" onclick="this.select()">rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // อนุญาตให้อ่าน-เขียนข้อมูลสัตว์เลี้ยง
-    match /pets/{petId} {
-      allow read, write: if true;
-    }
-    
-    // อนุญาตให้ทดสอบการเชื่อมต่อ
-    match /_health/{document} {
-      allow read, write: if true;
-    }
-    
-    // ป้องกันการเข้าถึงข้อมูลอื่นๆ
-    match /{document=**} {
-      allow read, write: if false;
-    }
-  }
-}</textarea>
-                            <p class="text-xs text-yellow-700 mt-2">🛡️ <strong>ปลอดภัย:</strong> Rules นี้อนุญาตเฉพาะข้อมูลสัตว์เลี้ยงและการทดสอบเท่านั้น</p>
-                        </div>
-                        
-                        <div class="flex space-x-4">
-                            <button onclick="parseAndTestFirebaseConfig()" class="flex-1 bg-orange-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-orange-600 transition-colors">
-                                🧪 แยกข้อมูล + ทดสอบ
-                            </button>
-                            <button onclick="saveFirebaseConfigFromText()" class="flex-1 bg-green-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-green-600 transition-colors">
-                                💾 บันทึกการตั้งค่า
-                            </button>
-                            <button onclick="loadFirebaseData()" class="flex-1 bg-blue-500 text-white py-3 px-6 rounded-xl font-semibold hover:bg-blue-600 transition-colors">
-                                📥 โหลดข้อมูล
-                            </button>
-                        </div>
-                        
-                        <div id="firebaseSetupStatus" class="text-center" style="display: none;"></div>
-                        
-                        <!-- แสดงข้อมูลที่แยกได้ -->
-                        <div id="parsedConfig" class="hidden bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-xl">
-                            <h3 class="font-bold text-blue-800 mb-2">📊 ข้อมูลที่แยกได้:</h3>
-                            <div id="configDetails" class="text-sm text-blue-700 space-y-1"></div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            
-            // โหลดค่าเดิมถ้ามี
-            const savedConfig = JSON.parse(localStorage.getItem('firebaseConfig') || '{}');
-            if (savedConfig.apiKey) {
-                const configText = `const firebaseConfig = {
-  apiKey: "${savedConfig.apiKey}",
-  authDomain: "${savedConfig.authDomain}",
-  projectId: "${savedConfig.projectId}",
-  storageBucket: "${savedConfig.storageBucket}",
-  messagingSenderId: "${savedConfig.messagingSenderId}",
-  appId: "${savedConfig.appId}"
-};`;
-                document.getElementById('firebaseConfigText').value = configText;
-            }
-        }
-
-        function parseFirebaseConfig(configText) {
-            try {
-                console.log('Parsing config text:', configText.substring(0, 100) + '...');
-                
-                // ลบ comment และ whitespace ที่ไม่จำเป็น
-                let cleanText = configText.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
-                
-                // ลองหาแบบต่างๆ
-                let config = null;
-                
-                // วิธีที่ 1: หา JSON object ใน text
-                let jsonMatch = cleanText.match(/\{[\s\S]*\}/);
-                if (jsonMatch) {
-                    let jsonStr = jsonMatch[0];
-                    
-                    try {
-                        // แปลง JavaScript object notation เป็น JSON
-                        jsonStr = jsonStr
-                            .replace(/(\w+)\s*:/g, '"$1":')  // เพิ่ม quotes รอบ keys
-                            .replace(/'/g, '"')              // เปลี่ยน single quotes เป็น double quotes
-                            .replace(/,(\s*[}\]])/g, '$1')   // ลบ trailing commas
-                            .replace(/\n/g, ' ')             // ลบ newlines
-                            .replace(/\s+/g, ' ');           // ลด whitespace
-                        
-                        config = JSON.parse(jsonStr);
-                    } catch (e) {
-                        console.log('JSON parse failed, trying alternative method');
-                    }
-                }
-                
-                // วิธีที่ 2: ใช้ regex แยกแต่ละ field
-                if (!config) {
-                    config = {};
-                    
-                    const patterns = {
-                        apiKey: /apiKey\s*:\s*["']([^"']+)["']/,
-                        authDomain: /authDomain\s*:\s*["']([^"']+)["']/,
-                        projectId: /projectId\s*:\s*["']([^"']+)["']/,
-                        storageBucket: /storageBucket\s*:\s*["']([^"']+)["']/,
-                        messagingSenderId: /messagingSenderId\s*:\s*["']([^"']+)["']/,
-                        appId: /appId\s*:\s*["']([^"']+)["']/
+            let uploadedCount = 0;
+            Array.from(files).forEach(file => {
+                if (file.name.endsWith('.ovpn') || file.name.endsWith('.conf')) {
+                    const newFile = {
+                        id: Date.now() + Math.random(),
+                        name: file.name,
+                        server: "Custom Server",
+                        status: "online",
+                        type: "premium",
+                        speed: "100 Mbps",
+                        ping: "20ms",
+                        uploadDate: new Date().toISOString().split('T')[0],
+                        size: (file.size / 1024).toFixed(1) + " KB"
                     };
-                    
-                    for (const [key, pattern] of Object.entries(patterns)) {
-                        const match = cleanText.match(pattern);
-                        if (match) {
-                            config[key] = match[1];
-                        }
-                    }
-                }
-                
-                // วิธีที่ 3: ลองใช้ eval (ปลอดภัยเพราะเป็น config เท่านั้น)
-                if (!config || Object.keys(config).length === 0) {
-                    try {
-                        // สร้าง sandbox สำหรับ eval
-                        const sandbox = {
-                            const: undefined,
-                            firebaseConfig: undefined
-                        };
-                        
-                        // ลองรัน code ใน sandbox
-                        const func = new Function('sandbox', `
-                            with(sandbox) {
-                                ${cleanText}
-                                return typeof firebaseConfig !== 'undefined' ? firebaseConfig : null;
-                            }
-                        `);
-                        
-                        const result = func(sandbox);
-                        if (result && typeof result === 'object') {
-                            config = result;
-                        }
-                    } catch (e) {
-                        console.log('Eval method failed:', e.message);
-                    }
-                }
-                
-                if (!config || Object.keys(config).length === 0) {
-                    throw new Error('ไม่สามารถแยกข้อมูล Firebase config ได้ กรุณาตรวจสอบรูปแบบข้อมูล');
-                }
-                
-                console.log('Parsed config:', config);
-                
-                // ตรวจสอบว่ามี required fields
-                const requiredFields = ['apiKey', 'projectId', 'appId'];
-                const missingFields = requiredFields.filter(field => !config[field]);
-                
-                if (missingFields.length > 0) {
-                    throw new Error(`ไม่พบข้อมูลที่จำเป็น: ${missingFields.join(', ')}`);
-                }
-                
-                // เติมค่าเริ่มต้นสำหรับ optional fields
-                if (!config.authDomain && config.projectId) {
-                    config.authDomain = `${config.projectId}.firebaseapp.com`;
-                }
-                if (!config.storageBucket && config.projectId) {
-                    config.storageBucket = `${config.projectId}.appspot.com`;
-                }
-                
-                return config;
-            } catch (error) {
-                console.error('Parse error:', error);
-                throw new Error(`ไม่สามารถแยกข้อมูล Firebase config ได้: ${error.message}`);
-            }
-        }
-
-        function parseAndTestFirebaseConfig() {
-            const configText = document.getElementById('firebaseConfigText').value.trim();
-            const statusDiv = document.getElementById('firebaseSetupStatus');
-            const parsedDiv = document.getElementById('parsedConfig');
-            const detailsDiv = document.getElementById('configDetails');
-            
-            if (!configText) {
-                statusDiv.innerHTML = '<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ กรุณาวาง Firebase config ในช่องด้านบน</div>';
-                statusDiv.style.display = 'block';
-                return;
-            }
-            
-            try {
-                // แยกข้อมูล config
-                const config = parseFirebaseConfig(configText);
-                
-                // แสดงข้อมูลที่แยกได้
-                detailsDiv.innerHTML = `
-                    <div><strong>🔑 API Key:</strong> ${config.apiKey.substring(0, 20)}...</div>
-                    <div><strong>🌐 Auth Domain:</strong> ${config.authDomain}</div>
-                    <div><strong>📁 Project ID:</strong> ${config.projectId}</div>
-                    <div><strong>🗄️ Storage Bucket:</strong> ${config.storageBucket}</div>
-                    <div><strong>📨 Messaging Sender ID:</strong> ${config.messagingSenderId || 'ไม่ระบุ'}</div>
-                    <div><strong>📱 App ID:</strong> ${config.appId}</div>
-                `;
-                parsedDiv.classList.remove('hidden');
-                
-                // ทดสอบการเชื่อมต่อ
-                testFirebaseConnectionWithConfig(config);
-                
-            } catch (error) {
-                statusDiv.innerHTML = `<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ ${error.message}</div>`;
-                statusDiv.style.display = 'block';
-                parsedDiv.classList.add('hidden');
-            }
-        }
-
-        async function testFirebaseConnectionWithConfig(config) {
-            const statusDiv = document.getElementById('firebaseSetupStatus');
-            
-            statusDiv.innerHTML = '<div class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg">🔄 กำลังทดสอบการเชื่อมต่อ Firebase...</div>';
-            statusDiv.style.display = 'block';
-            
-            try {
-                // ลองเชื่อมต่อ Firebase
-                const testApp = firebase.initializeApp(config, 'test-app-' + Date.now());
-                const testFirestore = firebase.firestore(testApp);
-                
-                // ทดสอบเขียนข้อมูล
-                await testFirestore.collection('_health').doc('connection-test').set({
-                    message: 'Firebase connection test',
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                // ทดสอบอ่านข้อมูล
-                const doc = await testFirestore.collection('_health').doc('connection-test').get();
-                
-                if (doc.exists) {
-                    statusDiv.innerHTML = '<div class="bg-green-100 text-green-700 px-4 py-2 rounded-lg">✅ เชื่อมต่อ Firebase สำเร็จ! ระบบพร้อมใช้งาน<br><small>ข้อมูลทดสอบถูกเพิ่มลงใน Firestore แล้ว</small></div>';
-                    
-                    // ลบข้อมูลทดสอบ
-                    await testFirestore.collection('_health').doc('connection-test').delete();
-                } else {
-                    throw new Error('ไม่สามารถอ่านข้อมูลได้');
-                }
-                
-                // ลบ test app
-                await testApp.delete();
-                
-            } catch (error) {
-                let errorMessage = '❌ เชื่อมต่อ Firebase ล้มเหลว: ';
-                
-                if (error.code === 'permission-denied') {
-                    errorMessage += 'ไม่มีสิทธิ์เข้าถึง - ตรวจสอบ Firestore Security Rules';
-                } else if (error.code === 'invalid-api-key') {
-                    errorMessage += 'API Key ไม่ถูกต้อง';
-                } else if (error.code === 'project-not-found') {
-                    errorMessage += 'ไม่พบ Project ID';
-                } else {
-                    errorMessage += error.message;
-                }
-                
-                statusDiv.innerHTML = `<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">${errorMessage}</div>`;
-            }
-        }
-
-        function saveFirebaseConfigFromText() {
-            const configText = document.getElementById('firebaseConfigText').value.trim();
-            const statusDiv = document.getElementById('firebaseSetupStatus');
-            
-            if (!configText) {
-                statusDiv.innerHTML = '<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ กรุณาวาง Firebase config ในช่องด้านบน</div>';
-                statusDiv.style.display = 'block';
-                return;
-            }
-            
-            try {
-                // แยกข้อมูล config
-                const config = parseFirebaseConfig(configText);
-                config.enabled = true;
-                
-                // บันทึกการตั้งค่า
-                localStorage.setItem('firebaseConfig', JSON.stringify(config));
-                
-                // อัพเดทการตั้งค่าในระบบ
-                Object.assign(FIREBASE_CONFIG, config);
-                
-                // เริ่มต้น Firebase
-                initializeFirebase().then(success => {
-                    if (success) {
-                        statusDiv.innerHTML = '<div class="bg-green-100 text-green-700 px-4 py-2 rounded-lg">✅ บันทึกการตั้งค่าสำเร็จ! Firebase พร้อมใช้งาน</div>';
-                        updateConnectionStatus();
-                        
-                        // ตั้งค่า real-time listener
-                        setupFirebaseListener();
-                        
-                        // ปิด modal หลังจาก 2 วินาที
-                        setTimeout(() => {
-                            document.querySelector('.fixed.inset-0').remove();
-                        }, 2000);
-                    } else {
-                        statusDiv.innerHTML = '<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ ไม่สามารถเริ่มต้น Firebase ได้</div>';
-                    }
-                    statusDiv.style.display = 'block';
-                });
-                
-            } catch (error) {
-                statusDiv.innerHTML = `<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ ${error.message}</div>`;
-                statusDiv.style.display = 'block';
-            }
-        }
-
-
-
-        async function loadFirebaseData() {
-            if (!FIREBASE_CONFIG.enabled) {
-                alert('กรุณาตั้งค่า Firebase ก่อน');
-                return;
-            }
-            
-            const statusDiv = document.getElementById('firebaseSetupStatus');
-            statusDiv.innerHTML = '<div class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg">🔄 กำลังโหลดข้อมูลจาก Firebase...</div>';
-            statusDiv.style.display = 'block';
-            
-            try {
-                const firebasePets = await loadFromFirebase();
-                
-                if (firebasePets.length > 0) {
-                    // ผสานข้อมูลจาก Firebase กับข้อมูลในเครื่อง
-                    const localPetIds = pets.map(pet => pet.id);
-                    const newPets = firebasePets.filter(pet => !localPetIds.includes(pet.id));
-                    
-                    pets = [...newPets, ...pets];
-                    savePets();
-                    renderPets();
-                    updateTotalCount();
-                    
-                    statusDiv.innerHTML = `<div class="bg-green-100 text-green-700 px-4 py-2 rounded-lg">✅ โหลดข้อมูลสำเร็จ! พบข้อมูลใหม่ ${newPets.length} รายการ</div>`;
-                } else {
-                    statusDiv.innerHTML = '<div class="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-lg">📭 ไม่พบข้อมูลใน Firebase</div>';
-                }
-                
-            } catch (error) {
-                statusDiv.innerHTML = `<div class="bg-red-100 text-red-700 px-4 py-2 rounded-lg">❌ โหลดข้อมูลล้มเหลว: ${error.message}</div>`;
-            }
-        }
-
-        // Show full image modal
-        function showFullImage(imageSrc, petName) {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = `
-                <div class="relative max-w-4xl max-h-full">
-                    <img src="${imageSrc}" alt="${petName}" 
-                         class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl">
-                    <button onclick="this.closest('.fixed').remove()" 
-                            class="absolute top-4 right-4 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl font-bold backdrop-blur-sm transition-all">
-                        ✕
-                    </button>
-                    <div class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-4 py-2 rounded-xl backdrop-blur-sm">
-                        <div class="font-semibold">${petName}</div>
-                    </div>
-                </div>
-            `;
-            
-            // ปิด modal เมื่อคลิกพื้นหลัง
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.remove();
+                    vpnFiles.unshift(newFile);
+                    uploadedCount++;
                 }
             });
             
-            document.body.appendChild(modal);
+            if (uploadedCount > 0) {
+                renderFiles(getFilteredFiles());
+                updateStats();
+                alert(`✅ อัปโหลด ${uploadedCount} ไฟล์เรียบร้อยแล้ว!`);
+            }
         }
 
-        // Event Listeners
-        document.getElementById('searchInput').addEventListener('input', filterPets);
-        document.getElementById('typeFilter').addEventListener('change', filterPets);
-        document.getElementById('exportBtn').addEventListener('click', exportToExcel);
-        document.getElementById('setupBtn').addEventListener('click', showSetupModal);
-        document.getElementById('firebaseBtn').addEventListener('click', showFirebaseSetupModal);
-        document.getElementById('contactBtn').addEventListener('click', function() {
-            window.open('https://www.google.com', '_blank');
+        // Event listeners
+        searchInput.addEventListener('input', () => renderFiles(getFilteredFiles()));
+        filterSelect.addEventListener('change', () => renderFiles(getFilteredFiles()));
+
+        uploadZone.addEventListener('click', () => fileInput.click());
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            handleFileUpload(e.dataTransfer.files);
         });
 
-        // Initialize - เริ่มต้นระบบ
-        async function initializeApp() {
-            console.log('Initializing Pet Registration System...');
-            
-            // โหลดการตั้งค่า Google Sheets
-            const savedGoogleConfig = JSON.parse(localStorage.getItem('googleSheetsConfig') || '{}');
-            if (savedGoogleConfig.enabled) {
-                GOOGLE_SHEETS_CONFIG.scriptUrl = savedGoogleConfig.scriptUrl;
-                GOOGLE_SHEETS_CONFIG.sheetId = savedGoogleConfig.sheetId;
-                GOOGLE_SHEETS_CONFIG.enabled = true;
-                console.log('Google Sheets config loaded');
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files);
             }
-            
-            // โหลดการตั้งค่า Firebase
-            const savedFirebaseConfig = JSON.parse(localStorage.getItem('firebaseConfig') || '{}');
-            if (savedFirebaseConfig.enabled) {
-                Object.assign(FIREBASE_CONFIG, savedFirebaseConfig);
-                console.log('Firebase config loaded, initializing...');
-                
-                // เริ่มต้น Firebase แบบ async
-                initializeFirebase().then(success => {
-                    if (success) {
-                        console.log('Firebase initialized successfully');
-                        updateConnectionStatus();
-                        
-                        // ตั้งค่า real-time listener
-                        setupFirebaseListener();
-                        
-                        // โหลดข้อมูลจาก Firebase
-                        loadFromFirebase().then(firebasePets => {
-                            if (firebasePets.length > 0) {
-                                updateLocalDataFromFirebase(firebasePets);
-                            }
-                        }).catch(error => {
-                            console.error('Failed to load Firebase data:', error);
-                        });
-                    } else {
-                        console.warn('Firebase initialization failed');
-                        updateConnectionStatus();
-                    }
-                }).catch(error => {
-                    console.error('Firebase initialization error:', error);
-                    updateConnectionStatus();
-                });
-            }
-            
-            // อัพเดท UI
-            updateConnectionStatus();
-            renderPets();
-            updateTotalCount();
-            
-            // ลองซิงค์ข้อมูลที่ค้างอยู่กับ Google Sheets
-            if (GOOGLE_SHEETS_CONFIG.enabled && isOnline) {
-                setTimeout(syncWithGoogleSheets, 1000);
-            }
-            
-            console.log('App initialization completed');
-        }
+        });
 
-        // Cleanup function สำหรับปิดการเชื่อมต่อ
-        function cleanup() {
-            if (window.firebaseUnsubscribe) {
-                window.firebaseUnsubscribe();
-                console.log('Firebase listener unsubscribed');
-            }
-        }
+        // Admin login with Enter key
+        adminUsername.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') adminLogin();
+        });
+        adminPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') adminLogin();
+        });
 
-        // ปิดการเชื่อมต่อเมื่อปิดหน้าเว็บ
-        window.addEventListener('beforeunload', cleanup);
-
-        initializeApp();
+        closeModal.addEventListener('click', closeModal);
+        fileModal.addEventListener('click', (e) => {
+            if (e.target === fileModal) closeModal();
+        });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96ef4b42f0432c14',t:'MTc1NTE2MjM2My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98608536e0f8d7ad',t:'MTc1OTAzMzk4Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
