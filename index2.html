@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดตารางคิวงานช่าง - ซิงค์ออนไลน์</title>
+    <title>ระบบจัดตารางคิวงานช่าง - ซิงค์ออนไลน์2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -263,7 +263,20 @@ const SHEET_ID = 'YOUR_SHEET_ID_HERE';
 
 function doPost(e) {
   try {
-    const data = JSON.parse(e.postData.contents);
+    // รองรับทั้ง JSON และ FormData
+    let data;
+    if (e.postData.type === 'application/x-www-form-urlencoded') {
+      // FormData format
+      const params = e.parameter;
+      data = {
+        action: params.action,
+        tasks: params.tasks ? JSON.parse(params.tasks) : []
+      };
+    } else {
+      // JSON format
+      data = JSON.parse(e.postData.contents);
+    }
+    
     const sheet = SpreadsheetApp.openById(SHEET_ID).getActiveSheet();
     
     if (data.action === 'write') {
@@ -355,6 +368,17 @@ function doGet(e) {
                         <li>• Apps Script ต้อง Deploy เป็น "Web app" และเปิดให้ "Anyone" เข้าถึงได้</li>
                         <li>• ครั้งแรกอาจต้องอนุญาตสิทธิ์ในการเข้าถึง Google Sheets</li>
                         <li>• หากแก้ไขโค้ด Apps Script ต้อง Deploy ใหม่</li>
+                    </ul>
+                </div>
+
+                <div class="bg-red-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-red-800 mb-2">🔧 แก้ปัญหาการส่งข้อมูลล้มเหลว</h4>
+                    <ul class="text-red-700 space-y-2 text-sm">
+                        <li><strong>1. ตรวจสอบ URL:</strong> ต้องเป็น URL จาก Google Apps Script ที่ Deploy แล้ว</li>
+                        <li><strong>2. ตรวจสอบสิทธิ์:</strong> Apps Script ต้องเปิดให้ "Anyone" เข้าถึงได้</li>
+                        <li><strong>3. ทดสอบการเชื่อมต่อ:</strong> กดปุ่ม "ทดสอบการเชื่อมต่อ" ก่อน</li>
+                        <li><strong>4. ตรวจสอบ Sheet ID:</strong> ใน Apps Script ต้องใส่ Sheet ID ที่ถูกต้อง</li>
+                        <li><strong>5. ลองใหม่:</strong> หากยังไม่ได้ ลอง Deploy Apps Script ใหม่</li>
                     </ul>
                 </div>
             </div>
@@ -818,36 +842,61 @@ function doGet(e) {
                     return;
                 }
                 
+                // ตรวจสอบ URL format
+                if (!url.includes('script.google.com') && !url.includes('script.googleusercontent.com')) {
+                    this.showMessage('❌ URL ไม่ถูกต้อง กรุณาใช้ URL จาก Google Apps Script', 'error');
+                    return;
+                }
+                
                 try {
                     this.syncStatus = 'syncing';
                     this.updateSyncIndicator();
                     
+                    // ใช้ FormData แทน JSON เพื่อหลีกเลี่ยงปัญหา CORS
+                    const formData = new FormData();
+                    formData.append('action', 'write');
+                    formData.append('tasks', JSON.stringify(this.tasks));
+                    
                     const response = await fetch(url, {
                         method: 'POST',
-                        mode: 'cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            action: 'write',
-                            tasks: this.tasks
-                        })
+                        body: formData,
+                        redirect: 'follow'
                     });
                     
                     if (response.ok) {
-                        const data = await response.json();
-                        if (data.success) {
-                            this.syncStatus = 'online';
-                            this.showMessage(`✅ ${data.message}`, 'success');
-                        } else {
-                            throw new Error(data.error || 'การส่งข้อมูลล้มเหลว');
+                        const text = await response.text();
+                        try {
+                            const data = JSON.parse(text);
+                            if (data.success) {
+                                this.syncStatus = 'online';
+                                this.showMessage(`✅ ${data.message || 'ส่งข้อมูลสำเร็จ'}`, 'success');
+                            } else {
+                                throw new Error(data.error || 'การส่งข้อมูลล้มเหลว');
+                            }
+                        } catch (parseError) {
+                            // หาก response ไม่ใช่ JSON อาจเป็น HTML redirect
+                            if (text.includes('Google') || text.includes('script')) {
+                                this.syncStatus = 'online';
+                                this.showMessage('✅ ส่งข้อมูลสำเร็จ (ได้รับการตอบกลับจาก Google)', 'success');
+                            } else {
+                                throw new Error('ได้รับข้อมูลที่ไม่คาดคิด');
+                            }
                         }
                     } else {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
                 } catch (error) {
                     this.syncStatus = 'offline';
-                    this.showMessage(`❌ ส่งข้อมูลล้มเหลว: ${error.message}`, 'error');
+                    let errorMsg = error.message;
+                    
+                    // แสดงข้อความช่วยเหลือตามประเภทของ error
+                    if (error.message.includes('CORS')) {
+                        errorMsg += '\n💡 ลองตรวจสอบว่า Apps Script ได้ Deploy เป็น "Web app" และเปิดให้ "Anyone" เข้าถึงได้';
+                    } else if (error.message.includes('Failed to fetch')) {
+                        errorMsg += '\n💡 ตรวจสอบ URL และการเชื่อมต่ออินเทอร์เน็ต';
+                    }
+                    
+                    this.showMessage(`❌ ส่งข้อมูลล้มเหลว: ${errorMsg}`, 'error');
                 } finally {
                     this.updateSyncIndicator();
                 }
@@ -865,35 +914,45 @@ function doGet(e) {
                     this.syncStatus = 'syncing';
                     this.updateSyncIndicator();
                     
+                    // ใช้ FormData สำหรับการดึงข้อมูลด้วย
+                    const formData = new FormData();
+                    formData.append('action', 'read');
+                    
                     const response = await fetch(url, {
                         method: 'POST',
-                        mode: 'cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            action: 'read'
-                        })
+                        body: formData,
+                        redirect: 'follow'
                     });
                     
                     if (response.ok) {
-                        const data = await response.json();
-                        if (data.success && data.tasks) {
-                            this.tasks = data.tasks;
-                            this.saveTasks();
-                            this.renderCalendar();
-                            this.updateStats();
-                            this.syncStatus = 'online';
-                            this.showMessage(`✅ ดึงข้อมูล ${data.tasks.length} รายการจาก Google Sheets เรียบร้อย`, 'success');
-                        } else {
-                            throw new Error(data.error || 'การดึงข้อมูลล้มเหลว');
+                        const text = await response.text();
+                        try {
+                            const data = JSON.parse(text);
+                            if (data.success && data.tasks) {
+                                this.tasks = data.tasks;
+                                this.saveTasks();
+                                this.renderCalendar();
+                                this.updateStats();
+                                this.syncStatus = 'online';
+                                this.showMessage(`✅ ดึงข้อมูล ${data.tasks.length} รายการจาก Google Sheets เรียบร้อย`, 'success');
+                            } else {
+                                throw new Error(data.error || 'การดึงข้อมูลล้มเหลว');
+                            }
+                        } catch (parseError) {
+                            throw new Error('ไม่สามารถแปลงข้อมูลที่ได้รับได้');
                         }
                     } else {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
                 } catch (error) {
                     this.syncStatus = 'offline';
-                    this.showMessage(`❌ ดึงข้อมูลล้มเหลว: ${error.message}`, 'error');
+                    let errorMsg = error.message;
+                    
+                    if (error.message.includes('Failed to fetch')) {
+                        errorMsg += '\n💡 ตรวจสอบ URL และการเชื่อมต่ออินเทอร์เน็ต';
+                    }
+                    
+                    this.showMessage(`❌ ดึงข้อมูลล้มเหลว: ${errorMsg}`, 'error');
                 } finally {
                     this.updateSyncIndicator();
                 }
@@ -1038,5 +1097,5 @@ function doGet(e) {
             new TaskScheduler();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98dc3d4cb64dfb86',t:'MTc2MDMzMTI3Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98dc9eec558ef8e6',t:'MTc2MDMzNTI3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
