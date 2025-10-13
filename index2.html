@@ -21,7 +21,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดตารางคิวงานช่างออนไลน์</title>
+    <title>ระบบจัดตารางคิวงานช่าง</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -177,7 +177,7 @@
     <div class="container mx-auto p-6 max-w-6xl">
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h1 class="text-3xl font-bold text-gray-800 mb-4">📋 ระบบจัดตารางคิวงานช่าง</h1>
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">📋 ระบบจัดตารางคิวงานช่างออนไลน์</h1>
             
             <!-- Controls -->
             <div class="flex flex-wrap gap-4 items-center justify-between">
@@ -1974,12 +1974,12 @@ function sendLineMessage(channelAccessToken, userId, message) {
 
             // LINE Bot functions
             async sendLineMessage(message) {
-                // ใช้ค่าจากฟอร์มแทนค่าที่เก็บไว้ เพื่อให้ได้ค่าล่าสุด
-                const token = document.getElementById('lineChannelAccessToken').value.trim();
-                const userId = document.getElementById('lineUserId').value.trim();
+                // ใช้ค่าจากฟอร์มหรือค่าเริ่มต้นที่ตั้งไว้ในโค้ด
+                const token = document.getElementById('lineChannelAccessToken').value.trim() || this.DEFAULT_LINE_CHANNEL_ACCESS_TOKEN;
+                const userId = document.getElementById('lineUserId').value.trim() || this.DEFAULT_LINE_USER_ID;
                 const enabled = document.getElementById('enableLineNotify').checked;
 
-                if (!token || !userId || !enabled) {
+                if (!token || !userId || !enabled || token.includes('YOUR_LINE_CHANNEL_ACCESS_TOKEN_HERE') || userId.includes('YOUR_LINE_USER_ID_HERE')) {
                     return false;
                 }
 
@@ -2014,16 +2014,16 @@ function sendLineMessage(channelAccessToken, userId, message) {
             }
 
             async testLineBot() {
-                const token = document.getElementById('lineChannelAccessToken').value.trim();
-                const userId = document.getElementById('lineUserId').value.trim();
+                const token = document.getElementById('lineChannelAccessToken').value.trim() || this.DEFAULT_LINE_CHANNEL_ACCESS_TOKEN;
+                const userId = document.getElementById('lineUserId').value.trim() || this.DEFAULT_LINE_USER_ID;
                 
-                if (!token) {
-                    this.showMessage('กรุณาใส่ Channel Access Token', 'warning');
+                if (!token || token.includes('YOUR_LINE_CHANNEL_ACCESS_TOKEN_HERE')) {
+                    this.showMessage('กรุณาแก้ไข LINE Channel Access Token ในโค้ด', 'warning');
                     return;
                 }
 
-                if (!userId) {
-                    this.showMessage('กรุณาใส่ User ID หรือ Group ID', 'warning');
+                if (!userId || userId.includes('YOUR_LINE_USER_ID_HERE')) {
+                    this.showMessage('กรุณาแก้ไข LINE User ID ในโค้ด', 'warning');
                     return;
                 }
 
@@ -2232,5 +2232,5 @@ function sendLineMessage(channelAccessToken, userId, message) {
             scheduler = new TaskScheduler();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98dd817644229faa',t:'MTc2MDM0NDU0OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98dd8623565d9faa',t:'MTc2MDM0NDc0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
