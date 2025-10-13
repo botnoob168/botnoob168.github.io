@@ -21,7 +21,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดตารางคิวงานช่าง</title>
+    <title>ระบบจัดตารางคิวงานช่างv2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -177,7 +177,7 @@
     <div class="container mx-auto p-6 max-w-6xl">
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h1 class="text-3xl font-bold text-gray-800 mb-4">📋 ระบบจัดตารางคิวงานช่างออนไลน์</h1>
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">📋 ระบบจัดตารางคิวงานช่าง</h1>
             
             <!-- Controls -->
             <div class="flex flex-wrap gap-4 items-center justify-between">
@@ -317,11 +317,12 @@
                     <button id="lineSetupBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm transition-colors">
                         📖 วิธีตั้งค่า LINE Bot
                     </button>
-                    <div class="text-xs text-green-600 bg-green-50 p-2 rounded">
-                        <p class="font-semibold">🚀 ส่งโดยตรง ไม่ต้องผ่าน Apps Script!</p>
+                    <div class="text-xs text-blue-600 bg-blue-50 p-2 rounded">
+                        <p class="font-semibold">🔧 ส่งผ่าน Google Apps Script</p>
                         <p>• แจ้งเตือนเมื่อเปลี่ยนสถานะงาน</p>
                         <p>• แจ้งเตือนงานใกล้ครบกำหนด</p>
                         <p>• แจ้งเตือนงานเลยกำหนด</p>
+                        <p>• หลีกเลี่ยงปัญหา CORS</p>
                     </div>
                 </div>
             </div>
@@ -893,10 +894,11 @@ function sendLineMessage(channelAccessToken, userId, message) {
             </div>
             
             <div class="space-y-6">
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-green-800 mb-2">🚀 ระบบแจ้งเตือน LINE แบบใหม่</h4>
-                    <p class="text-green-700 text-sm mb-2">ตอนนี้ระบบส่งข้อความ LINE โดยตรงแล้ว! ไม่ต้องผ่าน Google Apps Script</p>
-                    <p class="text-green-700 text-sm"><strong>ข้อดี:</strong> เร็วขึ้น, เสถียรกว่า, ส่งข้อความได้ไม่จำกัด, รองรับ Rich Message</p>
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-blue-800 mb-2">🔧 ระบบแจ้งเตือน LINE ผ่าน Apps Script</h4>
+                    <p class="text-blue-700 text-sm mb-2">เนื่องจากข้อจำกัด CORS ระบบจึงส่งข้อความ LINE ผ่าน Google Apps Script</p>
+                    <p class="text-blue-700 text-sm"><strong>ข้อดี:</strong> หลีกเลี่ยงปัญหา CORS, เสถียร, ปลอดภัย, ใช้งานได้ทุกเบราว์เซอร์</p>
+                    <p class="text-blue-700 text-sm mt-2"><strong>ข้อกำหนด:</strong> ต้องตั้งค่า Google Apps Script URL ให้ถูกต้อง</p>
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-6">
@@ -1978,33 +1980,42 @@ function sendLineMessage(channelAccessToken, userId, message) {
                 const token = document.getElementById('lineChannelAccessToken').value.trim() || this.DEFAULT_LINE_CHANNEL_ACCESS_TOKEN;
                 const userId = document.getElementById('lineUserId').value.trim() || this.DEFAULT_LINE_USER_ID;
                 const enabled = document.getElementById('enableLineNotify').checked;
+                const appsScriptUrl = document.getElementById('appsScriptUrl').value.trim() || this.DEFAULT_APPS_SCRIPT_URL;
 
                 if (!token || !userId || !enabled || token.includes('YOUR_LINE_CHANNEL_ACCESS_TOKEN_HERE') || userId.includes('YOUR_LINE_USER_ID_HERE')) {
                     return false;
                 }
 
+                if (!appsScriptUrl || appsScriptUrl.includes('YOUR_SCRIPT_ID_HERE')) {
+                    console.warn('Google Apps Script URL not configured for LINE messaging');
+                    return false;
+                }
+
                 try {
-                    // ส่งข้อความ LINE โดยตรงผ่าน LINE Messaging API
-                    const response = await fetch('https://api.line.me/v2/bot/message/push', {
+                    // ส่งข้อความ LINE ผ่าน Google Apps Script เพื่อหลีกเลี่ยง CORS
+                    const response = await fetch(appsScriptUrl, {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'text/plain',
                         },
                         body: JSON.stringify({
-                            to: userId,
-                            messages: [{
-                                type: 'text',
-                                text: message
-                            }]
+                            action: 'sendLine',
+                            token: token,
+                            userId: userId,
+                            message: message
                         })
                     });
 
                     if (response.ok) {
-                        return true;
+                        const result = await response.json();
+                        if (result.success) {
+                            return true;
+                        } else {
+                            console.error('LINE API Error via Apps Script:', result.error);
+                            return false;
+                        }
                     } else {
-                        const errorData = await response.json().catch(() => ({}));
-                        console.error('LINE API Error:', response.status, errorData);
+                        console.error('Apps Script Error:', response.status, response.statusText);
                         return false;
                     }
                 } catch (error) {
@@ -2016,6 +2027,13 @@ function sendLineMessage(channelAccessToken, userId, message) {
             async testLineBot() {
                 const token = document.getElementById('lineChannelAccessToken').value.trim() || this.DEFAULT_LINE_CHANNEL_ACCESS_TOKEN;
                 const userId = document.getElementById('lineUserId').value.trim() || this.DEFAULT_LINE_USER_ID;
+                const appsScriptUrl = document.getElementById('appsScriptUrl').value.trim() || this.DEFAULT_APPS_SCRIPT_URL;
+                
+                console.log('🔍 ตรวจสอบการตั้งค่า LINE Bot:');
+                console.log('Token length:', token ? token.length : 0);
+                console.log('User ID:', userId);
+                console.log('Token starts with:', token ? token.substring(0, 20) + '...' : 'ไม่มี');
+                console.log('Apps Script URL:', appsScriptUrl ? appsScriptUrl.substring(0, 50) + '...' : 'ไม่มี');
                 
                 if (!token || token.includes('YOUR_LINE_CHANNEL_ACCESS_TOKEN_HERE')) {
                     this.showMessage('กรุณาแก้ไข LINE Channel Access Token ในโค้ด', 'warning');
@@ -2027,44 +2045,56 @@ function sendLineMessage(channelAccessToken, userId, message) {
                     return;
                 }
 
+                if (!appsScriptUrl || appsScriptUrl.includes('YOUR_SCRIPT_ID_HERE')) {
+                    this.showMessage('กรุณาแก้ไข Google Apps Script URL ในโค้ด', 'warning');
+                    return;
+                }
+
                 const testBtn = document.getElementById('testLineBtn');
                 const originalText = testBtn.textContent;
                 testBtn.textContent = '📱 กำลังทดสอบ...';
                 testBtn.disabled = true;
 
                 try {
-                    // ส่งข้อความ LINE โดยตรงผ่าน LINE Messaging API
-                    const response = await fetch('https://api.line.me/v2/bot/message/push', {
+                    console.log('📤 กำลังส่งข้อความ LINE ผ่าน Apps Script...');
+                    
+                    // ส่งข้อความ LINE ผ่าน Google Apps Script เพื่อหลีกเลี่ยง CORS
+                    const response = await fetch(appsScriptUrl, {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'text/plain',
                         },
                         body: JSON.stringify({
-                            to: userId,
-                            messages: [{
-                                type: 'text',
-                                text: '🔧 ทดสอบระบบแจ้งเตือนจากระบบจัดตารางคิวงานช่าง\n✅ การเชื่อมต่อสำเร็จ!'
-                            }]
+                            action: 'sendLine',
+                            token: token,
+                            userId: userId,
+                            message: '🔧 ทดสอบระบบแจ้งเตือนจากระบบจัดตารางคิวงานช่าง\n✅ การเชื่อมต่อสำเร็จ!\n⏰ ' + new Date().toLocaleString('th-TH')
                         })
                     });
 
+                    console.log('📥 Response status:', response.status);
+                    console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
+
                     if (response.ok) {
-                        this.showMessage('✅ ส่งข้อความทดสอบสำเร็จ!', 'success');
-                    } else {
-                        const errorData = await response.json().catch(() => ({}));
-                        let errorMsg = `HTTP ${response.status}`;
+                        const result = await response.json();
+                        console.log('📥 Response data:', result);
                         
-                        if (errorData.message) {
-                            errorMsg += `: ${errorData.message}`;
+                        if (result.success) {
+                            console.log('✅ ส่งข้อความสำเร็จ!');
+                            this.showMessage('✅ ส่งข้อความทดสอบสำเร็จ!', 'success');
+                        } else {
+                            console.error('❌ LINE API Error:', result.error);
+                            throw new Error(result.error || 'การส่งข้อความล้มเหลว');
                         }
-                        
-                        throw new Error(errorMsg);
+                    } else {
+                        const responseText = await response.text();
+                        console.error('❌ Apps Script Error:', response.status, responseText);
+                        throw new Error(`Apps Script Error: HTTP ${response.status}`);
                     }
                 } catch (error) {
                     let errorMsg = error.message;
                     
-                    // ตรวจสอบข้อผิดพลาด 401 Authentication failed
+                    // ตรวจสอบข้อผิดพลาดต่างๆ
                     if (errorMsg.includes('401') || errorMsg.includes('Authentication failed')) {
                         errorMsg = '🚨 ข้อผิดพลาด 401: Token หรือ User ID ไม่ถูกต้อง';
                         this.showMessage(errorMsg, 'error');
@@ -2080,11 +2110,13 @@ function sendLineMessage(channelAccessToken, userId, message) {
                         this.showMessage('🚨 ข้อผิดพลาด 403: บอทไม่สามารถส่งข้อความได้\n• ตรวจสอบว่าบอทเป็นเพื่อนกับผู้ใช้แล้ว\n• หรือบอทถูกเชิญเข้ากลุ่มแล้ว', 'error');
                     } else if (errorMsg.includes('400')) {
                         this.showMessage('🚨 ข้อผิดพลาด 400: User ID ไม่ถูกต้อง\n• ตรวจสอบ User ID หรือ Group ID ให้ถูกต้อง', 'error');
+                    } else if (errorMsg.includes('CORS') || errorMsg.includes('fetch')) {
+                        this.showMessage('🚨 ปัญหา CORS: ตอนนี้ใช้ Google Apps Script แทน\n• ตรวจสอบ Apps Script URL ให้ถูกต้อง\n• ตรวจสอบว่า Deploy เป็น Web app แล้ว', 'error');
                     } else {
                         this.showMessage(`❌ ส่งข้อความล้มเหลว: ${errorMsg}`, 'error');
                         
                         setTimeout(() => {
-                            this.showMessage('💡 ตรวจสอบ: 1) Token ถูกต้อง 2) User ID ถูกต้อง 3) บอทเป็นเพื่อนแล้ว 4) เครือข่ายอินเทอร์เน็ต', 'info');
+                            this.showMessage('💡 ตรวจสอบ: 1) Apps Script URL ถูกต้อง 2) Token ถูกต้อง 3) User ID ถูกต้อง 4) บอทเป็นเพื่อนแล้ว', 'info');
                         }, 2000);
                     }
                 } finally {
@@ -2232,5 +2264,5 @@ function sendLineMessage(channelAccessToken, userId, message) {
             scheduler = new TaskScheduler();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98dd8623565d9faa',t:'MTc2MDM0NDc0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98dd8d4f973d9faa',t:'MTc2MDM0NTAzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
