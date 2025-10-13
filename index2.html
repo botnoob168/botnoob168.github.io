@@ -1063,7 +1063,7 @@ function sendLineMessage(channelAccessToken, userId, message) {
                 // 📱 LINE Bot Configuration (สำหรับแจ้งเตือน)
                 // วิธีการ: ไปที่ developers.line.biz → สร้าง Messaging API Channel
                 this.DEFAULT_LINE_CHANNEL_ACCESS_TOKEN = 'Fvv/+EW2OR5y18NHCBSdvkcoea4ZpiUBb64CPaD0tFAj+OTV5zPKn7VbDtT1q6Gy98HcBRE1By40/CkxCylfdwIvow/bsmlXWw6Slu8tK7MxdRldqcPOE87iNLTNFe4HfGaY/7ripZul4mUXEvVEXAdB04t89/1O/w1cDnyilFU=';
-                this.DEFAULT_LINE_USER_ID = 'Cbacb0fee7f4d2d9a7035586a7298d001'; // User ID ที่ตั้งค่าแล้ว
+                this.DEFAULT_LINE_USER_ID = 'Uc8c00fd05b1af0c34351d1629b453666'; // User ID ที่ตั้งค่าแล้ว
                 
                 // 🚀 เปิดใช้งานอัตโนมัติ (true = เปิด, false = ปิด)
                 this.DEFAULT_AUTO_SYNC = true;
@@ -1489,10 +1489,10 @@ function sendLineMessage(channelAccessToken, userId, message) {
             }
             
             async testConnection() {
-                const url = document.getElementById('appsScriptUrl').value.trim();
+                const url = document.getElementById('appsScriptUrl').value.trim() || this.DEFAULT_APPS_SCRIPT_URL;
                 
-                if (!url) {
-                    this.showMessage('กรุณาใส่ Google Apps Script URL', 'warning');
+                if (!url || url.includes('YOUR_SCRIPT_ID_HERE')) {
+                    this.showMessage('กรุณาแก้ไข Google Apps Script URL ในโค้ด', 'warning');
                     return;
                 }
                 
@@ -1534,10 +1534,10 @@ function sendLineMessage(channelAccessToken, userId, message) {
             }
             
             async syncToSheet() {
-                const url = document.getElementById('appsScriptUrl').value.trim();
+                const url = document.getElementById('appsScriptUrl').value.trim() || this.DEFAULT_APPS_SCRIPT_URL;
                 
-                if (!url) {
-                    this.showMessage('กรุณาใส่ Google Apps Script URL ก่อน', 'warning');
+                if (!url || url.includes('YOUR_SCRIPT_ID_HERE')) {
+                    this.showMessage('กรุณาแก้ไข Google Apps Script URL ในโค้ด', 'warning');
                     return;
                 }
                 
@@ -1577,10 +1577,10 @@ function sendLineMessage(channelAccessToken, userId, message) {
             }
             
             async syncFromSheet() {
-                const url = document.getElementById('appsScriptUrl').value.trim();
+                const url = document.getElementById('appsScriptUrl').value.trim() || this.DEFAULT_APPS_SCRIPT_URL;
                 
-                if (!url) {
-                    this.showMessage('กรุณาใส่ Google Apps Script URL ก่อน', 'warning');
+                if (!url || url.includes('YOUR_SCRIPT_ID_HERE')) {
+                    this.showMessage('กรุณาแก้ไข Google Apps Script URL ในโค้ด', 'warning');
                     return;
                 }
                 
@@ -1657,8 +1657,8 @@ function sendLineMessage(channelAccessToken, userId, message) {
                 if (this.autoSyncEnabled && !this.syncInterval) {
                     // Sync every 5 minutes
                     this.syncInterval = setInterval(async () => {
-                        const url = document.getElementById('appsScriptUrl').value.trim();
-                        if (url) {
+                        const url = document.getElementById('appsScriptUrl').value.trim() || this.DEFAULT_APPS_SCRIPT_URL;
+                        if (url && !url.includes('YOUR_SCRIPT_ID_HERE')) {
                             await this.syncToSheet();
                         }
                     }, 5 * 60 * 1000);
@@ -2232,5 +2232,5 @@ function sendLineMessage(channelAccessToken, userId, message) {
             scheduler = new TaskScheduler();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98dd781b01559faa',t:'MTc2MDM0NDE2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98dd817644229faa',t:'MTc2MDM0NDU0OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
