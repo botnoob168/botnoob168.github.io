@@ -21,7 +21,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดตารางคิวงานช่างv2</title>
+    <title>ระบบv2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -104,12 +104,36 @@
             object-fit: cover;
             border-radius: 4px;
             cursor: pointer;
+            border: 2px solid #e5e7eb;
+            background-color: #f9fafb;
         }
         .image-gallery {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
             margin-top: 8px;
+        }
+        .image-placeholder {
+            width: 60px;
+            height: 60px;
+            border: 2px dashed #d1d5db;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #9ca3af;
+            background-color: #f9fafb;
+        }
+        @media (max-width: 640px) {
+            .image-preview, .image-placeholder {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            .image-gallery {
+                gap: 6px;
+            }
         }
         .notification-panel {
             position: fixed;
@@ -192,6 +216,9 @@
                 </div>
                 
                 <div class="flex gap-2">
+                    <button id="syncFromSheetTopBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-semibold shadow-lg">
+                        📥 ดึงข้อมูลจาก Sheet
+                    </button>
                     <button id="addTaskBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
                         ➕ เพิ่มงาน
                     </button>
@@ -1065,7 +1092,7 @@ function sendLineMessage(channelAccessToken, userId, message) {
                 // 📱 LINE Bot Configuration (สำหรับแจ้งเตือน)
                 // วิธีการ: ไปที่ developers.line.biz → สร้าง Messaging API Channel
                 this.DEFAULT_LINE_CHANNEL_ACCESS_TOKEN = 'Fvv/+EW2OR5y18NHCBSdvkcoea4ZpiUBb64CPaD0tFAj+OTV5zPKn7VbDtT1q6Gy98HcBRE1By40/CkxCylfdwIvow/bsmlXWw6Slu8tK7MxdRldqcPOE87iNLTNFe4HfGaY/7ripZul4mUXEvVEXAdB04t89/1O/w1cDnyilFU=';
-                this.DEFAULT_LINE_USER_ID = 'Uc8c00fd05b1af0c34351d1629b453666'; // User ID ที่ตั้งค่าแล้ว
+                this.DEFAULT_LINE_USER_ID = 'Cbacb0fee7f4d2d9a7035586a7298d001'; // User ID ที่ตั้งค่าแล้ว
                 
                 // 🚀 เปิดใช้งานอัตโนมัติ (true = เปิด, false = ปิด)
                 this.DEFAULT_AUTO_SYNC = true;
@@ -1138,6 +1165,7 @@ function sendLineMessage(channelAccessToken, userId, message) {
                 document.getElementById('testConnectionBtn').addEventListener('click', () => this.testConnection());
                 document.getElementById('syncToSheetBtn').addEventListener('click', () => this.syncToSheet());
                 document.getElementById('syncFromSheetBtn').addEventListener('click', () => this.syncFromSheet());
+                document.getElementById('syncFromSheetTopBtn').addEventListener('click', () => this.syncFromSheet());
                 
                 // Auto sync toggle
                 document.getElementById('autoSync').addEventListener('change', (e) => {
@@ -1378,62 +1406,90 @@ function sendLineMessage(channelAccessToken, userId, message) {
             }
             
             async saveTask() {
-                const taskData = {
-                    id: this.currentEditingTask ? this.currentEditingTask.id : Date.now(),
-                    title: document.getElementById('taskTitle').value,
-                    description: document.getElementById('taskDescription').value,
-                    date: document.getElementById('taskDate').value,
-                    time: document.getElementById('taskTime').value,
-                    priority: document.getElementById('taskPriority').value,
-                    status: document.getElementById('taskStatus').value,
-                    assignee: document.getElementById('taskAssignee').value,
-                    dueDate: document.getElementById('taskDueDate').value,
-                    beforeImages: this.currentEditingTask ? this.currentEditingTask.beforeImages || [] : [],
-                    afterImages: this.currentEditingTask ? this.currentEditingTask.afterImages || [] : [],
-                    createdAt: this.currentEditingTask ? this.currentEditingTask.createdAt : new Date().toISOString()
-                };
+                // แสดงสถานะกำลังบันทึก
+                const submitBtn = document.querySelector('#taskForm button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = '💾 กำลังบันทึก...';
+                submitBtn.disabled = true;
 
-                // Handle new image uploads
-                const beforeFiles = document.getElementById('beforeImages').files;
-                const afterFiles = document.getElementById('afterImages').files;
+                try {
+                    const taskData = {
+                        id: this.currentEditingTask ? this.currentEditingTask.id : Date.now(),
+                        title: document.getElementById('taskTitle').value,
+                        description: document.getElementById('taskDescription').value,
+                        date: document.getElementById('taskDate').value,
+                        time: document.getElementById('taskTime').value,
+                        priority: document.getElementById('taskPriority').value,
+                        status: document.getElementById('taskStatus').value,
+                        assignee: document.getElementById('taskAssignee').value,
+                        dueDate: document.getElementById('taskDueDate').value,
+                        beforeImages: this.currentEditingTask ? this.currentEditingTask.beforeImages || [] : [],
+                        afterImages: this.currentEditingTask ? this.currentEditingTask.afterImages || [] : [],
+                        createdAt: this.currentEditingTask ? this.currentEditingTask.createdAt : new Date().toISOString()
+                    };
 
-                if (beforeFiles.length > 0) {
-                    taskData.beforeImages = await this.processImageFiles(beforeFiles);
-                }
+                    // Handle new image uploads
+                    const beforeFiles = document.getElementById('beforeImages').files;
+                    const afterFiles = document.getElementById('afterImages').files;
 
-                if (afterFiles.length > 0) {
-                    taskData.afterImages = await this.processImageFiles(afterFiles);
-                }
+                    // ประมวลผลรูปภาพแบบไม่บล็อก UI
+                    if (beforeFiles.length > 0) {
+                        submitBtn.textContent = '📷 กำลังประมวลผลรูปก่อน...';
+                        taskData.beforeImages = await this.processImageFiles(beforeFiles);
+                    }
 
-                // Check for status change to send LINE notification
-                let statusChanged = false;
-                let oldStatus = '';
-                let newStatus = taskData.status;
-                
-                if (this.currentEditingTask) {
-                    oldStatus = this.currentEditingTask.status;
-                    statusChanged = oldStatus !== newStatus;
-                    const index = this.tasks.findIndex(t => t.id === this.currentEditingTask.id);
-                    this.tasks[index] = taskData;
-                } else {
-                    this.tasks.push(taskData);
-                    statusChanged = true; // New task created
-                    oldStatus = 'new';
-                }
-                
-                this.saveTasks();
-                this.renderCalendar();
-                this.updateStats();
-                this.closeTaskModal();
+                    if (afterFiles.length > 0) {
+                        submitBtn.textContent = '📷 กำลังประมวลผลรูปหลัง...';
+                        taskData.afterImages = await this.processImageFiles(afterFiles);
+                    }
 
-                // Send LINE notification if status changed
-                if (statusChanged && this.lineNotifyEnabled) {
-                    await this.sendStatusChangeNotification(taskData, oldStatus, newStatus);
-                }
-                
-                // Auto sync if enabled
-                if (this.autoSyncEnabled) {
-                    await this.syncToSheet();
+                    submitBtn.textContent = '💾 กำลังบันทึกข้อมูล...';
+
+                    // Check for status change to send LINE notification
+                    let statusChanged = false;
+                    let oldStatus = '';
+                    let newStatus = taskData.status;
+                    
+                    if (this.currentEditingTask) {
+                        oldStatus = this.currentEditingTask.status;
+                        statusChanged = oldStatus !== newStatus;
+                        const index = this.tasks.findIndex(t => t.id === this.currentEditingTask.id);
+                        this.tasks[index] = taskData;
+                    } else {
+                        this.tasks.push(taskData);
+                        statusChanged = true; // New task created
+                        oldStatus = 'new';
+                    }
+                    
+                    this.saveTasks();
+                    this.renderCalendar();
+                    this.updateStats();
+                    this.closeTaskModal();
+
+                    // แสดงข้อความสำเร็จ
+                    this.showMessage('✅ บันทึกงานเรียบร้อย!', 'success');
+
+                    // Send LINE notification if status changed (ไม่บล็อก UI)
+                    if (statusChanged && this.lineNotifyEnabled) {
+                        this.sendStatusChangeNotification(taskData, oldStatus, newStatus).catch(error => {
+                            console.warn('LINE notification failed:', error);
+                        });
+                    }
+                    
+                    // Auto sync if enabled (ไม่บล็อก UI)
+                    if (this.autoSyncEnabled) {
+                        this.syncToSheet().catch(error => {
+                            console.warn('Auto sync failed:', error);
+                        });
+                    }
+
+                } catch (error) {
+                    console.error('Error saving task:', error);
+                    this.showMessage('❌ เกิดข้อผิดพลาดในการบันทึก: ' + error.message, 'error');
+                } finally {
+                    // คืนค่าปุ่มเดิม
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
                 }
             }
             
@@ -1585,6 +1641,19 @@ function sendLineMessage(channelAccessToken, userId, message) {
                     this.showMessage('กรุณาแก้ไข Google Apps Script URL ในโค้ด', 'warning');
                     return;
                 }
+
+                // หาปุ่มที่ถูกคลิก (อาจเป็นปุ่มด้านบนหรือด้านล่าง)
+                const topBtn = document.getElementById('syncFromSheetTopBtn');
+                const bottomBtn = document.getElementById('syncFromSheetBtn');
+                
+                // อัพเดทสถานะปุ่มทั้งสอง
+                const originalTopText = topBtn.textContent;
+                const originalBottomText = bottomBtn.textContent;
+                
+                topBtn.textContent = '📥 กำลังดึงข้อมูล...';
+                topBtn.disabled = true;
+                bottomBtn.textContent = '📥 กำลังดึงข้อมูล...';
+                bottomBtn.disabled = true;
                 
                 try {
                     this.syncStatus = 'syncing';
@@ -1603,12 +1672,20 @@ function sendLineMessage(channelAccessToken, userId, message) {
                     if (response.ok) {
                         const result = await response.json();
                         if (result.success) {
+                            const oldTaskCount = this.tasks.length;
                             this.tasks = result.tasks || [];
                             this.saveTasks();
                             this.renderCalendar();
                             this.updateStats();
+                            this.checkNotifications(); // อัพเดทการแจ้งเตือน
                             this.syncStatus = 'online';
-                            this.showMessage(`✅ ดึงข้อมูลสำเร็จ (${this.tasks.length} รายการ)`, 'success');
+                            
+                            const newTaskCount = this.tasks.length;
+                            const changeText = oldTaskCount !== newTaskCount ? 
+                                ` (เปลี่ยนจาก ${oldTaskCount} เป็น ${newTaskCount} รายการ)` : 
+                                ' (ไม่มีการเปลี่ยนแปลง)';
+                            
+                            this.showMessage(`✅ ดึงข้อมูลสำเร็จ${changeText}`, 'success');
                         } else {
                             throw new Error(result.error || 'การดึงข้อมูลล้มเหลว');
                         }
@@ -1620,6 +1697,11 @@ function sendLineMessage(channelAccessToken, userId, message) {
                     this.syncStatus = 'offline';
                     this.showMessage(`❌ ดึงข้อมูลล้มเหลว: ${error.message}`, 'error');
                 } finally {
+                    // คืนค่าปุ่มทั้งสอง
+                    topBtn.textContent = originalTopText;
+                    topBtn.disabled = false;
+                    bottomBtn.textContent = originalBottomText;
+                    bottomBtn.disabled = false;
                     this.updateSyncIndicator();
                 }
             }
@@ -1901,13 +1983,37 @@ function sendLineMessage(channelAccessToken, userId, message) {
                     previewContainer.innerHTML = '';
                     
                     for (let file of files) {
+                        // แสดง placeholder ก่อน
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'image-placeholder';
+                        placeholder.innerHTML = '📷';
+                        previewContainer.appendChild(placeholder);
+                        
                         const reader = new FileReader();
                         reader.onload = (e) => {
-                            const img = document.createElement('img');
-                            img.src = e.target.result;
-                            img.className = 'image-preview';
-                            img.onclick = () => this.openImageViewer(e.target.result);
-                            previewContainer.appendChild(img);
+                            try {
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                img.className = 'image-preview';
+                                img.onclick = () => this.openImageViewer(e.target.result);
+                                img.onerror = () => {
+                                    // หากโหลดรูปไม่ได้ แสดง placeholder แทน
+                                    const errorPlaceholder = document.createElement('div');
+                                    errorPlaceholder.className = 'image-placeholder';
+                                    errorPlaceholder.innerHTML = '❌';
+                                    errorPlaceholder.title = 'ไม่สามารถแสดงรูปได้';
+                                    img.replaceWith(errorPlaceholder);
+                                };
+                                placeholder.replaceWith(img);
+                            } catch (error) {
+                                console.error('Error loading image:', error);
+                                placeholder.innerHTML = '❌';
+                                placeholder.title = 'ไม่สามารถแสดงรูปได้';
+                            }
+                        };
+                        reader.onerror = () => {
+                            placeholder.innerHTML = '❌';
+                            placeholder.title = 'ไม่สามารถอ่านไฟล์ได้';
                         };
                         reader.readAsDataURL(file);
                     }
@@ -1916,24 +2022,61 @@ function sendLineMessage(channelAccessToken, userId, message) {
 
             async processImageFiles(files) {
                 const images = [];
+                const maxSize = 5 * 1024 * 1024; // 5MB limit
+                
                 for (let file of files) {
-                    const base64 = await this.fileToBase64(file);
-                    images.push({
-                        name: file.name,
-                        data: base64,
-                        size: file.size,
-                        type: file.type
-                    });
+                    try {
+                        // ตรวจสอบขนาดไฟล์
+                        if (file.size > maxSize) {
+                            console.warn(`File ${file.name} is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Skipping.`);
+                            this.showMessage(`ไฟล์ ${file.name} ใหญ่เกินไป (เกิน 5MB)`, 'warning');
+                            continue;
+                        }
+
+                        // ตรวจสอบประเภทไฟล์
+                        if (!file.type.startsWith('image/')) {
+                            console.warn(`File ${file.name} is not an image. Skipping.`);
+                            this.showMessage(`ไฟล์ ${file.name} ไม่ใช่รูปภาพ`, 'warning');
+                            continue;
+                        }
+
+                        const base64 = await this.fileToBase64(file);
+                        images.push({
+                            name: file.name,
+                            data: base64,
+                            size: file.size,
+                            type: file.type,
+                            uploadedAt: new Date().toISOString()
+                        });
+                    } catch (error) {
+                        console.error(`Error processing file ${file.name}:`, error);
+                        this.showMessage(`ไม่สามารถประมวลผลไฟล์ ${file.name} ได้`, 'error');
+                    }
                 }
                 return images;
             }
 
             fileToBase64(file) {
                 return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = error => reject(error);
+                    try {
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                            try {
+                                resolve(reader.result);
+                            } catch (error) {
+                                reject(new Error(`Failed to read file: ${error.message}`));
+                            }
+                        };
+                        reader.onerror = () => {
+                            reject(new Error(`FileReader error: ${reader.error?.message || 'Unknown error'}`));
+                        };
+                        reader.onabort = () => {
+                            reject(new Error('File reading was aborted'));
+                        };
+                        reader.readAsDataURL(file);
+                    } catch (error) {
+                        reject(new Error(`Failed to initialize FileReader: ${error.message}`));
+                    }
                 });
             }
 
@@ -1943,11 +2086,26 @@ function sendLineMessage(channelAccessToken, userId, message) {
                 
                 if (images && images.length > 0) {
                     images.forEach(image => {
+                        // แสดง placeholder ก่อน
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'image-placeholder';
+                        placeholder.innerHTML = '📷';
+                        previewContainer.appendChild(placeholder);
+                        
                         const img = document.createElement('img');
                         img.src = image.data;
                         img.className = 'image-preview';
                         img.onclick = () => this.openImageViewer(image.data);
-                        previewContainer.appendChild(img);
+                        img.onload = () => {
+                            // เมื่อรูปโหลดเสร็จ ให้แทนที่ placeholder
+                            placeholder.replaceWith(img);
+                        };
+                        img.onerror = () => {
+                            // หากโหลดรูปไม่ได้ แสดงข้อความแทน
+                            placeholder.innerHTML = '❌';
+                            placeholder.title = `ไม่สามารถแสดงรูป ${image.name || 'ไม่ทราบชื่อ'} ได้`;
+                            placeholder.onclick = null;
+                        };
                     });
                 }
             }
@@ -2264,5 +2422,5 @@ function sendLineMessage(channelAccessToken, userId, message) {
             scheduler = new TaskScheduler();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98dd8d4f973d9faa',t:'MTc2MDM0NTAzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98ddb854f496fb86',t:'MTc2MDM0Njc5Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
