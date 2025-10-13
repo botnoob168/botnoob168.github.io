@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจัดตารางคิวงานช่าง - ซิงค์ออนไลน์2</title>
+    <title>ระบบจัดตารางคิวงานช่าง</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -65,10 +65,10 @@
         🔴 ออฟไลน์
     </div>
 
-    <div class="container mx-auto p-6 max-w-7xl">
+    <div class="container mx-auto p-6 max-w-6xl">
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h1 class="text-3xl font-bold text-gray-800 mb-4">📋 ระบบจัดตารางคิวงานช่าง - ซิงค์ออนไลน์</h1>
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">📋 ระบบจัดตารางคิวงานช่าง</h1>
             
             <!-- Controls -->
             <div class="flex flex-wrap gap-4 items-center justify-between">
@@ -184,7 +184,7 @@
 
     <!-- Setup Guide Modal -->
     <div id="setupGuideModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-5xl mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-semibold">📖 คู่มือตั้งค่า Google Apps Script</h3>
                 <button id="closeGuideBtn" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
@@ -263,23 +263,17 @@ const SHEET_ID = 'YOUR_SHEET_ID_HERE';
 
 function doPost(e) {
   try {
-    // รองรับทั้ง JSON และ FormData
-    let data;
-    if (e.postData.type === 'application/x-www-form-urlencoded') {
-      // FormData format
-      const params = e.parameter;
-      data = {
-        action: params.action,
-        tasks: params.tasks ? JSON.parse(params.tasks) : []
-      };
-    } else {
-      // JSON format
-      data = JSON.parse(e.postData.contents);
-    }
-    
+    const data = JSON.parse(e.postData.contents);
     const sheet = SpreadsheetApp.openById(SHEET_ID).getActiveSheet();
     
     if (data.action === 'write') {
+      // ตรวจสอบว่ามีหัวตาราง หากไม่มีให้สร้าง
+      if (sheet.getLastRow() === 0) {
+        sheet.getRange(1, 1, 1, 8).setValues([
+          ['วันที่เริ่ม', 'เวลาเริ่ม', 'ชื่องาน', 'รายละเอียด', 'ช่างผู้รับผิดชอบ', 'ความสำคัญ', 'สถานะ', 'กำหนดแล้วเสร็จ']
+        ]);
+      }
+      
       // ล้างข้อมูลเก่า (เว้นหัวตาราง)
       const lastRow = sheet.getLastRow();
       if (lastRow > 1) {
@@ -310,6 +304,13 @@ function doPost(e) {
     
     if (data.action === 'read') {
       const values = sheet.getDataRange().getValues();
+      if (values.length <= 1) {
+        return ContentService.createTextOutput(JSON.stringify({
+          success: true,
+          tasks: []
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
+      
       const headers = values[0];
       const rows = values.slice(1);
       
@@ -341,13 +342,6 @@ function doPost(e) {
     })).setMimeType(ContentService.MimeType.JSON);
   }
 }
-
-function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify({
-    success: true,
-    message: 'Google Apps Script พร้อมใช้งาน!'
-  })).setMimeType(ContentService.MimeType.JSON);
-}
                     </textarea>
                     <p class="text-xs text-gray-600 mt-2">💡 คลิกในกล่องเพื่อเลือกโค้ดทั้งหมด</p>
                 </div>
@@ -370,24 +364,13 @@ function doGet(e) {
                         <li>• หากแก้ไขโค้ด Apps Script ต้อง Deploy ใหม่</li>
                     </ul>
                 </div>
-
-                <div class="bg-red-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-red-800 mb-2">🔧 แก้ปัญหาการส่งข้อมูลล้มเหลว</h4>
-                    <ul class="text-red-700 space-y-2 text-sm">
-                        <li><strong>1. ตรวจสอบ URL:</strong> ต้องเป็น URL จาก Google Apps Script ที่ Deploy แล้ว</li>
-                        <li><strong>2. ตรวจสอบสิทธิ์:</strong> Apps Script ต้องเปิดให้ "Anyone" เข้าถึงได้</li>
-                        <li><strong>3. ทดสอบการเชื่อมต่อ:</strong> กดปุ่ม "ทดสอบการเชื่อมต่อ" ก่อน</li>
-                        <li><strong>4. ตรวจสอบ Sheet ID:</strong> ใน Apps Script ต้องใส่ Sheet ID ที่ถูกต้อง</li>
-                        <li><strong>5. ลองใหม่:</strong> หากยังไม่ได้ ลอง Deploy Apps Script ใหม่</li>
-                    </ul>
-                </div>
             </div>
         </div>
     </div>
 
     <!-- Add Task Modal -->
-    <div id="taskModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+    <div id="taskModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 class="text-lg font-semibold mb-4">เพิ่ม/แก้ไขงาน</h3>
             
             <form id="taskForm" class="space-y-4">
@@ -417,12 +400,6 @@ function doGet(e) {
                     </div>
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">กำหนดแล้วเสร็จ</label>
-                    <input type="date" id="taskDueDate" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">ความสำคัญ</label>
@@ -448,6 +425,12 @@ function doGet(e) {
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">ช่างผู้รับผิดชอบ</label>
                     <input type="text" id="taskAssignee" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">กำหนดแล้วเสร็จ</label>
+                    <input type="date" id="taskDueDate" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 
@@ -541,7 +524,7 @@ function doGet(e) {
                     this.saveConfig();
                 });
                 
-                // Close modal on outside click
+                // Close modals on outside click
                 this.taskModal.addEventListener('click', (e) => {
                     if (e.target === this.taskModal) this.closeTaskModal();
                 });
@@ -620,21 +603,16 @@ function doGet(e) {
                 taskEl.className = `task-item priority-${task.priority} status-${task.status}`;
                 
                 const time = task.time ? ` ${task.time}` : '';
-                const dueDate = task.dueDate ? `📅 ${task.dueDate}` : '';
-                
-                // ตรวจสอบว่าเลยกำหนดหรือไม่
-                const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
-                if (isOverdue) {
-                    taskEl.classList.add('border-2', 'border-red-400');
-                }
+                const dueDate = task.dueDate ? ` 📅 ${task.dueDate}` : '';
                 
                 taskEl.innerHTML = `
                     <div class="font-medium truncate">${task.title}</div>
                     ${time ? `<div class="text-xs opacity-75">⏰ ${time}</div>` : ''}
-                    ${dueDate ? `<div class="text-xs opacity-75 ${isOverdue ? 'text-red-600 font-semibold' : ''}">${dueDate}</div>` : ''}
                     ${task.assignee ? `<div class="text-xs opacity-75">👤 ${task.assignee}</div>` : ''}
+                    ${dueDate ? `<div class="text-xs opacity-75">${dueDate}</div>` : ''}
                 `;
                 
+                // Add event listener for editing task
                 taskEl.addEventListener('click', (e) => {
                     e.stopPropagation();
                     this.editTask(task);
@@ -661,10 +639,10 @@ function doGet(e) {
                 this.currentEditingTask = null;
                 this.taskForm.reset();
                 
-                // ตั้งค่าวันที่และเวลาปัจจุบัน
+                // Set current date and time
                 const now = new Date();
                 const currentDate = date ? this.formatDate(date) : this.formatDate(now);
-                const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
+                const currentTime = now.toTimeString().slice(0, 5);
                 
                 document.getElementById('taskDate').value = currentDate;
                 document.getElementById('taskTime').value = currentTime;
@@ -673,7 +651,6 @@ function doGet(e) {
                 this.taskModal.classList.remove('hidden');
                 this.taskModal.classList.add('flex');
                 
-                // Focus on title input
                 setTimeout(() => {
                     document.getElementById('taskTitle').focus();
                 }, 100);
@@ -718,11 +695,9 @@ function doGet(e) {
                 };
                 
                 if (this.currentEditingTask) {
-                    // Update existing task
                     const index = this.tasks.findIndex(t => t.id === this.currentEditingTask.id);
                     this.tasks[index] = taskData;
                 } else {
-                    // Add new task
                     this.tasks.push(taskData);
                 }
                 
@@ -745,7 +720,6 @@ function doGet(e) {
                     this.updateStats();
                     this.closeTaskModal();
                     
-                    // Auto sync if enabled
                     if (this.autoSyncEnabled) {
                         await this.syncToSheet();
                     }
@@ -809,21 +783,23 @@ function doGet(e) {
                     this.updateSyncIndicator();
                     
                     const response = await fetch(url, {
-                        method: 'GET',
-                        mode: 'cors'
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'text/plain',
+                        },
+                        body: JSON.stringify({
+                            action: 'read'
+                        })
                     });
                     
                     if (response.ok) {
-                        const data = await response.json();
-                        if (data.success) {
-                            this.syncStatus = 'online';
-                            this.showMessage('✅ เชื่อมต่อสำเร็จ! พร้อมใช้งาน', 'success');
-                        } else {
-                            throw new Error(data.error || 'การเชื่อมต่อล้มเหลว');
-                        }
+                        const result = await response.json();
+                        this.syncStatus = 'online';
+                        this.showMessage('✅ เชื่อมต่อสำเร็จ! พร้อมใช้งาน', 'success');
                     } else {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
+                    
                 } catch (error) {
                     this.syncStatus = 'offline';
                     this.showMessage(`❌ เชื่อมต่อล้มเหลว: ${error.message}`, 'error');
@@ -842,61 +818,36 @@ function doGet(e) {
                     return;
                 }
                 
-                // ตรวจสอบ URL format
-                if (!url.includes('script.google.com') && !url.includes('script.googleusercontent.com')) {
-                    this.showMessage('❌ URL ไม่ถูกต้อง กรุณาใช้ URL จาก Google Apps Script', 'error');
-                    return;
-                }
-                
                 try {
                     this.syncStatus = 'syncing';
                     this.updateSyncIndicator();
                     
-                    // ใช้ FormData แทน JSON เพื่อหลีกเลี่ยงปัญหา CORS
-                    const formData = new FormData();
-                    formData.append('action', 'write');
-                    formData.append('tasks', JSON.stringify(this.tasks));
-                    
                     const response = await fetch(url, {
                         method: 'POST',
-                        body: formData,
-                        redirect: 'follow'
+                        headers: {
+                            'Content-Type': 'text/plain',
+                        },
+                        body: JSON.stringify({
+                            action: 'write',
+                            tasks: this.tasks
+                        })
                     });
                     
                     if (response.ok) {
-                        const text = await response.text();
-                        try {
-                            const data = JSON.parse(text);
-                            if (data.success) {
-                                this.syncStatus = 'online';
-                                this.showMessage(`✅ ${data.message || 'ส่งข้อมูลสำเร็จ'}`, 'success');
-                            } else {
-                                throw new Error(data.error || 'การส่งข้อมูลล้มเหลว');
-                            }
-                        } catch (parseError) {
-                            // หาก response ไม่ใช่ JSON อาจเป็น HTML redirect
-                            if (text.includes('Google') || text.includes('script')) {
-                                this.syncStatus = 'online';
-                                this.showMessage('✅ ส่งข้อมูลสำเร็จ (ได้รับการตอบกลับจาก Google)', 'success');
-                            } else {
-                                throw new Error('ได้รับข้อมูลที่ไม่คาดคิด');
-                            }
+                        const result = await response.json();
+                        if (result.success) {
+                            this.syncStatus = 'online';
+                            this.showMessage('✅ ส่งข้อมูลสำเร็จ', 'success');
+                        } else {
+                            throw new Error(result.error || 'การส่งข้อมูลล้มเหลว');
                         }
                     } else {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
+                    
                 } catch (error) {
                     this.syncStatus = 'offline';
-                    let errorMsg = error.message;
-                    
-                    // แสดงข้อความช่วยเหลือตามประเภทของ error
-                    if (error.message.includes('CORS')) {
-                        errorMsg += '\n💡 ลองตรวจสอบว่า Apps Script ได้ Deploy เป็น "Web app" และเปิดให้ "Anyone" เข้าถึงได้';
-                    } else if (error.message.includes('Failed to fetch')) {
-                        errorMsg += '\n💡 ตรวจสอบ URL และการเชื่อมต่ออินเทอร์เน็ต';
-                    }
-                    
-                    this.showMessage(`❌ ส่งข้อมูลล้มเหลว: ${errorMsg}`, 'error');
+                    this.showMessage(`❌ ส่งข้อมูลล้มเหลว: ${error.message}`, 'error');
                 } finally {
                     this.updateSyncIndicator();
                 }
@@ -914,45 +865,35 @@ function doGet(e) {
                     this.syncStatus = 'syncing';
                     this.updateSyncIndicator();
                     
-                    // ใช้ FormData สำหรับการดึงข้อมูลด้วย
-                    const formData = new FormData();
-                    formData.append('action', 'read');
-                    
                     const response = await fetch(url, {
                         method: 'POST',
-                        body: formData,
-                        redirect: 'follow'
+                        headers: {
+                            'Content-Type': 'text/plain',
+                        },
+                        body: JSON.stringify({
+                            action: 'read'
+                        })
                     });
                     
                     if (response.ok) {
-                        const text = await response.text();
-                        try {
-                            const data = JSON.parse(text);
-                            if (data.success && data.tasks) {
-                                this.tasks = data.tasks;
-                                this.saveTasks();
-                                this.renderCalendar();
-                                this.updateStats();
-                                this.syncStatus = 'online';
-                                this.showMessage(`✅ ดึงข้อมูล ${data.tasks.length} รายการจาก Google Sheets เรียบร้อย`, 'success');
-                            } else {
-                                throw new Error(data.error || 'การดึงข้อมูลล้มเหลว');
-                            }
-                        } catch (parseError) {
-                            throw new Error('ไม่สามารถแปลงข้อมูลที่ได้รับได้');
+                        const result = await response.json();
+                        if (result.success) {
+                            this.tasks = result.tasks || [];
+                            this.saveTasks();
+                            this.renderCalendar();
+                            this.updateStats();
+                            this.syncStatus = 'online';
+                            this.showMessage(`✅ ดึงข้อมูลสำเร็จ (${this.tasks.length} รายการ)`, 'success');
+                        } else {
+                            throw new Error(result.error || 'การดึงข้อมูลล้มเหลว');
                         }
                     } else {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
+                    
                 } catch (error) {
                     this.syncStatus = 'offline';
-                    let errorMsg = error.message;
-                    
-                    if (error.message.includes('Failed to fetch')) {
-                        errorMsg += '\n💡 ตรวจสอบ URL และการเชื่อมต่ออินเทอร์เน็ต';
-                    }
-                    
-                    this.showMessage(`❌ ดึงข้อมูลล้มเหลว: ${errorMsg}`, 'error');
+                    this.showMessage(`❌ ดึงข้อมูลล้มเหลว: ${error.message}`, 'error');
                 } finally {
                     this.updateSyncIndicator();
                 }
@@ -962,60 +903,21 @@ function doGet(e) {
                 if (this.autoSyncEnabled) {
                     await this.syncToSheet();
                 } else {
-                    this.showMessage('เปิดใช้งานซิงค์อัตโนมัติก่อน หรือใช้ปุ่มส่งไป Sheet', 'warning');
-                }
-            }
-            
-            startAutoSync() {
-                if (this.autoSyncEnabled && !this.syncInterval) {
-                    // ซิงค์ทุก 30 วินาที
-                    this.syncInterval = setInterval(async () => {
-                        if (this.syncStatus !== 'syncing') {
-                            await this.syncToSheet();
-                        }
-                    }, 30000);
-                }
-            }
-            
-            stopAutoSync() {
-                if (this.syncInterval) {
-                    clearInterval(this.syncInterval);
-                    this.syncInterval = null;
+                    this.showMessage('กรุณาเปิดใช้งานซิงค์อัตโนมัติก่อน', 'warning');
                 }
             }
             
             exportData() {
-                const csvContent = this.generateCSV();
-                const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const dataStr = JSON.stringify(this.tasks, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
                 const link = document.createElement('a');
+                link.href = url;
+                link.download = `งานช่าง_${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                URL.revokeObjectURL(url);
                 
-                if (link.download !== undefined) {
-                    const url = URL.createObjectURL(blob);
-                    link.setAttribute('href', url);
-                    link.setAttribute('download', `งานช่าง_${new Date().toISOString().split('T')[0]}.csv`);
-                    link.style.visibility = 'hidden';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }
-            }
-            
-            generateCSV() {
-                const headers = ['วันที่เริ่ม', 'เวลาเริ่ม', 'ชื่องาน', 'รายละเอียด', 'ช่างผู้รับผิดชอบ', 'ความสำคัญ', 'สถานะ', 'กำหนดแล้วเสร็จ'];
-                const rows = this.tasks.map(task => [
-                    task.date,
-                    task.time || '',
-                    task.title,
-                    task.description || '',
-                    task.assignee || '',
-                    task.priority === 'high' ? 'สูง' : task.priority === 'medium' ? 'ปานกลาง' : 'ต่ำ',
-                    task.status === 'pending' ? 'รอดำเนินการ' : task.status === 'progress' ? 'กำลังทำ' : 'เสร็จแล้ว',
-                    task.dueDate || ''
-                ]);
-                
-                return [headers, ...rows].map(row => 
-                    row.map(field => `"${field}"`).join(',')
-                ).join('\n');
+                this.showMessage('✅ ส่งออกข้อมูลเรียบร้อย', 'success');
             }
             
             openSetupGuide() {
@@ -1028,74 +930,97 @@ function doGet(e) {
                 document.getElementById('setupGuideModal').classList.remove('flex');
             }
             
+            startAutoSync() {
+                if (this.autoSyncEnabled && !this.syncInterval) {
+                    // Sync every 5 minutes
+                    this.syncInterval = setInterval(async () => {
+                        const url = document.getElementById('appsScriptUrl').value.trim();
+                        if (url) {
+                            await this.syncToSheet();
+                        }
+                    }, 5 * 60 * 1000);
+                }
+            }
+            
+            stopAutoSync() {
+                if (this.syncInterval) {
+                    clearInterval(this.syncInterval);
+                    this.syncInterval = null;
+                }
+            }
+            
+            loadSavedConfig() {
+                const config = JSON.parse(localStorage.getItem('schedulerConfig')) || {};
+                
+                if (config.appsScriptUrl) {
+                    document.getElementById('appsScriptUrl').value = config.appsScriptUrl;
+                }
+                
+                if (config.autoSync) {
+                    document.getElementById('autoSync').checked = config.autoSync;
+                    this.autoSyncEnabled = config.autoSync;
+                }
+            }
+            
             saveConfig() {
                 const config = {
                     appsScriptUrl: document.getElementById('appsScriptUrl').value,
                     autoSync: document.getElementById('autoSync').checked
                 };
-                localStorage.setItem('taskSchedulerConfig', JSON.stringify(config));
-            }
-            
-            loadSavedConfig() {
-                const saved = localStorage.getItem('taskSchedulerConfig');
-                if (saved) {
-                    const config = JSON.parse(saved);
-                    document.getElementById('appsScriptUrl').value = config.appsScriptUrl || '';
-                    document.getElementById('autoSync').checked = config.autoSync || false;
-                    this.autoSyncEnabled = config.autoSync || false;
-                }
+                
+                localStorage.setItem('schedulerConfig', JSON.stringify(config));
             }
             
             showMessage(message, type = 'info') {
-                // สร้าง notification element
-                const notification = document.createElement('div');
-                notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-md transition-all duration-300 transform translate-x-full`;
+                // Create toast notification
+                const toast = document.createElement('div');
+                toast.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm transition-all duration-300 transform translate-x-full`;
                 
-                // กำหนดสีตามประเภท
                 switch (type) {
                     case 'success':
-                        notification.classList.add('bg-green-500', 'text-white');
-                        break;
-                    case 'warning':
-                        notification.classList.add('bg-yellow-500', 'text-white');
+                        toast.classList.add('bg-green-500', 'text-white');
                         break;
                     case 'error':
-                        notification.classList.add('bg-red-500', 'text-white');
+                        toast.classList.add('bg-red-500', 'text-white');
+                        break;
+                    case 'warning':
+                        toast.classList.add('bg-yellow-500', 'text-white');
                         break;
                     default:
-                        notification.classList.add('bg-blue-500', 'text-white');
+                        toast.classList.add('bg-blue-500', 'text-white');
                 }
                 
-                notification.innerHTML = `
-                    <div class="flex items-start gap-3">
-                        <div class="flex-1 text-sm">${message}</div>
-                        <button class="text-white hover:text-gray-200 text-lg leading-none" onclick="this.parentElement.parentElement.remove()">×</button>
+                toast.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium">${message}</span>
+                        <button class="ml-4 text-white hover:text-gray-200" onclick="this.parentElement.parentElement.remove()">×</button>
                     </div>
                 `;
                 
-                document.body.appendChild(notification);
+                document.body.appendChild(toast);
                 
-                // แสดง notification
+                // Animate in
                 setTimeout(() => {
-                    notification.classList.remove('translate-x-full');
+                    toast.classList.remove('translate-x-full');
                 }, 100);
                 
-                // ซ่อนอัตโนมัติหลัง 5 วินาที
+                // Auto remove after 5 seconds
                 setTimeout(() => {
-                    notification.classList.add('translate-x-full');
+                    toast.classList.add('translate-x-full');
                     setTimeout(() => {
-                        if (notification.parentElement) {
-                            notification.remove();
+                        if (toast.parentElement) {
+                            toast.remove();
                         }
                     }, 300);
                 }, 5000);
             }
         }
         
-        // Initialize the application
+        // Initialize the scheduler when page loads
+        let scheduler;
         document.addEventListener('DOMContentLoaded', () => {
-            new TaskScheduler();
+            scheduler = new TaskScheduler();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98dc9eec558ef8e6',t:'MTc2MDMzNTI3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98dcdbd6e324fb86',t:'MTc2MDMzNzc2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
