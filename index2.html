@@ -1,5 +1,23 @@
 <!DOCTYPE html>
 <html lang="th">
+<!--
+🔧 วิธีตั้งค่าระบบ - แก้ไขในโค้ด JavaScript ด้านล่าง
+========================================================
+
+1. 📊 Google Apps Script URL (บรรทัดประมาณ 1036):
+   this.DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec';
+   
+2. 📱 LINE Bot Configuration (บรรทัดประมาณ 1040-1041):
+   this.DEFAULT_LINE_CHANNEL_ACCESS_TOKEN = 'YOUR_LINE_CHANNEL_ACCESS_TOKEN_HERE';
+   this.DEFAULT_LINE_USER_ID = 'YOUR_LINE_USER_ID_HERE';
+
+3. 🚀 เปิด/ปิดฟีเจอร์ (บรรทัดประมาณ 1044-1045):
+   this.DEFAULT_AUTO_SYNC = true;        // ซิงค์อัตโนมัติ
+   this.DEFAULT_LINE_NOTIFY = true;      // แจ้งเตือน LINE
+
+หลังจากแก้ไขแล้ว ระบบจะทำงานอัตโนมัติ ไม่ต้องกรอกข้อมูลซ้ำ!
+========================================================
+-->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -251,8 +269,12 @@
             <div class="bg-white rounded-lg shadow-md p-4">
                 <h3 class="font-semibold text-gray-700 mb-2">🌐 ซิงค์ออนไลน์</h3>
                 <div class="space-y-2">
+                    <div class="text-xs bg-green-50 p-2 rounded border-l-4 border-green-500">
+                        <p class="font-semibold text-green-800">✅ ตั้งค่าในโค้ดแล้ว!</p>
+                        <p class="text-green-700">ไม่ต้องกรอกข้อมูลซ้ำ</p>
+                    </div>
                     <input type="text" id="appsScriptUrl" placeholder="Google Apps Script URL" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50" readonly>
                     <div class="flex items-center gap-2 text-sm">
                         <input type="checkbox" id="autoSync" class="rounded">
                         <label for="autoSync">ซิงค์อัตโนมัติ</label>
@@ -277,10 +299,14 @@
             <div class="bg-white rounded-lg shadow-md p-4">
                 <h3 class="font-semibold text-gray-700 mb-2">📱 แจ้งเตือน LINE</h3>
                 <div class="space-y-2">
+                    <div class="text-xs bg-blue-50 p-2 rounded border-l-4 border-blue-500">
+                        <p class="font-semibold text-blue-800">🔧 ตั้งค่าในโค้ดแล้ว!</p>
+                        <p class="text-blue-700">แก้ไขค่าในโค้ดเพื่อใช้งาน</p>
+                    </div>
                     <input type="text" id="lineChannelAccessToken" placeholder="Channel Access Token" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50" readonly>
                     <input type="text" id="lineUserId" placeholder="User ID หรือ Group ID" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50" readonly>
                     <div class="flex items-center gap-2 text-sm">
                         <input type="checkbox" id="enableLineNotify" class="rounded">
                         <label for="enableLineNotify">เปิดใช้แจ้งเตือน LINE</label>
@@ -291,7 +317,8 @@
                     <button id="lineSetupBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm transition-colors">
                         📖 วิธีตั้งค่า LINE Bot
                     </button>
-                    <div class="text-xs text-gray-600">
+                    <div class="text-xs text-green-600 bg-green-50 p-2 rounded">
+                        <p class="font-semibold">🚀 ส่งโดยตรง ไม่ต้องผ่าน Apps Script!</p>
                         <p>• แจ้งเตือนเมื่อเปลี่ยนสถานะงาน</p>
                         <p>• แจ้งเตือนงานใกล้ครบกำหนด</p>
                         <p>• แจ้งเตือนงานเลยกำหนด</p>
@@ -319,34 +346,64 @@
                 <div class="grid md:grid-cols-2 gap-6">
                     <div>
                         <h4 class="font-semibold mb-3">🚀 ขั้นตอนที่ 1: สร้าง Google Apps Script</h4>
-                        <ol class="space-y-2 text-sm">
+                        <ol class="space-y-3 text-sm">
                             <li class="flex gap-2">
                                 <span class="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">1</span>
-                                <span>เปิด <a href="https://script.google.com" target="_blank" class="text-blue-600 underline">script.google.com</a></span>
+                                <div>
+                                    <div>เปิด <a href="https://script.google.com" target="_blank" class="text-blue-600 underline font-semibold">script.google.com</a></div>
+                                    <div class="text-xs text-gray-600 mt-1">ต้องล็อกอินด้วย Google Account</div>
+                                </div>
                             </li>
                             <li class="flex gap-2">
                                 <span class="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">2</span>
-                                <span>กด "New project"</span>
+                                <div>
+                                    <div>กด <strong>"New project"</strong> (ปุ่มสีน้ำเงิน)</div>
+                                    <div class="text-xs text-gray-600 mt-1">หรือ "+ New project" ถ้าไม่เจอ</div>
+                                </div>
                             </li>
                             <li class="flex gap-2">
                                 <span class="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">3</span>
-                                <span>คัดลอกโค้ดด้านล่างไปวาง</span>
+                                <div>
+                                    <div><strong>ลบโค้ดเดิมทั้งหมด</strong> แล้วคัดลอกโค้ดด้านล่างไปวาง</div>
+                                    <div class="text-xs text-gray-600 mt-1">ลบ function myFunction() {...} ออกก่อน</div>
+                                </div>
                             </li>
                             <li class="flex gap-2">
                                 <span class="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">4</span>
-                                <span>แก้ไข SHEET_ID ในโค้ด</span>
+                                <div>
+                                    <div><strong>แก้ไข SHEET_ID</strong> ในบรรทัดที่ 2</div>
+                                    <div class="text-xs text-gray-600 mt-1">เปลี่ยน 'YOUR_SHEET_ID_HERE' เป็น ID จริง</div>
+                                </div>
                             </li>
                             <li class="flex gap-2">
                                 <span class="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">5</span>
-                                <span>กด "Deploy" → "New deployment"</span>
+                                <div>
+                                    <div>กด <strong>"Deploy"</strong> → <strong>"New deployment"</strong></div>
+                                    <div class="text-xs text-gray-600 mt-1">ปุ่ม Deploy อยู่มุมขวาบน</div>
+                                </div>
                             </li>
                             <li class="flex gap-2">
                                 <span class="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">6</span>
-                                <span>เลือก "Web app" → "Anyone" → "Deploy"</span>
+                                <div>
+                                    <div>เลือก Type: <strong>"Web app"</strong></div>
+                                    <div>Execute as: <strong>"Me"</strong></div>
+                                    <div>Who has access: <strong>"Anyone"</strong></div>
+                                    <div class="text-xs text-red-600 mt-1">⚠️ ต้องเลือก "Anyone" ไม่งั้นใช้ไม่ได้</div>
+                                </div>
                             </li>
                             <li class="flex gap-2">
                                 <span class="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">7</span>
-                                <span>คัดลอก URL ที่ได้มาใส่ในระบบ</span>
+                                <div>
+                                    <div>กด <strong>"Deploy"</strong> และอนุญาตสิทธิ์</div>
+                                    <div class="text-xs text-gray-600 mt-1">อาจต้องยืนยันตัวตนและอนุญาตการเข้าถึง</div>
+                                </div>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">8</span>
+                                <div>
+                                    <div><strong>คัดลอก Web app URL</strong> ที่ได้</div>
+                                    <div class="text-xs text-gray-600 mt-1">URL จะขึ้นต้นด้วย https://script.google.com/macros/s/...</div>
+                                </div>
                             </li>
                         </ol>
                     </div>
@@ -383,6 +440,12 @@ const SHEET_ID = 'YOUR_SHEET_ID_HERE';
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
+    
+    // ฟังก์ชันส่งข้อความ LINE
+    if (data.action === 'sendLine') {
+      return sendLineMessage(data.token, data.userId, data.message);
+    }
+    
     const sheet = SpreadsheetApp.openById(SHEET_ID).getActiveSheet();
     
     if (data.action === 'write') {
@@ -523,6 +586,61 @@ function doPost(e) {
     })).setMimeType(ContentService.MimeType.JSON);
   }
 }
+
+// ฟังก์ชันส่งข้อความ LINE Messaging API
+function sendLineMessage(channelAccessToken, userId, message) {
+  try {
+    const url = 'https://api.line.me/v2/bot/message/push';
+    
+    const payload = {
+      to: userId,
+      messages: [{
+        type: 'text',
+        text: message
+      }]
+    };
+    
+    const options = {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + channelAccessToken,
+        'Content-Type': 'application/json'
+      },
+      payload: JSON.stringify(payload)
+    };
+    
+    const response = UrlFetchApp.fetch(url, options);
+    const responseCode = response.getResponseCode();
+    
+    if (responseCode === 200) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: true,
+        message: 'ส่งข้อความ LINE สำเร็จ'
+      })).setMimeType(ContentService.MimeType.JSON);
+    } else {
+      const errorText = response.getContentText();
+      let errorMessage = `HTTP ${responseCode}`;
+      
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.message || errorMessage;
+      } catch (e) {
+        errorMessage = errorText || errorMessage;
+      }
+      
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        error: `LINE API Error: ${errorMessage}`
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: `ส่งข้อความ LINE ล้มเหลว: ${error.toString()}`
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
                     </textarea>
                     <p class="text-xs text-gray-600 mt-2">💡 คลิกในกล่องเพื่อเลือกโค้ดทั้งหมด</p>
                 </div>
@@ -555,6 +673,58 @@ function doPost(e) {
                         <li>• หากแก้ไขโค้ด Apps Script ต้อง Deploy ใหม่</li>
                         <li>• รูปภาพขนาดใหญ่อาจทำให้การซิงค์ช้าลง</li>
                     </ul>
+                </div>
+
+                <div class="bg-red-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-red-800 mb-2">🔧 แก้ปัญหาที่พบบ่อย</h4>
+                    <div class="space-y-3 text-sm">
+                        <div class="border-l-4 border-red-500 pl-3">
+                            <p class="font-semibold text-red-800">ปัญหา: "Authorization required"</p>
+                            <p class="text-red-700">✅ แก้ไข: กดลิงก์ที่แสดง → เลือก Google Account → กด "Advanced" → "Go to [project name] (unsafe)" → "Allow"</p>
+                        </div>
+                        <div class="border-l-4 border-red-500 pl-3">
+                            <p class="font-semibold text-red-800">ปัญหา: "Exception: Invalid argument"</p>
+                            <p class="text-red-700">✅ แก้ไข: ตรวจสอบ SHEET_ID ให้ถูกต้อง และ Google Sheets ต้องแชร์ให้แก้ไขได้</p>
+                        </div>
+                        <div class="border-l-4 border-red-500 pl-3">
+                            <p class="font-semibold text-red-800">ปัญหา: "Script function not found"</p>
+                            <p class="text-red-700">✅ แก้ไข: ตรวจสอบว่าคัดลอกโค้ดครบถ้วน และกด Save ก่อน Deploy</p>
+                        </div>
+                        <div class="border-l-4 border-red-500 pl-3">
+                            <p class="font-semibold text-red-800">ปัญหา: "Access denied"</p>
+                            <p class="text-red-700">✅ แก้ไข: ตั้งค่า "Who has access" เป็น "Anyone" ใน Deploy settings</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-green-800 mb-2">✅ เช็คลิสต์ก่อนใช้งาน</h4>
+                    <div class="space-y-2 text-sm">
+                        <label class="flex items-center gap-2 text-green-700">
+                            <input type="checkbox" class="rounded"> สร้าง Google Sheets แล้ว
+                        </label>
+                        <label class="flex items-center gap-2 text-green-700">
+                            <input type="checkbox" class="rounded"> คัดลอก Sheet ID แล้ว
+                        </label>
+                        <label class="flex items-center gap-2 text-green-700">
+                            <input type="checkbox" class="rounded"> แชร์ Sheets ให้ "Anyone with the link" แก้ไขได้
+                        </label>
+                        <label class="flex items-center gap-2 text-green-700">
+                            <input type="checkbox" class="rounded"> สร้าง Apps Script project แล้ว
+                        </label>
+                        <label class="flex items-center gap-2 text-green-700">
+                            <input type="checkbox" class="rounded"> คัดลอกโค้ดและแก้ไข SHEET_ID แล้ว
+                        </label>
+                        <label class="flex items-center gap-2 text-green-700">
+                            <input type="checkbox" class="rounded"> Deploy เป็น Web app (Anyone access) แล้ว
+                        </label>
+                        <label class="flex items-center gap-2 text-green-700">
+                            <input type="checkbox" class="rounded"> อนุญาตสิทธิ์ทั้งหมดแล้ว
+                        </label>
+                        <label class="flex items-center gap-2 text-green-700">
+                            <input type="checkbox" class="rounded"> คัดลอก Web app URL แล้ว
+                        </label>
+                    </div>
                 </div>
 
                 <div class="bg-green-50 p-4 rounded-lg">
@@ -723,10 +893,10 @@ function doPost(e) {
             </div>
             
             <div class="space-y-6">
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h4 class="font-semibold text-blue-800 mb-2">🔄 เปลี่ยนจาก LINE Notify</h4>
-                    <p class="text-blue-700 text-sm mb-2">LINE Notify จะหยุดให้บริการในปี 2025 เราจึงเปลี่ยนมาใช้ LINE Messaging API แทน</p>
-                    <p class="text-blue-700 text-sm"><strong>ข้อดี:</strong> ส่งข้อความได้ไม่จำกัด, รองรับ Rich Message, ไม่มีวันหมดอายุ</p>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-green-800 mb-2">🚀 ระบบแจ้งเตือน LINE แบบใหม่</h4>
+                    <p class="text-green-700 text-sm mb-2">ตอนนี้ระบบส่งข้อความ LINE โดยตรงแล้ว! ไม่ต้องผ่าน Google Apps Script</p>
+                    <p class="text-green-700 text-sm"><strong>ข้อดี:</strong> เร็วขึ้น, เสถียรกว่า, ส่งข้อความได้ไม่จำกัด, รองรับ Rich Message</p>
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-6">
@@ -773,11 +943,11 @@ function doPost(e) {
                             </li>
                             <li class="flex gap-2">
                                 <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">3</span>
-                                <span>กด "Issue" ใน Channel access token</span>
+                                <span><strong>กด "Issue" ใน Channel access token (long-lived)</strong></span>
                             </li>
                             <li class="flex gap-2">
                                 <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">4</span>
-                                <span>คัดลอก Token ที่ได้</span>
+                                <span><strong>คัดลอก Token ทั้งหมด (ยาวประมาณ 100+ ตัวอักษร)</strong></span>
                             </li>
                             <li class="flex gap-2">
                                 <span class="bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">5</span>
@@ -788,6 +958,15 @@ function doPost(e) {
                                 <span>ปิด "Auto-reply messages" และ "Greeting messages"</span>
                             </li>
                         </ol>
+                        <div class="mt-3 p-3 bg-red-100 rounded border-l-4 border-red-500">
+                            <p class="text-red-800 text-sm font-semibold">🚨 แก้ไขข้อผิดพลาด 401:</p>
+                            <p class="text-red-800 text-sm">• <strong>ใช้ "Channel Access Token" (ยาวประมาณ 100+ ตัวอักษร)</strong></p>
+                            <p class="text-red-800 text-sm">• <strong>ไม่ใช่ "Channel Secret" (สั้นประมาณ 30 ตัวอักษร)</strong></p>
+                            <p class="text-red-800 text-sm">• กด "Issue" ใน Channel access token (long-lived)</p>
+                            <p class="text-red-800 text-sm">• ตัวอย่าง Token: "O3RHKsAexjFC3xrtWQzf/RgIn29svznPi8xyv0nC1PR..."</p>
+                            <p class="text-red-800 text-sm">• ตัวอย่าง User ID: "Uc8c00fd05b1af0c34351d1629b453666"</p>
+                            <p class="text-red-800 text-sm">• ตรวจสอบว่าบอทเป็นเพื่อนกับผู้ใช้แล้ว</p>
+                        </div>
                     </div>
                 </div>
 
@@ -874,6 +1053,26 @@ function doPost(e) {
     <script>
         class TaskScheduler {
             constructor() {
+                // 🔧 การตั้งค่าหลัก - แก้ไขตรงนี้เพื่อใช้งาน
+                // ========================================
+                
+                // 📊 Google Apps Script URL (สำหรับซิงค์ข้อมูลกับ Google Sheets)
+                // วิธีการ: ไปที่ script.google.com → สร้าง project ใหม่ → Deploy เป็น Web app
+                this.DEFAULT_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzuGe1c35Rs7uklLHySZH_u8evPcp3otFWB4TA5G0Egw5rx8qtD8CG7so6EvzpEkMXU/exec';
+                
+                // 📱 LINE Bot Configuration (สำหรับแจ้งเตือน)
+                // วิธีการ: ไปที่ developers.line.biz → สร้าง Messaging API Channel
+                this.DEFAULT_LINE_CHANNEL_ACCESS_TOKEN = 'Fvv/+EW2OR5y18NHCBSdvkcoea4ZpiUBb64CPaD0tFAj+OTV5zPKn7VbDtT1q6Gy98HcBRE1By40/CkxCylfdwIvow/bsmlXWw6Slu8tK7MxdRldqcPOE87iNLTNFe4HfGaY/7ripZul4mUXEvVEXAdB04t89/1O/w1cDnyilFU=';
+                this.DEFAULT_LINE_USER_ID = 'Cbacb0fee7f4d2d9a7035586a7298d001'; // User ID ที่ตั้งค่าแล้ว
+                
+                // 🚀 เปิดใช้งานอัตโนมัติ (true = เปิด, false = ปิด)
+                this.DEFAULT_AUTO_SYNC = true;
+                this.DEFAULT_LINE_NOTIFY = true;
+                
+                // ========================================
+                // ไม่ต้องแก้ไขโค้ดด้านล่างนี้
+                // ========================================
+                
                 this.currentDate = new Date();
                 this.tasks = JSON.parse(localStorage.getItem('schedulerTasks')) || [];
                 this.technicians = JSON.parse(localStorage.getItem('schedulerTechnicians')) || ['ช่างสมชาย', 'ช่างสมหญิง', 'ช่างมานะ'];
@@ -1476,28 +1675,38 @@ function doPost(e) {
             loadSavedConfig() {
                 const config = JSON.parse(localStorage.getItem('schedulerConfig')) || {};
                 
-                if (config.appsScriptUrl) {
-                    document.getElementById('appsScriptUrl').value = config.appsScriptUrl;
+                // ฝังค่าเริ่มต้นไว้ในโค้ด - ไม่ต้องกรอกเอง!
+                const defaultConfig = {
+                    appsScriptUrl: this.DEFAULT_APPS_SCRIPT_URL,
+                    autoSync: this.DEFAULT_AUTO_SYNC,
+                    lineChannelAccessToken: this.DEFAULT_LINE_CHANNEL_ACCESS_TOKEN,
+                    lineUserId: this.DEFAULT_LINE_USER_ID,
+                    lineNotifyEnabled: this.DEFAULT_LINE_NOTIFY
+                };
+                
+                // ใช้ค่าที่บันทึกไว้ หรือค่าเริ่มต้น
+                const finalConfig = { ...defaultConfig, ...config };
+                
+                document.getElementById('appsScriptUrl').value = finalConfig.appsScriptUrl;
+                document.getElementById('autoSync').checked = finalConfig.autoSync;
+                this.autoSyncEnabled = finalConfig.autoSync;
+
+                document.getElementById('lineChannelAccessToken').value = finalConfig.lineChannelAccessToken;
+                this.lineChannelAccessToken = finalConfig.lineChannelAccessToken;
+
+                document.getElementById('lineUserId').value = finalConfig.lineUserId;
+                this.lineUserId = finalConfig.lineUserId;
+
+                document.getElementById('enableLineNotify').checked = finalConfig.lineNotifyEnabled;
+                this.lineNotifyEnabled = finalConfig.lineNotifyEnabled;
+                
+                // แสดงสถานะการตั้งค่า
+                if (finalConfig.appsScriptUrl.includes('YOUR_SCRIPT_ID_HERE')) {
+                    this.showMessage('💡 กรุณาแก้ไข Google Apps Script URL ในโค้ด', 'warning');
                 }
                 
-                if (config.autoSync) {
-                    document.getElementById('autoSync').checked = config.autoSync;
-                    this.autoSyncEnabled = config.autoSync;
-                }
-
-                if (config.lineChannelAccessToken) {
-                    document.getElementById('lineChannelAccessToken').value = config.lineChannelAccessToken;
-                    this.lineChannelAccessToken = config.lineChannelAccessToken;
-                }
-
-                if (config.lineUserId) {
-                    document.getElementById('lineUserId').value = config.lineUserId;
-                    this.lineUserId = config.lineUserId;
-                }
-
-                if (config.lineNotifyEnabled) {
-                    document.getElementById('enableLineNotify').checked = config.lineNotifyEnabled;
-                    this.lineNotifyEnabled = config.lineNotifyEnabled;
+                if (finalConfig.lineChannelAccessToken.includes('YOUR_LINE_CHANNEL_ACCESS_TOKEN_HERE')) {
+                    this.showMessage('💡 กรุณาแก้ไข LINE Channel Access Token ในโค้ด', 'warning');
                 }
             }
             
@@ -1765,19 +1974,25 @@ function doPost(e) {
 
             // LINE Bot functions
             async sendLineMessage(message) {
-                if (!this.lineChannelAccessToken || !this.lineUserId || !this.lineNotifyEnabled) {
+                // ใช้ค่าจากฟอร์มแทนค่าที่เก็บไว้ เพื่อให้ได้ค่าล่าสุด
+                const token = document.getElementById('lineChannelAccessToken').value.trim();
+                const userId = document.getElementById('lineUserId').value.trim();
+                const enabled = document.getElementById('enableLineNotify').checked;
+
+                if (!token || !userId || !enabled) {
                     return false;
                 }
 
                 try {
+                    // ส่งข้อความ LINE โดยตรงผ่าน LINE Messaging API
                     const response = await fetch('https://api.line.me/v2/bot/message/push', {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${this.lineChannelAccessToken}`,
-                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            to: this.lineUserId,
+                            to: userId,
                             messages: [{
                                 type: 'text',
                                 text: message
@@ -1785,7 +2000,13 @@ function doPost(e) {
                         })
                     });
 
-                    return response.ok;
+                    if (response.ok) {
+                        return true;
+                    } else {
+                        const errorData = await response.json().catch(() => ({}));
+                        console.error('LINE API Error:', response.status, errorData);
+                        return false;
+                    }
                 } catch (error) {
                     console.error('LINE Bot error:', error);
                     return false;
@@ -1812,11 +2033,12 @@ function doPost(e) {
                 testBtn.disabled = true;
 
                 try {
+                    // ส่งข้อความ LINE โดยตรงผ่าน LINE Messaging API
                     const response = await fetch('https://api.line.me/v2/bot/message/push', {
                         method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json',
+                            'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
                             to: userId,
@@ -1830,11 +2052,41 @@ function doPost(e) {
                     if (response.ok) {
                         this.showMessage('✅ ส่งข้อความทดสอบสำเร็จ!', 'success');
                     } else {
-                        const errorData = await response.json();
-                        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+                        const errorData = await response.json().catch(() => ({}));
+                        let errorMsg = `HTTP ${response.status}`;
+                        
+                        if (errorData.message) {
+                            errorMsg += `: ${errorData.message}`;
+                        }
+                        
+                        throw new Error(errorMsg);
                     }
                 } catch (error) {
-                    this.showMessage(`❌ ส่งข้อความล้มเหลว: ${error.message}`, 'error');
+                    let errorMsg = error.message;
+                    
+                    // ตรวจสอบข้อผิดพลาด 401 Authentication failed
+                    if (errorMsg.includes('401') || errorMsg.includes('Authentication failed')) {
+                        errorMsg = '🚨 ข้อผิดพลาด 401: Token หรือ User ID ไม่ถูกต้อง';
+                        this.showMessage(errorMsg, 'error');
+                        
+                        setTimeout(() => {
+                            this.showMessage('🔧 แนะนำการแก้ไข:\n1. ตรวจสอบ Channel Access Token ให้ถูกต้อง\n2. ตรวจสอบ User ID หรือ Group ID\n3. ตรวจสอบว่าบอทเป็นเพื่อนกับผู้ใช้แล้ว', 'warning');
+                        }, 1500);
+                        
+                        setTimeout(() => {
+                            this.showMessage('💡 Token ที่ถูกต้องจะมีลักษณะเป็นข้อความยาวๆ เช่น "O3RHKsAexjFC3xrtWQzf/RgIn29svznPi8xyv0nC1PR..." (ประมาณ 100+ ตัวอักษร)', 'info');
+                        }, 3000);
+                    } else if (errorMsg.includes('403')) {
+                        this.showMessage('🚨 ข้อผิดพลาด 403: บอทไม่สามารถส่งข้อความได้\n• ตรวจสอบว่าบอทเป็นเพื่อนกับผู้ใช้แล้ว\n• หรือบอทถูกเชิญเข้ากลุ่มแล้ว', 'error');
+                    } else if (errorMsg.includes('400')) {
+                        this.showMessage('🚨 ข้อผิดพลาด 400: User ID ไม่ถูกต้อง\n• ตรวจสอบ User ID หรือ Group ID ให้ถูกต้อง', 'error');
+                    } else {
+                        this.showMessage(`❌ ส่งข้อความล้มเหลว: ${errorMsg}`, 'error');
+                        
+                        setTimeout(() => {
+                            this.showMessage('💡 ตรวจสอบ: 1) Token ถูกต้อง 2) User ID ถูกต้อง 3) บอทเป็นเพื่อนแล้ว 4) เครือข่ายอินเทอร์เน็ต', 'info');
+                        }, 2000);
+                    }
                 } finally {
                     testBtn.textContent = originalText;
                     testBtn.disabled = false;
@@ -1980,5 +2232,5 @@ function doPost(e) {
             scheduler = new TaskScheduler();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98dcf799501a9cf6',t:'MTc2MDMzODkwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98dd781b01559faa',t:'MTc2MDM0NDE2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
