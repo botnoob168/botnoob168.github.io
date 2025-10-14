@@ -328,15 +328,22 @@
                 <div>
                     <label class="block text-sm font-medium text-primary mb-1">ประเภทสินค้า</label>
                     <select id="productType" required 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onchange="toggleCustomProductType()">
                         <option value="">เลือกประเภทสินค้า</option>
                         <option value="ผัก-ผลไม้">ผัก-ผลไม้</option>
                         <option value="เนื้อสัตว์">เนื้อสัตว์</option>
                         <option value="อาหารแห้ง">อาหารแห้ง</option>
                         <option value="เครื่องปรุง">เครื่องปรุง</option>
                         <option value="ขนม-เครื่องดื่ม">ขนม-เครื่องดื่ม</option>
-                        <option value="อื่นๆ">อื่นๆ</option>
+                        <option value="เสื้อผ้า">เสื้อผ้า</option>
+                        <option value="ของใช้ในบ้าน">ของใช้ในบ้าน</option>
+                        <option value="เครื่องสำอาง">เครื่องสำอาง</option>
+                        <option value="อื่นๆ (ระบุ)">อื่นๆ (ระบุ)</option>
                     </select>
+                    <input type="text" id="customProductType" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mt-2 hidden"
+                           placeholder="ระบุประเภทสินค้า...">
                 </div>
 
                 <div>
@@ -371,15 +378,30 @@
                     <label class="block text-sm font-medium text-primary mb-1">ระยะเวลาสัญญา</label>
                     <select id="contractDuration" 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            onchange="calculateEndDate()">
+                            onchange="toggleCustomDuration()">
                         <option value="">เลือกระยะเวลา</option>
                         <option value="3m">3 เดือน</option>
                         <option value="6m">6 เดือน</option>
                         <option value="1y">1 ปี</option>
                         <option value="2y">2 ปี</option>
                         <option value="3y">3 ปี</option>
-                        <option value="custom">กำหนดเอง</option>
+                        <option value="custom">ระบุเอง</option>
                     </select>
+                    <div id="customDurationContainer" class="mt-2 hidden">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" id="customDurationValue" min="1" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="จำนวน" onchange="calculateEndDate()">
+                            <select id="customDurationUnit" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    onchange="calculateEndDate()">
+                                <option value="">หน่วย</option>
+                                <option value="days">วัน</option>
+                                <option value="months">เดือน</option>
+                                <option value="years">ปี</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
@@ -405,8 +427,9 @@
                     <select id="paymentDate" 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">เลือกรูปแบบการชำระ</option>
-                        <option value="รายเดือน">รายเดือน</option>
+                        <option value="รายวัน">รายวัน</option>
                         <option value="ราย10วัน">ราย10วัน</option>
+                        <option value="รายเดือน">รายเดือน</option>
                     </select>
                 </div>
 
@@ -501,18 +524,50 @@
             </div>
         </div>
 
-        <!-- Data Management -->
+        <!-- Quick Actions -->
         <div class="bg-card rounded-xl shadow-lg p-4 mb-6 border border-custom">
+            <h3 class="text-lg font-semibold text-primary mb-4 flex items-center">
+                <span class="mr-2">⚡</span>การจัดการด่วน
+            </h3>
+            
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div class="bg-gradient-to-r from-green-100 to-green-200 dark:from-green-800 dark:to-green-700 p-3 rounded-lg">
+                    <div class="text-sm text-green-700 dark:text-green-200">รายได้วันนี้</div>
+                    <div id="todayRevenue" class="text-lg font-bold text-green-800 dark:text-green-100">0 บาท</div>
+                </div>
+                <div class="bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-700 p-3 rounded-lg">
+                    <div class="text-sm text-blue-700 dark:text-blue-200">แผงว่าง</div>
+                    <div id="emptyStalls" class="text-lg font-bold text-blue-800 dark:text-blue-100">0 แผง</div>
+                </div>
+                <div class="bg-gradient-to-r from-yellow-100 to-yellow-200 dark:from-yellow-800 dark:to-yellow-700 p-3 rounded-lg">
+                    <div class="text-sm text-yellow-700 dark:text-yellow-200">ต้องติดตาม</div>
+                    <div id="needFollowUp" class="text-lg font-bold text-yellow-800 dark:text-yellow-100">0 ราย</div>
+                </div>
+                <div class="bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-800 dark:to-purple-700 p-3 rounded-lg">
+                    <div class="text-sm text-purple-700 dark:text-purple-200">เก็บเงินวันนี้</div>
+                    <div id="todayCollection" class="text-lg font-bold text-purple-800 dark:text-purple-100">0 ราย</div>
+                </div>
+            </div>
+
+            <!-- Search and Actions -->
             <div class="flex flex-col md:flex-row gap-4 mb-4">
                 <div class="relative flex-1">
                     <input type="text" id="searchInput" placeholder="ค้นหาข้อมูล..." 
                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
                 </div>
-                <button onclick="addNewRow()" 
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center">
-                    <span class="mr-2">➕</span>เพิ่มแถวใหม่
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="addNewRow()" 
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center">
+                        <span class="mr-2">➕</span>เพิ่มแถวใหม่
+                    </button>
+                    <button onclick="showNotifications()" 
+                            class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center justify-center relative">
+                        <span class="mr-2">🔔</span>แจ้งเตือน
+                        <span id="notificationBadge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                    </button>
+                </div>
             </div>
             
             <!-- Data Management Buttons -->
@@ -537,6 +592,10 @@
                         class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
                     <span class="mr-1">📥</span>วางจาก Sheets
                 </button>
+                <button onclick="printReport()" 
+                        class="bg-purple-500 hover:bg-purple-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
+                    <span class="mr-1">🖨️</span>พิมพ์รายงาน
+                </button>
                 <button onclick="clearAllData()" 
                         class="bg-red-500 hover:bg-red-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
                     <span class="mr-1">🗑️</span>ล้างข้อมูล
@@ -544,7 +603,7 @@
             </div>
             
             <!-- Hidden file inputs -->
-            <input type="file" id="importFile" accept=".csv,.json" style="display: none;">
+            <input type="file" id="importFile" accept=".csv,.json" style="display: none;" onchange="handleFileImport(event)">
         </div>
 
         <!-- Spreadsheet View -->
@@ -657,6 +716,31 @@
             </div>
         </div>
 
+        <!-- Notifications Modal -->
+        <div id="notificationsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-card rounded-xl p-6 mx-4 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-custom">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-primary flex items-center">
+                        <span class="mr-2">🔔</span>การแจ้งเตือน
+                    </h3>
+                    <button onclick="closeNotificationsModal()" class="text-secondary hover:text-primary text-xl">
+                        ✕
+                    </button>
+                </div>
+                
+                <div id="notificationsList" class="space-y-3">
+                    <!-- Notifications will be rendered here -->
+                </div>
+                
+                <div class="mt-4 pt-4 border-t border-custom">
+                    <button onclick="markAllNotificationsRead()" 
+                            class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg">
+                        ทำเครื่องหมายอ่านทั้งหมด
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Confirmation Modal -->
         <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
             <div class="bg-card rounded-xl p-6 mx-4 max-w-sm w-full border border-custom">
@@ -684,7 +768,6 @@
         let currentTheme = localStorage.getItem('theme') || 'light';
         let showDashboard = true;
 
-        // Initialize theme
         function initTheme() {
             document.documentElement.setAttribute('data-theme', currentTheme);
             updateThemeIcon();
@@ -695,6 +778,21 @@
             document.documentElement.setAttribute('data-theme', currentTheme);
             localStorage.setItem('theme', currentTheme);
             updateThemeIcon();
+        }
+
+        function toggleCustomProductType() {
+            const productTypeSelect = document.getElementById('productType');
+            const customProductTypeInput = document.getElementById('customProductType');
+            
+            if (productTypeSelect.value === 'อื่นๆ (ระบุ)') {
+                customProductTypeInput.classList.remove('hidden');
+                customProductTypeInput.required = true;
+                customProductTypeInput.focus();
+            } else {
+                customProductTypeInput.classList.add('hidden');
+                customProductTypeInput.required = false;
+                customProductTypeInput.value = '';
+            }
         }
 
         function updateThemeIcon() {
@@ -716,54 +814,107 @@
             return diffDays;
         }
 
-        function getDurationText(duration) {
-            switch(duration) {
+        function getDurationText(rental) {
+            if (!rental.contractDuration) return '';
+            
+            switch(rental.contractDuration) {
                 case '3m': return '3 เดือน';
                 case '6m': return '6 เดือน';
                 case '1y': return '1 ปี';
                 case '2y': return '2 ปี';
                 case '3y': return '3 ปี';
-                case 'custom': return 'กำหนดเอง';
+                case 'custom': 
+                    if (rental.customDurationValue && rental.customDurationUnit) {
+                        const unitText = {
+                            'days': 'วัน',
+                            'months': 'เดือน', 
+                            'years': 'ปี'
+                        };
+                        return `${rental.customDurationValue} ${unitText[rental.customDurationUnit] || rental.customDurationUnit}`;
+                    }
+                    return 'กำหนดเอง';
                 default: return '';
             }
+        }
+
+        function toggleCustomDuration() {
+            const duration = document.getElementById('contractDuration').value;
+            const customContainer = document.getElementById('customDurationContainer');
+            const customValue = document.getElementById('customDurationValue');
+            const customUnit = document.getElementById('customDurationUnit');
+            
+            if (duration === 'custom') {
+                customContainer.classList.remove('hidden');
+                customValue.required = true;
+                customUnit.required = true;
+                customValue.focus();
+            } else {
+                customContainer.classList.add('hidden');
+                customValue.required = false;
+                customUnit.required = false;
+                customValue.value = '';
+                customUnit.value = '';
+            }
+            
+            calculateEndDate();
         }
 
         function calculateEndDate() {
             const startDate = document.getElementById('contractStartDate').value;
             const duration = document.getElementById('contractDuration').value;
+            const customValue = document.getElementById('customDurationValue').value;
+            const customUnit = document.getElementById('customDurationUnit').value;
             const endDateInput = document.getElementById('contractEndDate');
             
-            if (!startDate || !duration || duration === 'custom') {
-                if (duration === 'custom') {
-                    endDateInput.disabled = false;
-                    endDateInput.focus();
-                }
+            if (!startDate) {
                 return;
             }
             
             const start = new Date(startDate);
             let endDate = new Date(start);
             
-            switch(duration) {
-                case '3m':
-                    endDate.setMonth(endDate.getMonth() + 3);
-                    break;
-                case '6m':
-                    endDate.setMonth(endDate.getMonth() + 6);
-                    break;
-                case '1y':
-                    endDate.setFullYear(endDate.getFullYear() + 1);
-                    break;
-                case '2y':
-                    endDate.setFullYear(endDate.getFullYear() + 2);
-                    break;
-                case '3y':
-                    endDate.setFullYear(endDate.getFullYear() + 3);
-                    break;
+            if (duration === 'custom') {
+                if (!customValue || !customUnit) {
+                    endDateInput.disabled = false;
+                    return;
+                }
+                
+                const value = parseInt(customValue);
+                switch(customUnit) {
+                    case 'days':
+                        endDate.setDate(endDate.getDate() + value);
+                        break;
+                    case 'months':
+                        endDate.setMonth(endDate.getMonth() + value);
+                        break;
+                    case 'years':
+                        endDate.setFullYear(endDate.getFullYear() + value);
+                        break;
+                }
+                endDate.setDate(endDate.getDate() - 1);
+            } else if (duration) {
+                switch(duration) {
+                    case '3m':
+                        endDate.setMonth(endDate.getMonth() + 3);
+                        break;
+                    case '6m':
+                        endDate.setMonth(endDate.getMonth() + 6);
+                        break;
+                    case '1y':
+                        endDate.setFullYear(endDate.getFullYear() + 1);
+                        break;
+                    case '2y':
+                        endDate.setFullYear(endDate.getFullYear() + 2);
+                        break;
+                    case '3y':
+                        endDate.setFullYear(endDate.getFullYear() + 3);
+                        break;
+                }
+                endDate.setDate(endDate.getDate() - 1);
+            } else {
+                endDateInput.disabled = false;
+                return;
             }
-            
-            // ลบ 1 วันเพื่อให้สัญญาสิ้นสุดในวันก่อนหน้า
-            endDate.setDate(endDate.getDate() - 1);
             
             endDateInput.value = endDate.toISOString().split('T')[0];
             endDateInput.disabled = true;
@@ -869,20 +1020,15 @@
         function updateDashboard() {
             if (!showDashboard) return;
             
-            // Calculate statistics
             const stats = calculateStatistics();
             
-            // Update summary cards
             document.getElementById('totalRevenue').textContent = formatCurrency(stats.totalRevenue) + ' บาท';
             document.getElementById('totalStalls').textContent = stats.totalStalls + ' แผง';
             document.getElementById('expiringSoon').textContent = stats.expiringSoon + ' สัญญา';
             document.getElementById('expiredContracts').textContent = stats.expired + ' สัญญา';
             
-            // Update charts
             renderBuildingChart(stats.buildingDistribution);
             renderStatusChart(stats.statusDistribution);
-            
-            // Update expiring contracts table
             renderExpiringContractsTable();
         }
 
@@ -898,10 +1044,8 @@
             };
 
             rentals.forEach(rental => {
-                // Calculate total revenue
                 stats.totalRevenue += (parseFloat(rental.lockFee) || 0) + (parseFloat(rental.commonFee) || 0);
                 
-                // Check contract expiry
                 if (rental.contractEndDate) {
                     const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
                     if (daysLeft !== null) {
@@ -913,11 +1057,9 @@
                     }
                 }
                 
-                // Building distribution
                 const building = rental.building || 'ไม่ระบุ';
                 stats.buildingDistribution[building] = (stats.buildingDistribution[building] || 0) + 1;
                 
-                // Status distribution
                 const status = rental.paymentStatus || 'ไม่ระบุ';
                 stats.statusDistribution[status] = (stats.statusDistribution[status] || 0) + 1;
             });
@@ -1009,7 +1151,7 @@
                 .filter(rental => {
                     if (!rental.contractEndDate) return false;
                     const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
-                    if (daysFilter === 0) return daysLeft !== null; // Show all
+                    if (daysFilter === 0) return daysLeft !== null;
                     return daysLeft !== null && daysLeft <= daysFilter && daysLeft >= 0;
                 })
                 .sort((a, b) => {
@@ -1077,11 +1219,25 @@
             const rental = rentals.find(r => r.id === id);
             if (!rental) return;
             
-            // Fill form with rental data
             document.getElementById('tenantName').value = rental.tenantName;
             document.getElementById('building').value = rental.building || '';
             document.getElementById('stallNumber').value = rental.stallNumber;
-            document.getElementById('productType').value = rental.productType;
+            
+            const productTypeSelect = document.getElementById('productType');
+            const customProductTypeInput = document.getElementById('customProductType');
+            const standardTypes = ['ผัก-ผลไม้', 'เนื้อสัตว์', 'อาหารแห้ง', 'เครื่องปรุง', 'ขนม-เครื่องดื่ม', 'เสื้อผ้า', 'ของใช้ในบ้าน', 'เครื่องสำอาง'];
+            
+            if (standardTypes.includes(rental.productType)) {
+                productTypeSelect.value = rental.productType;
+                customProductTypeInput.classList.add('hidden');
+                customProductTypeInput.required = false;
+            } else {
+                productTypeSelect.value = 'อื่นๆ (ระบุ)';
+                customProductTypeInput.value = rental.productType;
+                customProductTypeInput.classList.remove('hidden');
+                customProductTypeInput.required = true;
+            }
+            
             document.getElementById('phoneNumber').value = rental.phone || '';
             document.getElementById('lockFee').value = rental.lockFee || 0;
             document.getElementById('commonFee').value = rental.commonFee || 0;
@@ -1095,16 +1251,13 @@
             document.getElementById('guarantorAddress').value = rental.guarantorAddress || '';
             document.getElementById('notes').value = rental.notes || '';
             
-            // Show form
             const formView = document.getElementById('formView');
             formView.style.display = 'block';
             currentView = 'form';
             document.querySelector('button[onclick="toggleView()"]').innerHTML = '<span class="mr-2">📊</span>ตาราง';
             
-            // Scroll to form
             formView.scrollIntoView({ behavior: 'smooth' });
             
-            // Delete the old record (will be replaced when form is submitted)
             rentals = rentals.filter(r => r.id !== id);
             saveToStorage();
             updateDashboard();
@@ -1118,20 +1271,16 @@
             const recordCount = document.getElementById('recordCount');
             const totalAmount = document.getElementById('totalAmount');
             
-            // เรียงลำดับข้อมูลตามอาคารและหมายเลขแผง
             const sortedRentals = [...rentalsToRender].sort((a, b) => {
-                // เรียงตามอาคารก่อน
                 const buildingA = a.building || '';
                 const buildingB = b.building || '';
                 if (buildingA !== buildingB) {
                     return buildingA.localeCompare(buildingB, 'th');
                 }
                 
-                // แล้วเรียงตามหมายเลขแผง (แปลงเป็นตัวเลขถ้าเป็นได้)
                 const stallA = a.stallNumber || '';
                 const stallB = b.stallNumber || '';
                 
-                // ลองแปลงเป็นตัวเลข
                 const numA = parseInt(stallA);
                 const numB = parseInt(stallB);
                 
@@ -1139,7 +1288,6 @@
                     return numA - numB;
                 }
                 
-                // ถ้าแปลงไม่ได้ให้เรียงตามตัวอักษร
                 return stallA.localeCompare(stallB, 'th');
             });
             
@@ -1183,7 +1331,7 @@
                         <td class="editable-cell text-right" onclick="editCell(${rental.id}, 'commonFee', this)">${formatCurrency(rental.commonFee || 0)}</td>
                         <td class="text-right font-semibold text-green-600 dark:text-green-400">${formatCurrency((rental.lockFee || 0) + (rental.commonFee || 0))}</td>
                         <td class="editable-cell" onclick="editCell(${rental.id}, 'contractStartDate', this)">${formatDate(rental.contractStartDate)}</td>
-                        <td class="text-center">${getDurationText(rental.contractDuration)}</td>
+                        <td class="text-center">${getDurationText(rental)}</td>
                         <td class="editable-cell" onclick="editCell(${rental.id}, 'contractEndDate', this)">${formatDate(rental.contractEndDate)}</td>
                         <td class="text-center ${daysLeft !== null && daysLeft <= 7 ? 'text-red-600 font-bold' : daysLeft !== null && daysLeft <= 15 ? 'text-yellow-600 font-semibold' : ''}">${daysLeftText}</td>
                         <td class="editable-cell ${getStatusClass(rental.paymentStatus)}" onclick="editCell(${rental.id}, 'paymentStatus', this)">${rental.paymentStatus}</td>
@@ -1234,7 +1382,10 @@
                     <option value="อาหารแห้ง" ${currentValue === 'อาหารแห้ง' ? 'selected' : ''}>อาหารแห้ง</option>
                     <option value="เครื่องปรุง" ${currentValue === 'เครื่องปรุง' ? 'selected' : ''}>เครื่องปรุง</option>
                     <option value="ขนม-เครื่องดื่ม" ${currentValue === 'ขนม-เครื่องดื่ม' ? 'selected' : ''}>ขนม-เครื่องดื่ม</option>
-                    <option value="อื่นๆ" ${currentValue === 'อื่นๆ' ? 'selected' : ''}>อื่นๆ</option>
+                    <option value="เสื้อผ้า" ${currentValue === 'เสื้อผ้า' ? 'selected' : ''}>เสื้อผ้า</option>
+                    <option value="ของใช้ในบ้าน" ${currentValue === 'ของใช้ในบ้าน' ? 'selected' : ''}>ของใช้ในบ้าน</option>
+                    <option value="เครื่องสำอาง" ${currentValue === 'เครื่องสำอาง' ? 'selected' : ''}>เครื่องสำอาง</option>
+                    <option value="อื่นๆ (ระบุ)" ${!['ผัก-ผลไม้', 'เนื้อสัตว์', 'อาหารแห้ง', 'เครื่องปรุง', 'ขนม-เครื่องดื่ม', 'เสื้อผ้า', 'ของใช้ในบ้าน', 'เครื่องสำอาง'].includes(currentValue) && currentValue ? 'selected' : ''}>อื่นๆ (ระบุ)</option>
                 `;
             } else if (field === 'paymentStatus') {
                 inputElement = document.createElement('select');
@@ -1261,8 +1412,9 @@
                 inputElement.className = 'cell-input';
                 inputElement.innerHTML = `
                     <option value="">เลือกรูปแบบการชำระ</option>
-                    <option value="รายเดือน" ${currentValue === 'รายเดือน' ? 'selected' : ''}>รายเดือน</option>
+                    <option value="รายวัน" ${currentValue === 'รายวัน' ? 'selected' : ''}>รายวัน</option>
                     <option value="ราย10วัน" ${currentValue === 'ราย10วัน' ? 'selected' : ''}>ราย10วัน</option>
+                    <option value="รายเดือน" ${currentValue === 'รายเดือน' ? 'selected' : ''}>รายเดือน</option>
                 `;
             } else {
                 inputElement = document.createElement('input');
@@ -1426,7 +1578,6 @@
                 return;
             }
 
-            // สร้างข้อมูลในรูปแบบที่ Google Sheets เข้าใจ
             const headers = ['ชื่อผู้เช่า', 'อาคาร', 'หมายเลขแผง', 'ประเภทสินค้า', 'เบอร์โทรศัพท์', 'ค่าล็อค', 'ค่าส่วนกลาง', 'รวม', 'วันเริ่มสัญญา', 'วันสิ้นสุดสัญญา', 'วันที่เหลือ', 'สถานะการทำสัญญา', 'รูปแบบการชำระ', 'ผู้ค้ำประกัน', 'เบอร์ผู้ค้ำประกัน', 'ความสัมพันธ์', 'ที่อยู่ผู้ค้ำประกัน', 'หมายเหตุ'];
             
             const data = rentals.map(rental => {
@@ -1436,10 +1587,10 @@
                     'ไม่ระบุ';
                 
                 return [
-                    rental.tenantName,
+                    rental.tenantName || '',
                     rental.building || '',
-                    rental.stallNumber,
-                    rental.productType,
+                    rental.stallNumber || '',
+                    rental.productType || '',
                     rental.phone || '',
                     rental.lockFee || 0,
                     rental.commonFee || 0,
@@ -1457,33 +1608,110 @@
                 ];
             });
 
-            // รวมหัวตารางและข้อมูล
             const allData = [headers, ...data];
-            
-            // แปลงเป็น TSV (Tab Separated Values) สำหรับ Google Sheets
             const tsvContent = allData.map(row => row.join('\t')).join('\n');
             
-            // คัดลอกไปยัง clipboard
-            navigator.clipboard.writeText(tsvContent).then(() => {
-                showMessage(`คัดลอกข้อมูล ${rentals.length} รายการเรียบร้อย! ไปวางใน Google Sheets ได้เลย`, 'success');
-            }).catch(() => {
-                // Fallback สำหรับเบราว์เซอร์เก่า
+            // ลองใช้ Clipboard API ก่อน
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(tsvContent).then(() => {
+                    showMessage(`✅ คัดลอกข้อมูล ${rentals.length} รายการเรียบร้อย! ไปวางใน Google Sheets ได้เลย`, 'success');
+                }).catch(err => {
+                    console.log('Clipboard API failed, trying fallback:', err);
+                    copyToClipboardFallback(tsvContent);
+                });
+            } else {
+                // ใช้วิธีสำรอง
+                copyToClipboardFallback(tsvContent);
+            }
+        }
+
+        function copyToClipboardFallback(text) {
+            try {
+                // สร้าง textarea ชั่วคราว
                 const textArea = document.createElement('textarea');
-                textArea.value = tsvContent;
+                textArea.value = text;
+                textArea.style.position = 'absolute';
+                textArea.style.left = '-9999px';
+                textArea.style.top = '0';
+                textArea.style.opacity = '0';
+                textArea.style.pointerEvents = 'none';
+                textArea.setAttribute('readonly', '');
+                textArea.setAttribute('tabindex', '-1');
+                
                 document.body.appendChild(textArea);
+                
+                // เลือกข้อความ
                 textArea.select();
-                document.execCommand('copy');
+                textArea.setSelectionRange(0, textArea.value.length);
+                
+                // คัดลอก
+                let successful = false;
+                try {
+                    successful = document.execCommand('copy');
+                } catch (err) {
+                    console.error('execCommand failed:', err);
+                }
+                
+                // ลบ textarea
                 document.body.removeChild(textArea);
-                showMessage(`คัดลอกข้อมูล ${rentals.length} รายการเรียบร้อย! ไปวางใน Google Sheets ได้เลย`, 'success');
-            });
+                
+                if (successful) {
+                    showMessage(`✅ คัดลอกข้อมูล ${rentals.length} รายการเรียบร้อย! ไปวางใน Google Sheets ได้เลย`, 'success');
+                } else {
+                    // ถ้าไม่สำเร็จ ให้แสดงข้อมูลในหน้าต่างใหม่
+                    showCopyDataModal(text);
+                }
+            } catch (err) {
+                console.error('Copy failed:', err);
+                showCopyDataModal(text);
+            }
+        }
+
+        function showCopyDataModal(data) {
+            // สร้างหน้าต่างแสดงข้อมูลให้คัดลอกเอง
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 mx-4 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">📋 ข้อมูลสำหรับ Google Sheets</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">กรุณาเลือกข้อความด้านล่างทั้งหมด แล้วคัดลอก (Ctrl+C หรือ Cmd+C)</p>
+                    </div>
+                    <textarea readonly class="w-full h-96 p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-mono bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" onclick="this.select()">${data}</textarea>
+                    <div class="mt-4 flex space-x-3">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove(); showMessage('คัดลอกข้อมูลแล้วไปวางใน Google Sheets', 'success');" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg">
+                            ✅ คัดลอกแล้ว
+                        </button>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove();" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg">
+                            ปิด
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // เลือกข้อความทั้งหมดใน textarea
+            const textarea = modal.querySelector('textarea');
+            setTimeout(() => {
+                textarea.focus();
+                textarea.select();
+            }, 100);
         }
 
         function showPasteFromSheetsModal() {
             const modal = document.getElementById('pasteFromSheetsModal');
-            const textarea = document.getElementById('sheetsDataInput');
-            modal.classList.remove('hidden');
-            textarea.value = '';
-            textarea.focus();
+            if (modal) {
+                modal.classList.remove('hidden');
+                const textarea = document.getElementById('sheetsDataInput');
+                if (textarea) {
+                    textarea.value = '';
+                    setTimeout(() => {
+                        textarea.focus();
+                    }, 100);
+                }
+            } else {
+                showMessage('ไม่พบหน้าต่างสำหรับวางข้อมูล', 'error');
+            }
         }
 
         function closePasteFromSheetsModal() {
@@ -1491,9 +1719,227 @@
             modal.classList.add('hidden');
         }
 
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            
+            if (!['json', 'csv'].includes(fileExtension)) {
+                showMessage('รองรับเฉพาะไฟล์ .json และ .csv เท่านั้น', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            showMessage('กำลังอ่านไฟล์...', 'warning');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+
+                    if (fileExtension === 'json') {
+                        importFromJSON(content);
+                    } else if (fileExtension === 'csv') {
+                        importFromCSV(content);
+                    }
+                } catch (error) {
+                    console.error('File reading error:', error);
+                    showMessage('เกิดข้อผิดพลาดในการอ่านไฟล์: ' + error.message, 'error');
+                }
+            };
+
+            reader.onerror = function() {
+                showMessage('ไม่สามารถอ่านไฟล์ได้', 'error');
+            };
+
+            reader.readAsText(file, 'UTF-8');
+            
+            // รีเซ็ต input เพื่อให้สามารถเลือกไฟล์เดิมได้อีก
+            event.target.value = '';
+        }
+
+        function importFromJSON(content) {
+            try {
+                const data = JSON.parse(content);
+                let importedRentals = [];
+
+                // ตรวจสอบรูปแบบไฟล์สำรองข้อมูล
+                if (data.rentals && Array.isArray(data.rentals)) {
+                    importedRentals = data.rentals;
+                    if (data.nextId) {
+                        nextId = Math.max(nextId, data.nextId);
+                    }
+                } else if (Array.isArray(data)) {
+                    importedRentals = data;
+                } else {
+                    showMessage('รูปแบบไฟล์ JSON ไม่ถูกต้อง', 'error');
+                    return;
+                }
+
+                if (importedRentals.length === 0) {
+                    showMessage('ไม่พบข้อมูลในไฟล์', 'warning');
+                    return;
+                }
+
+                // ตรวจสอบและปรับปรุง ID
+                importedRentals.forEach(rental => {
+                    if (!rental.id) {
+                        rental.id = nextId++;
+                    }
+                });
+
+                showConfirmModal(
+                    `พบข้อมูล ${importedRentals.length} รายการ ต้องการแทนที่ข้อมูลเดิมหรือไม่?`,
+                    () => {
+                        rentals = importedRentals;
+                        saveToStorage();
+                        renderSpreadsheet();
+                        updateDashboard();
+                        showMessage(`✅ นำเข้าข้อมูลจากไฟล์ JSON สำเร็จ ${importedRentals.length} รายการ`, 'success');
+                    }
+                );
+
+            } catch (error) {
+                console.error('JSON import error:', error);
+                showMessage('ไฟล์ JSON ไม่ถูกต้อง: ' + error.message, 'error');
+            }
+        }
+
+        function importFromCSV(content) {
+            try {
+                const lines = content.split('\n').filter(line => line.trim());
+                
+                if (lines.length < 2) {
+                    showMessage('ไฟล์ CSV ต้องมีหัวตารางและข้อมูลอย่างน้อย 1 แถว', 'error');
+                    return;
+                }
+
+                const headerLine = lines[0];
+                const expectedHeaders = ['ชื่อผู้เช่า', 'อาคาร', 'หมายเลขแผง'];
+                const hasValidHeaders = expectedHeaders.some(header => headerLine.includes(header));
+                
+                if (!hasValidHeaders) {
+                    showMessage('ไม่พบหัวตารางที่ถูกต้องในไฟล์ CSV', 'error');
+                    return;
+                }
+
+                const importedRentals = [];
+                const dataLines = lines.slice(1);
+
+                for (let i = 0; i < dataLines.length; i++) {
+                    const line = dataLines[i].trim();
+                    if (!line) continue;
+
+                    // แยกคอลัมน์ด้วย comma และจัดการ quoted strings
+                    const columns = parseCSVLine(line);
+                    
+                    if (columns.length >= 3 && columns[0].trim() && columns[2].trim()) {
+                        const parseDate = (dateStr) => {
+                            if (!dateStr) return '';
+                            const cleanStr = dateStr.trim().replace(/"/g, '');
+                            
+                            // ตรวจสอบรูปแบบ dd/mm/yyyy
+                            const parts = cleanStr.split('/');
+                            if (parts.length === 3) {
+                                const day = parts[0].padStart(2, '0');
+                                const month = parts[1].padStart(2, '0');
+                                const year = parts[2];
+                                return `${year}-${month}-${day}`;
+                            }
+                            
+                            // ถ้าเป็นรูปแบบ yyyy-mm-dd อยู่แล้ว
+                            if (cleanStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                                return cleanStr;
+                            }
+                            
+                            return '';
+                        };
+
+                        const rental = {
+                            id: nextId++,
+                            tenantName: columns[0].replace(/"/g, '').trim(),
+                            building: columns[1] ? columns[1].replace(/"/g, '').trim() : '',
+                            stallNumber: columns[2].replace(/"/g, '').trim(),
+                            productType: columns[3] ? columns[3].replace(/"/g, '').trim() : '',
+                            phone: columns[4] ? columns[4].replace(/"/g, '').trim() : '',
+                            lockFee: columns[5] ? parseFloat(columns[5].replace(/[^\d.-]/g, '')) || 0 : 0,
+                            commonFee: columns[6] ? parseFloat(columns[6].replace(/[^\d.-]/g, '')) || 0 : 0,
+                            contractStartDate: columns[8] ? parseDate(columns[8]) : '',
+                            contractEndDate: columns[9] ? parseDate(columns[9]) : '',
+                            paymentStatus: columns[11] ? columns[11].replace(/"/g, '').trim() : '',
+                            paymentDate: columns[12] ? columns[12].replace(/"/g, '').trim() : '',
+                            guarantorName: columns[13] ? columns[13].replace(/"/g, '').trim() : '',
+                            guarantorPhone: columns[14] ? columns[14].replace(/"/g, '').trim() : '',
+                            guarantorRelation: columns[15] ? columns[15].replace(/"/g, '').trim() : '',
+                            guarantorAddress: columns[16] ? columns[16].replace(/"/g, '').trim() : '',
+                            notes: columns[17] ? columns[17].replace(/"/g, '').trim() : '',
+                            createdAt: new Date().toISOString()
+                        };
+
+                        importedRentals.push(rental);
+                    }
+                }
+
+                if (importedRentals.length === 0) {
+                    showMessage('ไม่พบข้อมูลที่ถูกต้องในไฟล์ CSV', 'error');
+                    return;
+                }
+
+                showConfirmModal(
+                    `พบข้อมูล ${importedRentals.length} รายการ ต้องการแทนที่ข้อมูลเดิมหรือไม่?`,
+                    () => {
+                        rentals = importedRentals;
+                        saveToStorage();
+                        renderSpreadsheet();
+                        updateDashboard();
+                        showMessage(`✅ นำเข้าข้อมูลจากไฟล์ CSV สำเร็จ ${importedRentals.length} รายการ`, 'success');
+                    }
+                );
+
+            } catch (error) {
+                console.error('CSV import error:', error);
+                showMessage('เกิดข้อผิดพลาดในการอ่านไฟล์ CSV: ' + error.message, 'error');
+            }
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            result.push(current);
+            return result;
+        }
+
         function importFromSheets() {
             const textarea = document.getElementById('sheetsDataInput');
-            const importMode = document.querySelector('input[name="importMode"]:checked').value;
+            const importModeElement = document.querySelector('input[name="importMode"]:checked');
+            
+            if (!textarea) {
+                showMessage('ไม่พบช่องข้อมูล', 'error');
+                return;
+            }
+            
+            if (!importModeElement) {
+                showMessage('กรุณาเลือกรูปแบบการนำเข้า', 'warning');
+                return;
+            }
+            
+            const importMode = importModeElement.value;
             const data = textarea.value.trim();
             
             if (!data) {
@@ -1502,15 +1948,19 @@
             }
 
             try {
-                // แยกข้อมูลเป็นแถว
+                console.log('Raw data:', data);
+                
                 const lines = data.split('\n').filter(line => line.trim());
+                console.log('Lines found:', lines.length);
+                
                 if (lines.length < 2) {
                     showMessage('ข้อมูลไม่ครบถ้วน กรุณาตรวจสอบว่ามีหัวตารางและข้อมูลอย่างน้อย 1 แถว', 'error');
                     return;
                 }
 
-                // ตรวจสอบหัวตาราง (แถวแรก)
                 const headerLine = lines[0];
+                console.log('Header line:', headerLine);
+                
                 const expectedHeaders = ['ชื่อผู้เช่า', 'อาคาร', 'หมายเลขแผง', 'ประเภทสินค้า'];
                 const hasValidHeaders = expectedHeaders.some(header => headerLine.includes(header));
                 
@@ -1519,34 +1969,42 @@
                     return;
                 }
 
-                // แปลงข้อมูล
                 const importedRentals = [];
-                const dataLines = lines.slice(1); // ข้ามหัวตาราง
+                const dataLines = lines.slice(1);
 
                 for (let i = 0; i < dataLines.length; i++) {
                     const line = dataLines[i].trim();
                     if (!line) continue;
 
-                    // แยกคอลัมน์ด้วย tab หรือ comma
+                    // ลองแยกด้วย Tab ก่อน แล้วค่อย Comma
                     let columns = line.split('\t');
                     if (columns.length === 1) {
                         columns = line.split(',');
                     }
+                    
+                    console.log(`Line ${i + 1}:`, line);
+                    console.log(`Columns (${columns.length}):`, columns);
 
-                    // ตรวจสอบว่ามีข้อมูลพื้นฐาน
                     if (columns.length >= 3 && columns[0].trim() && columns[2].trim()) {
-                        // แปลงวันที่จากรูปแบบไทยเป็น ISO
                         const parseThaiDate = (dateStr) => {
                             if (!dateStr) return '';
-                            // ถ้าเป็นรูปแบบ dd/mm/yyyy
-                            const parts = dateStr.split('/');
+                            const cleanStr = dateStr.trim();
+                            
+                            // ตรวจสอบรูปแบบ dd/mm/yyyy
+                            const parts = cleanStr.split('/');
                             if (parts.length === 3) {
                                 const day = parts[0].padStart(2, '0');
                                 const month = parts[1].padStart(2, '0');
                                 const year = parts[2];
                                 return `${year}-${month}-${day}`;
                             }
-                            return dateStr;
+                            
+                            // ถ้าเป็นรูปแบบ yyyy-mm-dd อยู่แล้ว
+                            if (cleanStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                                return cleanStr;
+                            }
+                            
+                            return '';
                         };
 
                         const rental = {
@@ -1558,8 +2016,8 @@
                             phone: columns[4] ? columns[4].trim() : '',
                             lockFee: columns[5] ? parseFloat(columns[5].replace(/[^\d.-]/g, '')) || 0 : 0,
                             commonFee: columns[6] ? parseFloat(columns[6].replace(/[^\d.-]/g, '')) || 0 : 0,
-                            contractStartDate: columns[8] ? parseThaiDate(columns[8].trim()) : '',
-                            contractEndDate: columns[9] ? parseThaiDate(columns[9].trim()) : '',
+                            contractStartDate: columns[8] ? parseThaiDate(columns[8]) : '',
+                            contractEndDate: columns[9] ? parseThaiDate(columns[9]) : '',
                             paymentStatus: columns[11] ? columns[11].trim() : '',
                             paymentDate: columns[12] ? columns[12].trim() : '',
                             guarantorName: columns[13] ? columns[13].trim() : '',
@@ -1570,16 +2028,20 @@
                             createdAt: new Date().toISOString()
                         };
 
+                        console.log('Created rental:', rental);
                         importedRentals.push(rental);
+                    } else {
+                        console.log(`Skipping line ${i + 1}: insufficient data or empty required fields`);
                     }
                 }
 
+                console.log('Total imported rentals:', importedRentals.length);
+
                 if (importedRentals.length === 0) {
-                    showMessage('ไม่พบข้อมูลที่ถูกต้องในข้อมูลที่วาง', 'error');
+                    showMessage('ไม่พบข้อมูลที่ถูกต้องในข้อมูลที่วาง กรุณาตรวจสอบรูปแบบข้อมูล', 'error');
                     return;
                 }
 
-                // นำเข้าข้อมูล
                 if (importMode === 'replace') {
                     rentals = importedRentals;
                 } else {
@@ -1592,170 +2054,98 @@
                 closePasteFromSheetsModal();
                 
                 const modeText = importMode === 'replace' ? 'แทนที่ข้อมูลเดิม' : 'เพิ่มเข้าไปในข้อมูลเดิม';
-                showMessage(`นำเข้าข้อมูล ${importedRentals.length} รายการเรียบร้อย (${modeText})`, 'success');
+                showMessage(`✅ นำเข้าข้อมูล ${importedRentals.length} รายการเรียบร้อย (${modeText})`, 'success');
 
             } catch (error) {
                 console.error('Import error:', error);
-                showMessage('เกิดข้อผิดพลาดในการนำเข้าข้อมูล กรุณาตรวจสอบรูปแบบข้อมูล', 'error');
+                showMessage('เกิดข้อผิดพลาดในการนำเข้าข้อมูล: ' + error.message, 'error');
             }
         }
 
-        function clearAllData() {
+        function printReport() {
             if (rentals.length === 0) {
-                showMessage('ไม่มีข้อมูลให้ล้าง', 'warning');
+                showMessage('ไม่มีข้อมูลให้พิมพ์', 'warning');
                 return;
             }
-            
-            showConfirmModal(
-                `ต้องการล้างข้อมูลทั้งหมด ${rentals.length} รายการหรือไม่? การกระทำนี้ไม่สามารถยกเลิกได้`,
-                () => {
-                    rentals = [];
-                    nextId = 1;
-                    saveToStorage();
-                    renderSpreadsheet();
-                    updateDashboard();
-                    showMessage('ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว!', 'success');
-                }
-            );
-        }
 
-        // Form submission
-        document.getElementById('rentalForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+            const stats = calculateStatistics();
+            const now = new Date();
+            const printWindow = window.open('', '_blank');
             
-            const formData = {
-                id: nextId++,
-                tenantName: document.getElementById('tenantName').value,
-                building: document.getElementById('building').value,
-                stallNumber: document.getElementById('stallNumber').value,
-                productType: document.getElementById('productType').value,
-                phone: document.getElementById('phoneNumber').value,
-                lockFee: parseFloat(document.getElementById('lockFee').value) || 0,
-                commonFee: parseFloat(document.getElementById('commonFee').value) || 0,
-                contractStartDate: document.getElementById('contractStartDate').value,
-                contractDuration: document.getElementById('contractDuration').value,
-                contractEndDate: document.getElementById('contractEndDate').value,
-                paymentStatus: document.getElementById('paymentStatus').value,
-                paymentDate: document.getElementById('paymentDate').value,
-                guarantorName: document.getElementById('guarantorName').value,
-                guarantorPhone: document.getElementById('guarantorPhone').value,
-                guarantorRelation: document.getElementById('guarantorRelation').value,
-                guarantorAddress: document.getElementById('guarantorAddress').value,
-                notes: document.getElementById('notes').value,
-                createdAt: new Date().toISOString()
-            };
-            
-            rentals.unshift(formData);
-            saveToStorage();
-            renderSpreadsheet();
-            updateDashboard();
-            this.reset();
-            showMessage('บันทึกข้อมูลเรียบร้อยแล้ว!', 'success');
-        });
-
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            if (!searchTerm) {
-                renderSpreadsheet();
-                return;
-            }
-            
-            const filteredRentals = rentals.filter(rental => 
-                rental.tenantName.toLowerCase().includes(searchTerm) ||
-                rental.building.toLowerCase().includes(searchTerm) ||
-                rental.stallNumber.toLowerCase().includes(searchTerm) ||
-                rental.productType.toLowerCase().includes(searchTerm) ||
-                (rental.phone && rental.phone.includes(searchTerm)) ||
-                (rental.guarantorName && rental.guarantorName.toLowerCase().includes(searchTerm))
-            );
-            
-            renderSpreadsheet(filteredRentals);
-        });
-
-        // File import functionality
-        document.getElementById('importFile').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    if (file.name.endsWith('.csv')) {
-                        const text = e.target.result;
-                        const lines = text.split('\n');
-                        const importedRentals = [];
-                        
-                        for (let i = 1; i < lines.length; i++) {
-                            const line = lines[i].trim();
-                            if (!line) continue;
-                            
-                            const columns = line.split(',').map(col => col.replace(/"/g, '').trim());
-                            if (columns.length >= 2 && columns[0] && columns[2]) {
-                                importedRentals.push({
-                                    id: nextId++,
-                                    tenantName: columns[0],
-                                    building: columns[1] || '',
-                                    stallNumber: columns[2],
-                                    productType: columns[3] || '',
-                                    phone: columns[4] || '',
-                                    lockFee: parseFloat(columns[5]) || 0,
-                                    commonFee: parseFloat(columns[6]) || 0,
-                                    contractStartDate: columns[8] || '',
-                                    contractEndDate: columns[9] || '',
-                                    paymentStatus: columns[11] || '',
-                                    paymentDate: columns[12] || '',
-                                    guarantorName: columns[13] || '',
-                                    guarantorPhone: columns[14] || '',
-                                    guarantorRelation: columns[15] || '',
-                                    guarantorAddress: columns[16] || '',
-                                    notes: columns[17] || '',
-                                    createdAt: new Date().toISOString()
-                                });
-                            }
+            const printContent = `
+                <!DOCTYPE html>
+                <html lang="th">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>รายงานข้อมูลค่าเช่าแผงในตลาด</title>
+                    <style>
+                        body { font-family: 'Sarabun', Arial, sans-serif; margin: 20px; color: #333; }
+                        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 15px; }
+                        .header h1 { margin: 0; font-size: 24px; }
+                        .header p { margin: 5px 0; color: #666; }
+                        .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+                        .summary-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #f9f9f9; }
+                        .summary-card h3 { margin: 0 0 10px 0; font-size: 14px; color: #666; }
+                        .summary-card .value { font-size: 20px; font-weight: bold; color: #333; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f5f5f5; font-weight: bold; }
+                        .text-right { text-align: right; }
+                        .text-center { text-align: center; }
+                        .status-paid { background: #dcfce7; }
+                        .status-pending { background: #fef3c7; }
+                        .status-overdue { background: #fee2e2; }
+                        .status-moved-out { background: #e0e7ff; }
+                        .urgent { color: #dc2626; font-weight: bold; }
+                        .warning { color: #d97706; font-weight: bold; }
+                        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 15px; }
+                        @media print {
+                            body { margin: 0; }
+                            .no-print { display: none; }
                         }
-                        
-                        if (importedRentals.length > 0) {
-                            rentals = [...importedRentals, ...rentals];
-                            saveToStorage();
-                            renderSpreadsheet();
-                            updateDashboard();
-                            showMessage(`นำเข้าข้อมูล ${importedRentals.length} รายการเรียบร้อย!`, 'success');
-                        } else {
-                            showMessage('ไม่พบข้อมูลที่ถูกต้องในไฟล์', 'error');
-                        }
-                    } else if (file.name.endsWith('.json')) {
-                        const data = JSON.parse(e.target.result);
-                        if (data.rentals && Array.isArray(data.rentals)) {
-                            rentals = data.rentals;
-                            nextId = data.nextId || (Math.max(...rentals.map(r => r.id)) + 1);
-                            saveToStorage();
-                            renderSpreadsheet();
-                            updateDashboard();
-                            showMessage(`กู้คืนข้อมูล ${rentals.length} รายการเรียบร้อย!`, 'success');
-                        } else {
-                            showMessage('รูปแบบไฟล์ไม่ถูกต้อง', 'error');
-                        }
-                    }
-                } catch (error) {
-                    showMessage('เกิดข้อผิดพลาดในการอ่านไฟล์', 'error');
-                }
-            };
-            reader.readAsText(file, 'UTF-8');
-            e.target.value = '';
-        });
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>รายงานข้อมูลค่าเช่าแผงในตลาด</h1>
+                        <p>วันที่พิมพ์: ${now.toLocaleDateString('th-TH', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric',
+                            weekday: 'long'
+                        })}</p>
+                        <p>เวลา: ${now.toLocaleTimeString('th-TH')}</p>
+                    </div>
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            initTheme();
-            renderSpreadsheet();
-            updateDashboard();
-            
-            // Hide form initially
-            if (currentView === 'spreadsheet') {
-                document.getElementById('formView').style.display = 'none';
-            }
-        });
-    </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e419c086da35a4',t:'MTc2MDQxMzcwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-</html>
+                    <div class="summary">
+                        <div class="summary-card">
+                            <h3>💰 รายได้รวมต่อเดือน</h3>
+                            <div class="value">${formatCurrency(stats.totalRevenue)} บาท</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>🏪 จำนวนแผงที่เช่า</h3>
+                            <div class="value">${stats.totalStalls} แผง</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>⏰ สัญญาใกล้หมดอายุ (30 วัน)</h3>
+                            <div class="value">${stats.expiringSoon} สัญญา</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>🚨 สัญญาหมดอายุแล้ว</h3>
+                            <div class="value">${stats.expired} สัญญา</div>
+                        </div>
+                    </div>
+
+                    <h2>📋 รายละเอียดข้อมูลทั้งหมด</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ลำดับ</th>
+                                <th>ชื่อผู้เช่า</th>
+                                <th>อาคาร-แผง</th>
+                                <th>ประเภทสินค้า</th>
+                                <th>เบอร์โทร</th>
+                                <th class="text-right">ค่าล็อค</th>
+                                <th class="text-right">ค่าส่วนกลาง</th>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e545d6f3ddfd2a',t:'MTc2MDQyNTk5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
