@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบบันทึก</title>
+    <title>ระบบบันทึกข้อมูลผู้ค้าในตลาด</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -14,56 +14,122 @@
             width: 100%;
             border-collapse: collapse;
             background: white;
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
         }
         .spreadsheet-table th {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
             color: white;
-            padding: 12px 8px;
+            padding: 16px 12px;
             text-align: left;
-            font-weight: 600;
+            font-weight: 700;
             position: sticky;
             top: 0;
             z-index: 10;
             border: none;
-            font-size: 13px;
+            font-size: 14px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            white-space: nowrap;
         }
         .spreadsheet-table td {
-            border-bottom: 1px solid #e5e7eb;
-            padding: 10px 8px;
+            border-bottom: 1px solid #f3f4f6;
+            border-right: 1px solid #f9fafb;
+            padding: 14px 12px;
             vertical-align: middle;
             background: white;
             transition: all 0.2s ease;
             font-size: 14px;
+            line-height: 1.4;
+        }
+        .spreadsheet-table tr:nth-child(even) td {
+            background: #fafbfc;
         }
         .spreadsheet-table tr:hover td {
-            background: #f9fafb;
+            background: #eff6ff !important;
+            transform: scale(1.001);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
         }
         .row-number {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            background: linear-gradient(135deg, #1e40af, #3b82f6) !important;
             color: white;
-            font-weight: 600;
+            font-weight: 700;
             text-align: center;
-            width: 40px;
-            min-width: 40px;
+            width: 50px;
+            min-width: 50px;
+            font-size: 13px;
         }
         .editable-cell {
             cursor: pointer;
-            min-height: 20px;
+            min-height: 24px;
+            position: relative;
+            border-radius: 4px;
         }
         .editable-cell:hover {
-            background: rgba(79, 70, 229, 0.1) !important;
+            background: rgba(59, 130, 246, 0.08) !important;
+            border: 1px solid rgba(59, 130, 246, 0.2);
         }
         .cell-input {
-            border: 2px solid #4f46e5;
+            border: 2px solid #3b82f6;
             outline: none;
             background: white;
             color: #1f2937;
             width: 100%;
-            padding: 4px 8px;
+            padding: 6px 10px;
             font-size: 14px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* เพิ่มสไตล์สำหรับคอลัมน์สำคัญ */
+        .important-column {
+            background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+            font-weight: 600;
+        }
+        .status-column {
+            text-align: center;
+            font-weight: 600;
+        }
+        .amount-column {
+            text-align: right;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+        .contact-column {
+            max-width: 120px;
+            word-break: break-all;
+        }
+        
+        /* สไตล์สำหรับข้อมูลที่สำคัญ */
+        .highlight-urgent {
+            background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
+            color: #dc2626;
+            font-weight: 700;
+            animation: pulse-urgent 2s infinite;
+        }
+        .highlight-warning {
+            background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+            color: #d97706;
+            font-weight: 600;
+        }
+        
+        @keyframes pulse-urgent {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* ปรับปรุงการแสดงผลบนมือถือ */
+        @media (max-width: 768px) {
+            .spreadsheet-table th,
+            .spreadsheet-table td {
+                padding: 8px 6px;
+                font-size: 12px;
+            }
+            .row-number {
+                width: 35px;
+                min-width: 35px;
+            }
         }
         .status-paid { 
             background: #10b981; 
@@ -161,59 +227,6 @@
             50% {
                 opacity: 0.7;
             }
-        }
-
-        /* Card View Styles */
-        .rental-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            border-left: 4px solid #4f46e5;
-        }
-        .rental-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-        }
-        .rental-card.expiring-soon {
-            border-left-color: #f59e0b;
-            background: linear-gradient(135deg, #fffbeb, #ffffff);
-        }
-        .rental-card.expired {
-            border-left-color: #ef4444;
-            background: linear-gradient(135deg, #fef2f2, #ffffff);
-        }
-
-        /* Compact View Styles */
-        .compact-table {
-            font-size: 13px;
-        }
-        .compact-table th {
-            padding: 8px 6px;
-        }
-        .compact-table td {
-            padding: 6px;
-        }
-
-        /* View Mode Buttons */
-        .view-mode-btn {
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: 2px solid #e5e7eb;
-            background: white;
-            color: #6b7280;
-            transition: all 0.2s ease;
-            font-size: 14px;
-        }
-        .view-mode-btn.active {
-            border-color: #4f46e5;
-            background: #4f46e5;
-            color: white;
-        }
-        .view-mode-btn:hover:not(.active) {
-            border-color: #9ca3af;
-            background: #f9fafb;
         }
     </style>
 </head>
@@ -607,31 +620,12 @@
                 <span class="mr-2">⚡</span>การจัดการด่วน
             </h3>
             
-            <!-- Quick Stats -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <div class="bg-gradient-to-r from-green-100 to-green-200 p-3 rounded-lg">
-                    <div class="text-sm text-green-700">รายได้วันนี้</div>
-                    <div id="todayRevenue" class="text-lg font-bold text-green-800">0 บาท</div>
-                </div>
-                <div class="bg-gradient-to-r from-blue-100 to-blue-200 p-3 rounded-lg">
-                    <div class="text-sm text-blue-700">แผงว่าง</div>
-                    <div id="emptyStalls" class="text-lg font-bold text-blue-800">0 แผง</div>
-                </div>
-                <div class="bg-gradient-to-r from-yellow-100 to-yellow-200 p-3 rounded-lg">
-                    <div class="text-sm text-yellow-700">ต้องติดตาม</div>
-                    <div id="needFollowUp" class="text-lg font-bold text-yellow-800">0 ราย</div>
-                </div>
-                <div class="bg-gradient-to-r from-purple-100 to-purple-200 p-3 rounded-lg">
-                    <div class="text-sm text-purple-700">เก็บเงินวันนี้</div>
-                    <div id="todayCollection" class="text-lg font-bold text-purple-800">0 ราย</div>
-                </div>
-            </div>
-
             <!-- Search and Actions -->
             <div class="flex flex-col md:flex-row gap-4 mb-4">
                 <div class="relative flex-1">
                     <input type="text" id="searchInput" placeholder="ค้นหาข้อมูล..." 
-                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           oninput="handleSearch()">
                     <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
                 </div>
                 <div class="flex gap-2">
@@ -676,10 +670,6 @@
                         class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
                     <span class="mr-1">📤</span>ส่งออก CSV
                 </button>
-                <button onclick="document.getElementById('importFile').click()" 
-                        class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
-                    <span class="mr-1">📥</span>นำเข้าไฟล์
-                </button>
                 <button onclick="backupData()" 
                         class="bg-purple-500 hover:bg-purple-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
                     <span class="mr-1">💾</span>สำรองข้อมูล
@@ -688,44 +678,14 @@
                         class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
                     <span class="mr-1">📋</span>คัดลอกสำหรับ Sheets
                 </button>
-                <button onclick="showPasteFromSheetsModal()" 
+                <button onclick="importData()" 
                         class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
-                    <span class="mr-1">📥</span>วางจาก Sheets
-                </button>
-                <button onclick="printReport()" 
-                        class="bg-purple-500 hover:bg-purple-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
-                    <span class="mr-1">🖨️</span>พิมพ์รายงาน
+                    <span class="mr-1">📥</span>นำเข้าข้อมูล
                 </button>
                 <button onclick="clearAllData()" 
                         class="bg-red-500 hover:bg-red-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
                     <span class="mr-1">🗑️</span>ล้างข้อมูล
                 </button>
-            </div>
-            
-            <!-- Hidden file inputs -->
-            <input type="file" id="importFile" accept=".csv,.json" style="display: none;" onchange="handleFileImport(event)">
-        </div>
-
-        <!-- View Mode Selection -->
-        <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                    <span class="mr-2">👁️</span>รูปแบบการแสดงผล
-                </h3>
-                <div class="flex space-x-2">
-                    <button onclick="setViewMode('card')" id="cardViewBtn" 
-                            class="view-mode-btn active">
-                        <span class="mr-1">🎯</span>การ์ด
-                    </button>
-                    <button onclick="setViewMode('compact')" id="compactViewBtn" 
-                            class="view-mode-btn">
-                        <span class="mr-1">📋</span>กะทัดรัด
-                    </button>
-                    <button onclick="setViewMode('full')" id="fullViewBtn" 
-                            class="view-mode-btn">
-                        <span class="mr-1">📊</span>ตารางเต็ม
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -746,35 +706,44 @@
                 </div>
             </div>
             
-            <!-- Card View -->
-            <div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Cards will be rendered here -->
+            <!-- Navigation Controls -->
+            <div class="flex items-center justify-between mb-4 bg-gray-50 p-4 rounded-lg">
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-gray-600">เลื่อนดูอย่างรวดเร็ว:</span>
+                    <button onclick="scrollToBuilding('อาคาร A')" 
+                            class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 px-2 py-1 rounded">
+                        อาคาร A
+                    </button>
+                    <button onclick="scrollToBuilding('อาคาร B')" 
+                            class="text-xs bg-green-100 hover:bg-green-200 text-green-800 px-2 py-1 rounded">
+                        อาคาร B
+                    </button>
+                    <button onclick="scrollToBuilding('อาคาร C')" 
+                            class="text-xs bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-2 py-1 rounded">
+                        อาคาร C
+                    </button>
+                    <button onclick="scrollToBuilding('อาคาร D')" 
+                            class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 px-2 py-1 rounded">
+                        อาคาร D
+                    </button>
+                    <button onclick="scrollToBuilding('อาคาร E')" 
+                            class="text-xs bg-pink-100 hover:bg-pink-200 text-pink-800 px-2 py-1 rounded">
+                        อาคาร E
+                    </button>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="scrollToTop()" 
+                            class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded flex items-center">
+                        <span class="mr-1">⬆️</span>บนสุด
+                    </button>
+                    <button onclick="scrollToBottom()" 
+                            class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded flex items-center">
+                        <span class="mr-1">⬇️</span>ล่างสุด
+                    </button>
+                </div>
             </div>
-
-            <!-- Compact Table View -->
-            <div id="compactView" class="overflow-x-auto hidden">
-                <table class="spreadsheet-table compact-table">
-                    <thead>
-                        <tr>
-                            <th class="row-number">#</th>
-                            <th>ชื่อผู้เช่า</th>
-                            <th>อาคาร-แผง</th>
-                            <th>ประเภทสินค้า</th>
-                            <th>เบอร์โทร</th>
-                            <th>ค่าเช่ารวม</th>
-                            <th>สถานะ</th>
-                            <th>วันหมดอายุ</th>
-                            <th>การจัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="compactTableBody">
-                        <!-- Compact table rows will be rendered here -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Full Table View -->
-            <div id="fullView" class="overflow-x-auto hidden">
+            
+            <div id="tableContainer" class="overflow-x-auto" style="max-height: 70vh; overflow-y: auto; border-radius: 12px; border: 1px solid #e5e7eb;">
                 <table class="spreadsheet-table">
                     <thead>
                         <tr>
@@ -799,8 +768,8 @@
                             <th style="min-width: 80px;">การจัดการ</th>
                         </tr>
                     </thead>
-                    <tbody id="fullTableBody">
-                        <!-- Full table rows will be rendered here -->
+                    <tbody id="tableBody">
+                        <!-- Table rows will be rendered here -->
                     </tbody>
                 </table>
             </div>
@@ -814,52 +783,21 @@
             </div>
         </div>
 
-        <!-- Paste from Sheets Modal -->
-        <div id="pasteFromSheetsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-            <div class="bg-white rounded-xl p-6 mx-4 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div class="mb-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                            <span class="mr-2">📥</span>นำเข้าข้อมูลจาก Google Sheets
-                        </h3>
-                        <button onclick="closePasteFromSheetsModal()" class="text-gray-500 hover:text-gray-700 text-xl">
-                            ✕
-                        </button>
-                    </div>
-                    <p class="text-gray-600 text-sm mb-4">วางข้อมูลที่คัดลอกจาก Google Sheets ลงในช่องด้านล่าง</p>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">ข้อมูลจาก Google Sheets:</label>
-                    <textarea id="sheetsDataInput" 
-                              class="w-full h-64 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-mono"
-                              placeholder="วางข้อมูลที่คัดลอกจาก Google Sheets ที่นี่...&#10;&#10;ตัวอย่าง:&#10;ชื่อผู้เช่า	อาคาร	หมายเลขแผง	ประเภทสินค้า&#10;นายสมชาย	อาคาร A	01	ผัก-ผลไม้&#10;นางสมหญิง	อาคาร B	02	เนื้อสัตว์"></textarea>
-                </div>
+        <!-- Import File Input (Hidden) -->
+        <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="handleFileImport(event)">
 
-                <div class="mb-4">
-                    <div class="flex items-center space-x-4">
-                        <label class="flex items-center">
-                            <input type="radio" name="importMode" value="replace" checked class="mr-2">
-                            <span class="text-sm text-gray-700">แทนที่ข้อมูลเดิมทั้งหมด</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="importMode" value="append" class="mr-2">
-                            <span class="text-sm text-gray-700">เพิ่มเข้าไปในข้อมูลเดิม</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="flex space-x-3">
-                    <button onclick="importFromSheets()" 
-                            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg flex items-center justify-center">
-                        <span class="mr-2">📥</span>นำเข้าข้อมูล
-                    </button>
-                    <button onclick="closePasteFromSheetsModal()" 
-                            class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg">
-                        ยกเลิก
-                    </button>
-                </div>
-            </div>
+        <!-- Floating Scroll Controls -->
+        <div class="fixed bottom-6 right-6 flex flex-col space-y-2 z-40">
+            <button onclick="scrollToTop()" 
+                    class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+                    title="เลื่อนขึ้นบนสุด">
+                ⬆️
+            </button>
+            <button onclick="scrollToBottom()" 
+                    class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+                    title="เลื่อนลงล่างสุด">
+                ⬇️
+            </button>
         </div>
 
         <!-- Confirmation Modal -->
@@ -887,7 +825,6 @@
         let nextId = parseInt(localStorage.getItem('nextRentalId')) || 1;
         let currentView = 'spreadsheet';
         let showDashboard = true;
-        let currentViewMode = 'card';
         let filteredRentals = [];
 
         function saveToStorage() {
@@ -1122,23 +1059,6 @@
             }
         }
 
-        function setViewMode(mode) {
-            currentViewMode = mode;
-            
-            // Update button states
-            document.querySelectorAll('.view-mode-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.getElementById(mode + 'ViewBtn').classList.add('active');
-            
-            // Show/hide views
-            document.getElementById('cardView').style.display = mode === 'card' ? 'grid' : 'none';
-            document.getElementById('compactView').style.display = mode === 'compact' ? 'block' : 'none';
-            document.getElementById('fullView').style.display = mode === 'full' ? 'block' : 'none';
-            
-            renderSpreadsheet();
-        }
-
         function applyFilters() {
             const buildingFilter = document.getElementById('buildingFilter').value;
             const statusFilter = document.getElementById('statusFilter').value;
@@ -1168,15 +1088,6 @@
 
         function handleSearch() {
             applyFilters();
-        }
-
-        function updateQuickStats() {
-            const stats = calculateStatistics();
-            
-            document.getElementById('todayRevenue').textContent = formatCurrency(stats.totalRevenue) + ' บาท';
-            document.getElementById('emptyStalls').textContent = '0 แผง';
-            document.getElementById('needFollowUp').textContent = stats.expiringSoon + ' ราย';
-            document.getElementById('todayCollection').textContent = '0 ราย';
         }
 
         function updateDashboard() {
@@ -1423,13 +1334,13 @@
             rentals = rentals.filter(r => r.id !== id);
             saveToStorage();
             updateDashboard();
-            updateQuickStats();
             renderSpreadsheet();
             
             showMessage('กรอกข้อมูลใหม่และกดบันทึกเพื่อแก้ไข', 'warning');
         }
 
         function renderSpreadsheet(rentalsToRender = rentals) {
+            const tableBody = document.getElementById('tableBody');
             const recordCount = document.getElementById('recordCount');
             const totalAmount = document.getElementById('totalAmount');
             
@@ -1458,180 +1369,8 @@
             const total = sortedRentals.reduce((sum, rental) => sum + (parseFloat(rental.lockFee) || 0) + (parseFloat(rental.commonFee) || 0), 0);
             totalAmount.textContent = formatCurrency(total);
 
-            if (currentViewMode === 'card') {
-                renderCardView(sortedRentals);
-            } else if (currentViewMode === 'compact') {
-                renderCompactView(sortedRentals);
-            } else {
-                renderFullView(sortedRentals);
-            }
-        }
-
-        function renderCardView(rentalsToRender) {
-            const cardView = document.getElementById('cardView');
-            
-            if (rentalsToRender.length === 0) {
-                cardView.innerHTML = `
-                    <div class="col-span-full text-center text-gray-500 py-12">
-                        <div>
-                            <span class="text-6xl mb-4 block">📊</span>
-                            <p class="text-xl mb-2">ไม่พบข้อมูลค่าเช่าแผง</p>
-                            <p class="text-sm">ลองค้นหาด้วยคำอื่น หรือเพิ่มข้อมูลใหม่</p>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-
-            cardView.innerHTML = rentalsToRender.map(rental => {
-                const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
-                const isExpiringSoon = daysLeft !== null && daysLeft <= 30 && daysLeft > 0;
-                const isExpired = daysLeft !== null && daysLeft <= 0;
-                
-                let cardClass = 'rental-card';
-                if (isExpired) cardClass += ' expired';
-                else if (isExpiringSoon) cardClass += ' expiring-soon';
-                
-                const daysLeftText = daysLeft !== null ? 
-                    (daysLeft <= 0 ? 'หมดอายุแล้ว' : `${daysLeft} วัน`) : 
-                    'ไม่ระบุ';
-                
-                return `
-                    <div class="${cardClass} fade-in">
-                        <div class="flex items-start justify-between mb-4">
-                            <div>
-                                <h4 class="text-lg font-bold text-gray-800">${rental.tenantName}</h4>
-                                <p class="text-sm text-gray-600">${rental.building} - แผง ${rental.stallNumber}</p>
-                            </div>
-                            <div class="flex space-x-1">
-                                <button onclick="editRental(${rental.id})" 
-                                        class="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50" 
-                                        title="แก้ไข">
-                                    ✏️
-                                </button>
-                                <button onclick="deleteRental(${rental.id})" 
-                                        class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50" 
-                                        title="ลบ">
-                                    🗑️
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <p class="text-xs text-gray-500 mb-1">ประเภทสินค้า</p>
-                                <p class="text-sm font-medium">${rental.productType || '-'}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500 mb-1">เบอร์โทร</p>
-                                ${rental.phone ? 
-                                    `<a href="tel:${rental.phone}" class="text-sm text-blue-600 hover:underline">${rental.phone}</a>` : 
-                                    '<p class="text-sm text-gray-400">-</p>'
-                                }
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-3 gap-2 mb-4 p-3 bg-gray-50 rounded-lg">
-                            <div class="text-center">
-                                <p class="text-xs text-gray-500">ค่าล็อค</p>
-                                <p class="text-sm font-semibold">${formatCurrency(rental.lockFee || 0)}</p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-xs text-gray-500">ค่าส่วนกลาง</p>
-                                <p class="text-sm font-semibold">${formatCurrency(rental.commonFee || 0)}</p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-xs text-gray-500">รวม</p>
-                                <p class="text-sm font-bold text-green-600">${formatCurrency((rental.lockFee || 0) + (rental.commonFee || 0))}</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex-1">
-                                <p class="text-xs text-gray-500 mb-1">สถานะ</p>
-                                <span class="${getStatusClass(rental.paymentStatus)} text-xs">${rental.paymentStatus || 'ไม่ระบุ'}</span>
-                            </div>
-                            <div class="flex-1 text-right">
-                                <p class="text-xs text-gray-500 mb-1">วันที่เหลือ</p>
-                                <p class="text-sm font-semibold ${daysLeft !== null && daysLeft <= 7 ? 'text-red-600' : daysLeft !== null && daysLeft <= 15 ? 'text-yellow-600' : ''}">${daysLeftText}</p>
-                            </div>
-                        </div>
-                        
-                        ${rental.contractEndDate ? 
-                            `<div class="text-xs text-gray-500">
-                                <p>สิ้นสุดสัญญา: ${formatDate(rental.contractEndDate)}</p>
-                            </div>` : ''
-                        }
-                        
-                        ${rental.notes ? 
-                            `<div class="mt-3 pt-3 border-t border-gray-200">
-                                <p class="text-xs text-gray-500 mb-1">หมายเหตุ</p>
-                                <p class="text-sm text-gray-700">${rental.notes}</p>
-                            </div>` : ''
-                        }
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderCompactView(rentalsToRender) {
-            const compactTableBody = document.getElementById('compactTableBody');
-            
-            if (rentalsToRender.length === 0) {
-                compactTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="9" class="text-center text-gray-500 py-8">
-                            <div>
-                                <span class="text-4xl mb-2 block">📊</span>
-                                <p>ไม่พบข้อมูลค่าเช่าแผง</p>
-                                <p class="text-sm">ลองค้นหาด้วยคำอื่น หรือเพิ่มข้อมูลใหม่</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            compactTableBody.innerHTML = rentalsToRender.map((rental, index) => {
-                const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
-                const daysLeftText = daysLeft !== null ? 
-                    (daysLeft <= 0 ? 'หมดอายุแล้ว' : `${daysLeft} วัน`) : 
-                    'ไม่ระบุ';
-                
-                return `
-                    <tr class="fade-in hover:bg-gray-50">
-                        <td class="row-number">${index + 1}</td>
-                        <td class="font-medium">${rental.tenantName}</td>
-                        <td>${rental.building} - ${rental.stallNumber}</td>
-                        <td class="text-sm">${rental.productType || '-'}</td>
-                        <td>
-                            ${rental.phone ? `<a href="tel:${rental.phone}" class="text-blue-600 hover:underline text-sm">${rental.phone}</a>` : '-'}
-                        </td>
-                        <td class="text-right font-semibold text-green-600">${formatCurrency((rental.lockFee || 0) + (rental.commonFee || 0))}</td>
-                        <td><span class="${getStatusClass(rental.paymentStatus)} text-xs">${rental.paymentStatus || 'ไม่ระบุ'}</span></td>
-                        <td class="text-sm ${daysLeft !== null && daysLeft <= 7 ? 'text-red-600 font-bold' : daysLeft !== null && daysLeft <= 15 ? 'text-yellow-600 font-semibold' : ''}">${formatDate(rental.contractEndDate)}</td>
-                        <td class="text-center">
-                            <div class="flex space-x-1 justify-center">
-                                <button onclick="editRental(${rental.id})" 
-                                        class="text-blue-600 hover:text-blue-800 p-1 rounded" title="แก้ไข">
-                                    ✏️
-                                </button>
-                                <button onclick="deleteRental(${rental.id})" 
-                                        class="text-red-500 hover:text-red-700 p-1 rounded" title="ลบ">
-                                    🗑️
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function renderFullView(rentalsToRender) {
-            const fullTableBody = document.getElementById('fullTableBody');
-            
-            if (rentalsToRender.length === 0) {
-                fullTableBody.innerHTML = `
+            if (sortedRentals.length === 0) {
+                tableBody.innerHTML = `
                     <tr>
                         <td colspan="19" class="text-center text-gray-500 py-8">
                             <div>
@@ -1645,45 +1384,134 @@
                 return;
             }
 
-            fullTableBody.innerHTML = rentalsToRender.map((rental, index) => {
+            // สร้าง HTML สำหรับแถวหัวข้อ
+            function createHeaderRow() {
+                return `
+                    <tr class="header-repeat-row" style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white;">
+                        <th class="row-number" style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; text-align: center; padding: 12px 8px; font-size: 12px;">#</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 120px;">ชื่อผู้เช่า</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 80px;">อาคาร</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 80px;">หมายเลขแผง</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 100px;">ประเภทสินค้า</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 120px;">เบอร์โทรศัพท์</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 80px;">ค่าล็อค</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 80px;">ค่าส่วนกลาง</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 80px;">รวม</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 100px;">วันเริ่มสัญญา</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 80px;">ระยะเวลา</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 100px;">วันสิ้นสุดสัญญา</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 80px;">วันที่เหลือ</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 120px;">สถานะการทำสัญญา</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 120px;">รูปแบบการชำระ</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 120px;">ผู้ค้ำประกัน</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 120px;">เบอร์ผู้ค้ำประกัน</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 150px;">หมายเหตุ</th>
+                        <th style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-weight: 700; padding: 12px 8px; font-size: 12px; min-width: 80px;">การจัดการ</th>
+                    </tr>
+                `;
+            }
+
+            let htmlContent = '';
+            let currentBuilding = '';
+            let rowCount = 0;
+
+            sortedRentals.forEach((rental, index) => {
                 const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
                 const daysLeftText = daysLeft !== null ? 
                     (daysLeft <= 0 ? 'หมดอายุแล้ว' : `${daysLeft} วัน`) : 
                     'ไม่ระบุ';
                 
-                return `
+                // กำหนดคลาสสำหรับแถวที่ต้องเน้น
+                const urgentClass = daysLeft !== null && daysLeft <= 7 ? 'highlight-urgent' : 
+                                   daysLeft !== null && daysLeft <= 15 ? 'highlight-warning' : '';
+                
+                // เพิ่มแถวหัวข้อเมื่อเปลี่ยนอาคาร หรือทุกๆ 10 แถว (ยกเว้นแถวแรก)
+                const buildingChanged = currentBuilding !== (rental.building || 'ไม่ระบุ');
+                const shouldAddHeader = (buildingChanged && index > 0) || (rowCount > 0 && rowCount % 10 === 0);
+                
+                if (shouldAddHeader) {
+                    htmlContent += createHeaderRow();
+                }
+                
+                // อัปเดต currentBuilding หลังจากตรวจสอบแล้ว
+                if (buildingChanged) {
+                    currentBuilding = rental.building || 'ไม่ระบุ';
+                }
+                
+                htmlContent += `
                     <tr class="fade-in">
                         <td class="row-number">${index + 1}</td>
-                        <td class="editable-cell" onclick="editCell(${rental.id}, 'tenantName', this)">${rental.tenantName}</td>
-                        <td class="editable-cell" onclick="editCell(${rental.id}, 'building', this)">${rental.building || ''}</td>
-                        <td class="editable-cell" onclick="editCell(${rental.id}, 'stallNumber', this)">${rental.stallNumber}</td>
-                        <td class="editable-cell" onclick="editCell(${rental.id}, 'productType', this)">${rental.productType}</td>
-                        <td class="editable-cell" onclick="editCell(${rental.id}, 'phone', this)">
-                            ${rental.phone ? `<a href="tel:${rental.phone}" class="text-blue-600 hover:underline">${rental.phone}</a>` : ''}
+                        <td class="editable-cell important-column" onclick="editCell(${rental.id}, 'tenantName', this)">
+                            <strong>${rental.tenantName}</strong>
                         </td>
-                        <td class="editable-cell text-right" onclick="editCell(${rental.id}, 'lockFee', this)">${formatCurrency(rental.lockFee || 0)}</td>
-                        <td class="editable-cell text-right" onclick="editCell(${rental.id}, 'commonFee', this)">${formatCurrency(rental.commonFee || 0)}</td>
-                        <td class="text-right font-semibold text-green-600">${formatCurrency((rental.lockFee || 0) + (rental.commonFee || 0))}</td>
-                        <td class="editable-cell" onclick="editCell(${rental.id}, 'contractStartDate', this)">${formatDate(rental.contractStartDate)}</td>
-                        <td class="text-center">${getDurationText(rental)}</td>
-                        <td class="editable-cell" onclick="editCell(${rental.id}, 'contractEndDate', this)">${formatDate(rental.contractEndDate)}</td>
-                        <td class="text-center ${daysLeft !== null && daysLeft <= 7 ? 'text-red-600 font-bold' : daysLeft !== null && daysLeft <= 15 ? 'text-yellow-600 font-semibold' : ''}">${daysLeftText}</td>
-                        <td class="editable-cell ${getStatusClass(rental.paymentStatus)}" onclick="editCell(${rental.id}, 'paymentStatus', this)">${rental.paymentStatus}</td>
-                        <td class="editable-cell" onclick="editCell(${rental.id}, 'paymentDate', this)">${rental.paymentDate || ''}</td>
-                        <td class="editable-cell" onclick="editCell(${rental.id}, 'guarantorName', this)">${rental.guarantorName || ''}</td>
-                        <td class="editable-cell" onclick="editCell(${rental.id}, 'guarantorPhone', this)">
-                            ${rental.guarantorPhone ? `<a href="tel:${rental.guarantorPhone}" class="text-blue-600 hover:underline">${rental.guarantorPhone}</a>` : ''}
+                        <td class="editable-cell status-column" onclick="editCell(${rental.id}, 'building', this)">
+                            <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
+                                ${rental.building || 'ไม่ระบุ'}
+                            </span>
                         </td>
-                        <td class="editable-cell" onclick="editCell(${rental.id}, 'notes', this)">${rental.notes || ''}</td>
+                        <td class="editable-cell status-column" onclick="editCell(${rental.id}, 'stallNumber', this)">
+                            <span class="inline-block px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-bold">
+                                ${rental.stallNumber}
+                            </span>
+                        </td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'productType', this)">
+                            <span class="text-sm text-gray-700">${rental.productType}</span>
+                        </td>
+                        <td class="editable-cell contact-column" onclick="editCell(${rental.id}, 'phone', this)">
+                            ${rental.phone ? `<a href="tel:${rental.phone}" class="text-blue-600 hover:text-blue-800 font-medium text-sm bg-blue-50 px-2 py-1 rounded">${rental.phone}</a>` : '<span class="text-gray-400 text-xs">ไม่มี</span>'}
+                        </td>
+                        <td class="editable-cell amount-column" onclick="editCell(${rental.id}, 'lockFee', this)">
+                            <span class="text-green-700 font-semibold">${formatCurrency(rental.lockFee || 0)}</span>
+                        </td>
+                        <td class="editable-cell amount-column" onclick="editCell(${rental.id}, 'commonFee', this)">
+                            <span class="text-green-700 font-semibold">${formatCurrency(rental.commonFee || 0)}</span>
+                        </td>
+                        <td class="amount-column important-column">
+                            <span class="text-green-800 font-bold text-lg">${formatCurrency((rental.lockFee || 0) + (rental.commonFee || 0))}</span>
+                        </td>
+                        <td class="editable-cell text-center" onclick="editCell(${rental.id}, 'contractStartDate', this)">
+                            <span class="text-sm text-gray-600">${formatDate(rental.contractStartDate)}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="inline-block px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+                                ${getDurationText(rental)}
+                            </span>
+                        </td>
+                        <td class="editable-cell text-center" onclick="editCell(${rental.id}, 'contractEndDate', this)">
+                            <span class="text-sm text-gray-600">${formatDate(rental.contractEndDate)}</span>
+                        </td>
+                        <td class="text-center status-column ${urgentClass}">
+                            <span class="font-bold text-sm">${daysLeftText}</span>
+                        </td>
+                        <td class="editable-cell status-column" onclick="editCell(${rental.id}, 'paymentStatus', this)">
+                            <span class="${getStatusClass(rental.paymentStatus)}">${rental.paymentStatus}</span>
+                        </td>
+                        <td class="editable-cell text-center" onclick="editCell(${rental.id}, 'paymentDate', this)">
+                            <span class="text-sm text-gray-600">${rental.paymentDate || 'ไม่ระบุ'}</span>
+                        </td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'guarantorName', this)">
+                            <span class="text-sm text-gray-700">${rental.guarantorName || '<span class="text-gray-400">ไม่มี</span>'}</span>
+                        </td>
+                        <td class="editable-cell contact-column" onclick="editCell(${rental.id}, 'guarantorPhone', this)">
+                            ${rental.guarantorPhone ? `<a href="tel:${rental.guarantorPhone}" class="text-blue-600 hover:text-blue-800 font-medium text-sm bg-blue-50 px-2 py-1 rounded">${rental.guarantorPhone}</a>` : '<span class="text-gray-400 text-xs">ไม่มี</span>'}
+                        </td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'notes', this)">
+                            <span class="text-sm text-gray-600">${rental.notes || '<span class="text-gray-400">ไม่มี</span>'}</span>
+                        </td>
                         <td class="text-center">
                             <button onclick="deleteRental(${rental.id})" 
-                                    class="text-red-500 hover:text-red-700 p-1 rounded" title="ลบ">
+                                    class="bg-red-100 hover:bg-red-200 text-red-600 hover:text-red-700 p-2 rounded-lg transition-all duration-200 text-sm font-medium" 
+                                    title="ลบข้อมูล">
                                 🗑️
                             </button>
                         </td>
                     </tr>
                 `;
-            }).join('');
+                
+                rowCount++;
+            });
+
+            tableBody.innerHTML = htmlContent;
         }
 
         function editCell(id, field, cellElement) {
@@ -1767,7 +1595,6 @@
                 saveToStorage();
                 renderSpreadsheet();
                 updateDashboard();
-                updateQuickStats();
                 showMessage('แก้ไขข้อมูลเรียบร้อยแล้ว!', 'success');
             }
             
@@ -1793,7 +1620,6 @@
                     saveToStorage();
                     renderSpreadsheet();
                     updateDashboard();
-                    updateQuickStats();
                     showMessage('ลบข้อมูลเรียบร้อยแล้ว!', 'success');
                 }
             );
@@ -1825,7 +1651,6 @@
             saveToStorage();
             renderSpreadsheet();
             updateDashboard();
-            updateQuickStats();
             showMessage('เพิ่มแถวใหม่เรียบร้อยแล้ว!', 'success');
         }
 
@@ -1989,21 +1814,258 @@
                 if (successful) {
                     showMessage(`✅ คัดลอกข้อมูล ${rentals.length} รายการเรียบร้อย! ไปวางใน Google Sheets ได้เลย`, 'success');
                 } else {
-                    showCopyDataModal(text);
+                    showMessage('ไม่สามารถคัดลอกได้ กรุณาลองใหม่', 'error');
                 }
             } catch (err) {
                 console.error('Copy failed:', err);
-                showCopyDataModal(text);
+                showMessage('ไม่สามารถคัดลอกได้ กรุณาลองใหม่', 'error');
             }
         }
 
-        function showCopyDataModal(data) {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-            modal.innerHTML = `
-                <div class="bg-white rounded-xl p-6 mx-4 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                    <div class="mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">📋 ข้อมูลสำหรับ Google Sheets</h3>
-                        <p class="text-sm text-gray-600">กรุณาเลือกข้อความด้านล่างทั้งหมด แล้วคัดลอก (Ctrl+C หรือ Cmd+C)</p>
-                    </div>
-                    <textarea readonly class="w-full h-96 p-3 border border-gray-300 rounded-lg text-sm font-mono bg-gray-50 text-gray-900" onclick="this<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e570d886305f6f',t:'MTc2MDQyNzc1NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+        function importData() {
+            const fileInput = document.getElementById('importFileInput');
+            fileInput.click();
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.type !== 'application/json') {
+                showMessage('กรุณาเลือกไฟล์ JSON เท่านั้น', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    // ตรวจสอบรูปแบบข้อมูล
+                    if (!importedData.rentals || !Array.isArray(importedData.rentals)) {
+                        showMessage('รูปแบบไฟล์ไม่ถูกต้อง กรุณาเลือกไฟล์สำรองข้อมูลที่ถูกต้อง', 'error');
+                        return;
+                    }
+
+                    const importCount = importedData.rentals.length;
+                    
+                    if (importCount === 0) {
+                        showMessage('ไม่พบข้อมูลในไฟล์', 'warning');
+                        return;
+                    }
+
+                    // ถามว่าต้องการเขียนทับหรือเพิ่มข้อมูล
+                    if (rentals.length > 0) {
+                        showConfirmModal(
+                            `พบข้อมูลเดิม ${rentals.length} รายการ ต้องการเขียนทับด้วยข้อมูลใหม่ ${importCount} รายการหรือไม่?`,
+                            () => {
+                                performImport(importedData, true);
+                            }
+                        );
+                    } else {
+                        performImport(importedData, false);
+                    }
+                    
+                } catch (error) {
+                    console.error('Import error:', error);
+                    showMessage('ไม่สามารถอ่านไฟล์ได้ กรุณาตรวจสอบรูปแบบไฟล์', 'error');
+                }
+            };
+            
+            reader.onerror = function() {
+                showMessage('เกิดข้อผิดพลาดในการอ่านไฟล์', 'error');
+            };
+            
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        }
+
+        function performImport(importedData, isOverwrite) {
+            try {
+                // ตรวจสอบและทำความสะอาดข้อมูล
+                const cleanedRentals = importedData.rentals.map(rental => {
+                    // ตรวจสอบฟิลด์ที่จำเป็น
+                    if (!rental.tenantName || !rental.stallNumber) {
+                        throw new Error('ข้อมูลไม่ครบถ้วน: ต้องมีชื่อผู้เช่าและหมายเลขแผง');
+                    }
+                    
+                    return {
+                        id: rental.id || nextId++,
+                        tenantName: rental.tenantName || '',
+                        building: rental.building || '',
+                        stallNumber: rental.stallNumber || '',
+                        productType: rental.productType || '',
+                        phone: rental.phone || '',
+                        lockFee: parseFloat(rental.lockFee) || 0,
+                        commonFee: parseFloat(rental.commonFee) || 0,
+                        contractStartDate: rental.contractStartDate || '',
+                        contractDuration: rental.contractDuration || '',
+                        customDurationValue: rental.customDurationValue || '',
+                        customDurationUnit: rental.customDurationUnit || '',
+                        contractEndDate: rental.contractEndDate || '',
+                        paymentStatus: rental.paymentStatus || '',
+                        paymentDate: rental.paymentDate || '',
+                        guarantorName: rental.guarantorName || '',
+                        guarantorPhone: rental.guarantorPhone || '',
+                        guarantorRelation: rental.guarantorRelation || '',
+                        guarantorAddress: rental.guarantorAddress || '',
+                        notes: rental.notes || '',
+                        createdAt: rental.createdAt || new Date().toISOString()
+                    };
+                });
+
+                if (isOverwrite) {
+                    rentals = cleanedRentals;
+                } else {
+                    rentals = [...rentals, ...cleanedRentals];
+                }
+
+                // อัปเดต nextId
+                if (importedData.nextId && importedData.nextId > nextId) {
+                    nextId = importedData.nextId;
+                } else {
+                    // หา ID สูงสุดและเพิ่ม 1
+                    const maxId = Math.max(...rentals.map(r => r.id || 0));
+                    nextId = maxId + 1;
+                }
+
+                saveToStorage();
+                renderSpreadsheet();
+                updateDashboard();
+                
+                showMessage(`นำเข้าข้อมูลเรียบร้อยแล้ว! ${cleanedRentals.length} รายการ`, 'success');
+                
+            } catch (error) {
+                console.error('Import processing error:', error);
+                showMessage(`เกิดข้อผิดพลาด: ${error.message}`, 'error');
+            }
+        }
+
+        function clearAllData() {
+            showConfirmModal(
+                'ต้องการลบข้อมูลทั้งหมดหรือไม่? การกระทำนี้ไม่สามารถยกเลิกได้',
+                () => {
+                    rentals = [];
+                    nextId = 1;
+                    saveToStorage();
+                    renderSpreadsheet();
+                    updateDashboard();
+                    showMessage('ลบข้อมูลทั้งหมดเรียบร้อยแล้ว!', 'success');
+                }
+            );
+        }
+
+        // Form submission
+        document.getElementById('rentalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const productType = document.getElementById('productType').value;
+            const customProductType = document.getElementById('customProductType').value;
+            const finalProductType = productType === 'อื่นๆ (ระบุ)' ? customProductType : productType;
+            
+            const rental = {
+                id: nextId++,
+                tenantName: document.getElementById('tenantName').value,
+                building: document.getElementById('building').value,
+                stallNumber: document.getElementById('stallNumber').value,
+                productType: finalProductType,
+                phone: document.getElementById('phoneNumber').value,
+                lockFee: parseFloat(document.getElementById('lockFee').value) || 0,
+                commonFee: parseFloat(document.getElementById('commonFee').value) || 0,
+                contractStartDate: document.getElementById('contractStartDate').value,
+                contractDuration: document.getElementById('contractDuration').value,
+                customDurationValue: document.getElementById('customDurationValue').value,
+                customDurationUnit: document.getElementById('customDurationUnit').value,
+                contractEndDate: document.getElementById('contractEndDate').value,
+                paymentStatus: document.getElementById('paymentStatus').value,
+                paymentDate: document.getElementById('paymentDate').value,
+                guarantorName: document.getElementById('guarantorName').value,
+                guarantorPhone: document.getElementById('guarantorPhone').value,
+                guarantorRelation: document.getElementById('guarantorRelation').value,
+                guarantorAddress: document.getElementById('guarantorAddress').value,
+                notes: document.getElementById('notes').value,
+                createdAt: new Date().toISOString()
+            };
+            
+            rentals.push(rental);
+            saveToStorage();
+            
+            this.reset();
+            document.getElementById('customProductType').classList.add('hidden');
+            document.getElementById('customDurationContainer').classList.add('hidden');
+            document.getElementById('contractEndDate').disabled = false;
+            
+            renderSpreadsheet();
+            updateDashboard();
+            showMessage('บันทึกข้อมูลเรียบร้อยแล้ว!', 'success');
+        });
+
+        // Scroll functions
+        function scrollToTop() {
+            const tableContainer = document.getElementById('tableContainer');
+            if (tableContainer) {
+                tableContainer.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function scrollToBottom() {
+            const tableContainer = document.getElementById('tableContainer');
+            if (tableContainer) {
+                tableContainer.scrollTo({ top: tableContainer.scrollHeight, behavior: 'smooth' });
+            } else {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }
+        }
+
+        function scrollToBuilding(buildingName) {
+            const tableBody = document.getElementById('tableBody');
+            if (!tableBody) return;
+            
+            // หาแถวแรกที่มีอาคารที่ต้องการ
+            const rows = tableBody.querySelectorAll('tr');
+            let targetRow = null;
+            
+            for (let row of rows) {
+                const buildingCell = row.querySelector('td:nth-child(3)'); // คอลัมน์อาคาร
+                if (buildingCell && buildingCell.textContent.includes(buildingName)) {
+                    targetRow = row;
+                    break;
+                }
+            }
+            
+            if (targetRow) {
+                const tableContainer = document.getElementById('tableContainer');
+                const rowTop = targetRow.offsetTop - tableContainer.offsetTop;
+                
+                tableContainer.scrollTo({
+                    top: rowTop - 100, // เผื่อพื้นที่ด้านบน
+                    behavior: 'smooth'
+                });
+                
+                // เน้นแถวชั่วคราว
+                targetRow.style.backgroundColor = '#fef3c7';
+                setTimeout(() => {
+                    targetRow.style.backgroundColor = '';
+                }, 2000);
+                
+                showMessage(`เลื่อนไปยัง${buildingName}แล้ว!`, 'success');
+            } else {
+                showMessage(`ไม่พบข้อมูล${buildingName}`, 'warning');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderSpreadsheet();
+            updateDashboard();
+            
+            // Hide form initially
+            document.getElementById('formView').style.display = 'none';
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e59997e65e8e13',t:'MTc2MDQyOTQyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
