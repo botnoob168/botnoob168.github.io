@@ -1,1110 +1,2007 @@
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">📝 สมัครสมาชิก</h1>
-                <p class="text-gray-600">สร้างบัญชีใหม่</p>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกข้อมูลผู้ค้าในตลาด</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-primary: #f9fafb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f8f9fa;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --hover-bg: #f3f4f6;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --bg-tertiary: #374151;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --border-color: #4b5563;
+            --hover-bg: #374151;
+        }
+
+        body {
+            box-sizing: border-box;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .bg-card {
+            background-color: var(--bg-secondary);
+        }
+        
+        .border-custom {
+            border-color: var(--border-color);
+        }
+        
+        .text-primary {
+            color: var(--text-primary);
+        }
+        
+        .text-secondary {
+            color: var(--text-secondary);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        .spreadsheet-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-secondary);
+            font-size: 14px;
+        }
+        .spreadsheet-table th {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .spreadsheet-table td {
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            vertical-align: top;
+            background: var(--bg-secondary);
+        }
+        .spreadsheet-table tr:hover td {
+            background: var(--hover-bg);
+        }
+        .row-number {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-align: center;
+            width: 50px;
+            min-width: 50px;
+        }
+        .editable-cell {
+            cursor: pointer;
+            min-height: 20px;
+        }
+        .editable-cell:hover {
+            background: var(--hover-bg);
+        }
+        .cell-input {
+            border: 2px solid #3b82f6;
+            outline: none;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            width: 100%;
+            padding: 4px;
+            font-size: 14px;
+        }
+        .status-paid { background: #dcfce7; color: #166534; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-overdue { background: #fee2e2; color: #dc2626; }
+        .status-moved-out { background: #e0e7ff; color: #3730a3; }
+        
+        /* Dark mode adjustments for status colors */
+        [data-theme="dark"] .status-paid { background: #065f46; color: #a7f3d0; }
+        [data-theme="dark"] .status-pending { background: #92400e; color: #fde68a; }
+        [data-theme="dark"] .status-overdue { background: #991b1b; color: #fca5a5; }
+        [data-theme="dark"] .status-moved-out { background: #3730a3; color: #c7d2fe; }
+        
+        /* Form inputs dark mode */
+        [data-theme="dark"] input, 
+        [data-theme="dark"] select, 
+        [data-theme="dark"] textarea {
+            background-color: var(--bg-tertiary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] input:focus, 
+        [data-theme="dark"] select:focus, 
+        [data-theme="dark"] textarea:focus {
+            background-color: var(--bg-secondary);
+        }
+    </style>
+</head>
+<body class="min-h-full">
+    <div class="container mx-auto px-4 py-6">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center">
+                <div class="bg-green-600 rounded-lg w-10 h-10 mr-3 flex items-center justify-center">
+                    <span class="text-white text-xl">📊</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-primary">ระบบบันทึกค่าเช่าแผงในตลาด</h1>
+                    <p class="text-secondary text-sm">จัดการข้อมูลการชำระเงินค่าเช่าแผง</p>
+                </div>
             </div>
-            
-            <form id="registerForm" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อผู้ใช้</label>
-                    <input type="text" id="regUsername" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกชื่อผู้ใช้" required>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">อีเมล</label>
-                    <input type="email" id="regEmail" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกอีเมล" required>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">รหัสผ่าน</label>
-                    <input type="password" id="regPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกรหัสผ่าน (อย่างน้อย 6 ตัว)" required>
-                </div>
-                
-                <button type="submit" id="registerBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
-                    สมัครสมาชิก
+            <div class="flex items-center space-x-2">
+                <button onclick="toggleTheme()" 
+                        class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm flex items-center">
+                    <span id="themeIcon" class="mr-1">🌙</span>
                 </button>
+                <button onclick="toggleDashboard()" 
+                        class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm flex items-center">
+                    <span class="mr-2">📈</span>แดชบอร์ด
+                </button>
+                <button onclick="toggleView()" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm flex items-center">
+                    <span class="mr-2">📋</span>แบบฟอร์ม
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboardView" class="mb-6">
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- Total Revenue Card -->
+                <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-green-100 text-sm font-medium">รายได้รวมต่อเดือน</p>
+                            <p id="totalRevenue" class="text-2xl font-bold">0 บาท</p>
+                        </div>
+                        <div class="bg-green-400 bg-opacity-30 rounded-full p-3">
+                            <span class="text-2xl">💰</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Stalls Card -->
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-blue-100 text-sm font-medium">จำนวนแผงที่เช่า</p>
+                            <p id="totalStalls" class="text-2xl font-bold">0 แผง</p>
+                        </div>
+                        <div class="bg-blue-400 bg-opacity-30 rounded-full p-3">
+                            <span class="text-2xl">🏪</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expiring Soon Card -->
+                <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-orange-100 text-sm font-medium">สัญญาใกล้หมดอายุ (30 วัน)</p>
+                            <p id="expiringSoon" class="text-2xl font-bold">0 สัญญา</p>
+                        </div>
+                        <div class="bg-orange-400 bg-opacity-30 rounded-full p-3">
+                            <span class="text-2xl">⏰</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expired Card -->
+                <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-6 text-white shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-red-100 text-sm font-medium">สัญญาหมดอายุแล้ว</p>
+                            <p id="expiredContracts" class="text-2xl font-bold">0 สัญญา</p>
+                        </div>
+                        <div class="bg-red-400 bg-opacity-30 rounded-full p-3">
+                            <span class="text-2xl">🚨</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts and Details -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Building Distribution -->
+                <div class="bg-card rounded-xl shadow-lg p-6 border border-custom">
+                    <h3 class="text-lg font-semibold text-primary mb-4 flex items-center">
+                        <span class="mr-2">🏢</span>การกระจายตามอาคาร
+                    </h3>
+                    <div id="buildingChart" class="space-y-3">
+                        <!-- Building distribution will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Contract Status -->
+                <div class="bg-card rounded-xl shadow-lg p-6 border border-custom">
+                    <h3 class="text-lg font-semibold text-primary mb-4 flex items-center">
+                        <span class="mr-2">📋</span>สถานะสัญญา
+                    </h3>
+                    <div id="statusChart" class="space-y-3">
+                        <!-- Status distribution will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expiring Contracts Table -->
+            <div class="bg-card rounded-xl shadow-lg p-6 border border-custom">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-primary flex items-center">
+                        <span class="mr-2">⚠️</span>สัญญาที่ต้องติดตาม
+                    </h3>
+                    <div class="flex space-x-2">
+                        <button onclick="filterExpiringContracts(7)" 
+                                class="text-sm bg-red-100 hover:bg-red-200 dark:bg-red-800 dark:hover:bg-red-700 text-red-800 dark:text-red-200 px-3 py-1 rounded-lg">
+                            7 วัน
+                        </button>
+                        <button onclick="filterExpiringContracts(15)" 
+                                class="text-sm bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-800 dark:hover:bg-yellow-700 text-yellow-800 dark:text-yellow-200 px-3 py-1 rounded-lg">
+                            15 วัน
+                        </button>
+                        <button onclick="filterExpiringContracts(30)" 
+                                class="text-sm bg-orange-100 hover:bg-orange-200 dark:bg-orange-800 dark:hover:bg-orange-700 text-orange-800 dark:text-orange-200 px-3 py-1 rounded-lg">
+                            30 วัน
+                        </button>
+                        <button onclick="filterExpiringContracts(0)" 
+                                class="text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-lg">
+                            ทั้งหมด
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-custom">
+                                <th class="text-left py-2 px-3 text-primary">ชื่อผู้เช่า</th>
+                                <th class="text-left py-2 px-3 text-primary">อาคาร-แผง</th>
+                                <th class="text-left py-2 px-3 text-primary">วันสิ้นสุด</th>
+                                <th class="text-left py-2 px-3 text-primary">วันที่เหลือ</th>
+                                <th class="text-left py-2 px-3 text-primary">เบอร์โทร</th>
+                                <th class="text-left py-2 px-3 text-primary">การดำเนินการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expiringContractsTable">
+                            <!-- Expiring contracts will be rendered here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Rental Form -->
+        <div id="formView" class="bg-card rounded-xl shadow-lg p-6 mb-6 border border-custom">
+            <h2 class="text-lg font-semibold text-primary mb-4 flex items-center">
+                <span class="mr-2">➕</span>เพิ่มข้อมูลค่าเช่าแผง
+            </h2>
+            <form id="rentalForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">ชื่อผู้เช่า</label>
+                    <input type="text" id="tenantName" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">อาคาร</label>
+                    <select id="building" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">เลือกอาคาร</option>
+                        <option value="อาคาร A">อาคาร A</option>
+                        <option value="อาคาร B">อาคาร B</option>
+                        <option value="อาคาร C">อาคาร C</option>
+                        <option value="อาคาร D">อาคาร D</option>
+                        <option value="อาคาร E">อาคาร E</option>
+                        <option value="โซนกลางแจ้ง">โซนกลางแจ้ง</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">หมายเลขแผง</label>
+                    <input type="text" id="stallNumber" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="เช่น 01, 02, 03">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">ประเภทสินค้า</label>
+                    <select id="productType" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onchange="toggleCustomProductType()">
+                        <option value="">เลือกประเภทสินค้า</option>
+                        <option value="ผัก-ผลไม้">ผัก-ผลไม้</option>
+                        <option value="เนื้อสัตว์">เนื้อสัตว์</option>
+                        <option value="อาหารแห้ง">อาหารแห้ง</option>
+                        <option value="เครื่องปรุง">เครื่องปรุง</option>
+                        <option value="ขนม-เครื่องดื่ม">ขนม-เครื่องดื่ม</option>
+                        <option value="เสื้อผ้า">เสื้อผ้า</option>
+                        <option value="ของใช้ในบ้าน">ของใช้ในบ้าน</option>
+                        <option value="เครื่องสำอาง">เครื่องสำอาง</option>
+                        <option value="อื่นๆ (ระบุ)">อื่นๆ (ระบุ)</option>
+                    </select>
+                    <input type="text" id="customProductType" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mt-2 hidden"
+                           placeholder="ระบุประเภทสินค้า...">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">เบอร์โทรศัพท์</label>
+                    <input type="tel" id="phoneNumber" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="08X-XXX-XXXX">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">ค่าล็อค/เดือน</label>
+                    <input type="number" id="lockFee" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="0">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">ค่าส่วนกลาง/เดือน</label>
+                    <input type="number" id="commonFee" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="0">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">วันที่เริ่มสัญญา</label>
+                    <input type="date" id="contractStartDate" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           onchange="calculateEndDate()">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">ระยะเวลาสัญญา</label>
+                    <select id="contractDuration" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onchange="calculateEndDate()">
+                        <option value="">เลือกระยะเวลา</option>
+                        <option value="3m">3 เดือน</option>
+                        <option value="6m">6 เดือน</option>
+                        <option value="1y">1 ปี</option>
+                        <option value="2y">2 ปี</option>
+                        <option value="3y">3 ปี</option>
+                        <option value="custom">กำหนดเอง</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">วันที่สิ้นสุดสัญญา</label>
+                    <input type="date" id="contractEndDate" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">สถานะการทำสัญญา</label>
+                    <select id="paymentStatus" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">เลือกสถานะ</option>
+                        <option value="ทำสัญญาแล้ว">ทำสัญญาแล้ว</option>
+                        <option value="รอทำสัญญา">รอทำสัญญา</option>
+                        <option value="สัญญาหมดอายุ">สัญญาหมดอายุ</option>
+                        <option value="ย้ายออกแล้ว">ย้ายออกแล้ว</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">รูปแบบการชำระ</label>
+                    <select id="paymentDate" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">เลือกรูปแบบการชำระ</option>
+                        <option value="รายเดือน">รายเดือน</option>
+                        <option value="ราย10วัน">ราย10วัน</option>
+                    </select>
+                </div>
+
+                <!-- ข้อมูลผู้ค้ำประกัน -->
+                <div class="md:col-span-2 lg:col-span-3">
+                    <h3 class="text-md font-semibold text-primary mb-3 flex items-center border-t pt-4 border-custom">
+                        <span class="mr-2">👥</span>ข้อมูลผู้ค้ำประกัน / ผู้ติดต่อฉุกเฉิน
+                    </h3>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">ชื่อผู้ค้ำประกัน</label>
+                    <input type="text" id="guarantorName" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="ชื่อ-นามสกุล ผู้ค้ำประกัน">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">เบอร์โทรผู้ค้ำประกัน</label>
+                    <input type="tel" id="guarantorPhone" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="08X-XXX-XXXX">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">ความสัมพันธ์</label>
+                    <select id="guarantorRelation" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">เลือกความสัมพันธ์</option>
+                        <option value="คู่สมรส">คู่สมรส</option>
+                        <option value="บิดา">บิดา</option>
+                        <option value="มารดา">มารดา</option>
+                        <option value="บุตร">บุตร</option>
+                        <option value="พี่น้อง">พี่น้อง</option>
+                        <option value="ญาติ">ญาติ</option>
+                        <option value="เพื่อน">เพื่อน</option>
+                        <option value="อื่นๆ">อื่นๆ</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2 lg:col-span-3">
+                    <label class="block text-sm font-medium text-primary mb-1">ที่อยู่ผู้ค้ำประกัน</label>
+                    <textarea id="guarantorAddress" rows="2" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="ที่อยู่ผู้ค้ำประกัน..."></textarea>
+                </div>
+
+                <div class="md:col-span-2 lg:col-span-3">
+                    <label class="block text-sm font-medium text-primary mb-1">หมายเหตุ</label>
+                    <textarea id="notes" rows="2" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="ข้อมูลเพิ่มเติม..."></textarea>
+                </div>
+
+                <div class="md:col-span-2 lg:col-span-3">
+                    <button type="submit" 
+                            class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center">
+                        <span class="mr-2">💾</span>บันทึกข้อมูล
+                    </button>
+                </div>
             </form>
+        </div>
+
+        <!-- Google Sheets Instructions -->
+        <div class="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-xl p-4 mb-6">
+            <div class="flex items-start">
+                <span class="text-2xl mr-3">📊</span>
+                <div class="flex-1">
+                    <h3 class="font-semibold text-blue-800 dark:text-blue-200 mb-3">การซิงค์ข้อมูลกับ Google Sheets</h3>
+                    
+                    <!-- Export Instructions -->
+                    <div class="mb-4">
+                        <h4 class="font-medium text-blue-700 dark:text-blue-300 mb-2">📤 ส่งออกข้อมูลไป Sheets:</h4>
+                        <div class="text-sm text-blue-700 dark:text-blue-300 space-y-1 ml-4">
+                            <p><strong>1.</strong> คลิก "คัดลอกสำหรับ Sheets" เพื่อคัดลอกข้อมูลทั้งหมด</p>
+                            <p><strong>2.</strong> เปิด <a href="https://sheets.google.com" target="_blank" rel="noopener noreferrer" class="underline hover:text-blue-900 dark:hover:text-blue-100">Google Sheets</a> และสร้างไฟล์ใหม่</p>
+                            <p><strong>3.</strong> วางข้อมูลที่คัดลอกไว้ในเซลล์ A1</p>
+                        </div>
+                    </div>
+
+                    <!-- Import Instructions -->
+                    <div>
+                        <h4 class="font-medium text-blue-700 dark:text-blue-300 mb-2">📥 นำเข้าข้อมูลจาก Sheets:</h4>
+                        <div class="text-sm text-blue-700 dark:text-blue-300 space-y-1 ml-4">
+                            <p><strong>1.</strong> เลือกข้อมูลทั้งหมดใน Google Sheets (รวมหัวตาราง)</p>
+                            <p><strong>2.</strong> คัดลอกข้อมูล (Ctrl+C หรือ Cmd+C)</p>
+                            <p><strong>3.</strong> คลิก "วางจาก Sheets" ด้านล่าง</p>
+                            <p><strong>4.</strong> วางข้อมูลในช่องที่ปรากฏขึ้น</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-card rounded-xl shadow-lg p-4 mb-6 border border-custom">
+            <h3 class="text-lg font-semibold text-primary mb-4 flex items-center">
+                <span class="mr-2">⚡</span>การจัดการด่วน
+            </h3>
             
-            <div class="mt-6 text-center">
-                <p class="text-sm text-gray-600">มีบัญชีแล้ว? <button id="showLogin" class="text-blue-600 hover:underline">เข้าสู่ระบบ</button></p>
-            </div>
-        </div>
-    </div>
-
-    <!-- User Dashboard -->
-    <div id="userDashboard" class="min-h-screen p-4 hidden">
-        <div class="max-w-6xl mx-auto">
-            <!-- Header -->
-            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-800">📥 ระบบดาวน์โหลดข้อความ VIP</h1>
-                        <div class="flex items-center gap-3 mt-2">
-                            <p class="text-gray-600">ยินดีต้อนรับ <span id="currentUser" class="font-semibold"></span></p>
-                            <span id="userVipBadge" class="px-3 py-1 rounded-full text-xs font-medium"></span>
-                        </div>
-                    </div>
-                    <div class="flex gap-3">
-                        <button id="upgradeBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition duration-200 hidden">
-                            ⭐ อัพเกรด VIP
-                        </button>
-                        <button id="adminBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition duration-200 hidden">
-                            🔧 แอดมิน
-                        </button>
-                        <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-200">
-                            ออกจากระบบ
-                        </button>
-                    </div>
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div class="bg-gradient-to-r from-green-100 to-green-200 dark:from-green-800 dark:to-green-700 p-3 rounded-lg">
+                    <div class="text-sm text-green-700 dark:text-green-200">รายได้วันนี้</div>
+                    <div id="todayRevenue" class="text-lg font-bold text-green-800 dark:text-green-100">0 บาท</div>
+                </div>
+                <div class="bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-700 p-3 rounded-lg">
+                    <div class="text-sm text-blue-700 dark:text-blue-200">แผงว่าง</div>
+                    <div id="emptyStalls" class="text-lg font-bold text-blue-800 dark:text-blue-100">0 แผง</div>
+                </div>
+                <div class="bg-gradient-to-r from-yellow-100 to-yellow-200 dark:from-yellow-800 dark:to-yellow-700 p-3 rounded-lg">
+                    <div class="text-sm text-yellow-700 dark:text-yellow-200">ต้องติดตาม</div>
+                    <div id="needFollowUp" class="text-lg font-bold text-yellow-800 dark:text-yellow-100">0 ราย</div>
+                </div>
+                <div class="bg-gradient-to-r from-purple-100 to-purple-200 dark:from-purple-800 dark:to-purple-700 p-3 rounded-lg">
+                    <div class="text-sm text-purple-700 dark:text-purple-200">เก็บเงินวันนี้</div>
+                    <div id="todayCollection" class="text-lg font-bold text-purple-800 dark:text-purple-100">0 ราย</div>
                 </div>
             </div>
 
-            <!-- Search -->
-            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                <div class="flex gap-4">
-                    <input type="text" id="searchInput" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="ค้นหาข้อความ...">
-                    <button id="searchBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200">
-                        🔍 ค้นหา
+            <!-- Search and Actions -->
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <div class="relative flex-1">
+                    <input type="text" id="searchInput" placeholder="ค้นหาข้อมูล..." 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="addNewRow()" 
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center">
+                        <span class="mr-2">➕</span>เพิ่มแถวใหม่
+                    </button>
+                    <button onclick="showNotifications()" 
+                            class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center justify-center relative">
+                        <span class="mr-2">🔔</span>แจ้งเตือน
+                        <span id="notificationBadge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
                     </button>
                 </div>
             </div>
-
-            <!-- Loading -->
-            <div id="messagesLoading" class="text-center py-12 hidden">
-                <div class="loading mx-auto mb-4"></div>
-                <p class="text-gray-600">กำลังโหลดข้อความ...</p>
+            
+            <!-- Data Management Buttons -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <button onclick="exportData()" 
+                        class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
+                    <span class="mr-1">📤</span>ส่งออก CSV
+                </button>
+                <button onclick="document.getElementById('importFile').click()" 
+                        class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
+                    <span class="mr-1">📥</span>นำเข้าไฟล์
+                </button>
+                <button onclick="backupData()" 
+                        class="bg-purple-500 hover:bg-purple-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
+                    <span class="mr-1">💾</span>สำรองข้อมูล
+                </button>
+                <button onclick="copyForGoogleSheets()" 
+                        class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
+                    <span class="mr-1">📋</span>คัดลอกสำหรับ Sheets
+                </button>
+                <button onclick="showPasteFromSheetsModal()" 
+                        class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
+                    <span class="mr-1">📥</span>วางจาก Sheets
+                </button>
+                <button onclick="printReport()" 
+                        class="bg-purple-500 hover:bg-purple-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
+                    <span class="mr-1">🖨️</span>พิมพ์รายงาน
+                </button>
+                <button onclick="clearAllData()" 
+                        class="bg-red-500 hover:bg-red-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
+                    <span class="mr-1">🗑️</span>ล้างข้อมูล
+                </button>
             </div>
-
-            <!-- Messages Grid -->
-            <div id="messagesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Messages will be loaded here -->
-            </div>
+            
+            <!-- Hidden file inputs -->
+            <input type="file" id="importFile" accept=".csv,.json" style="display: none;">
         </div>
-    </div>
 
-    <!-- Admin Dashboard -->
-    <div id="adminDashboard" class="min-h-screen p-4 hidden">
-        <div class="max-w-6xl mx-auto">
-            <!-- Header -->
-            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-800">🔧 หน้าแอดมิน</h1>
-                        <p class="text-gray-600">จัดการข้อความและผู้ใช้</p>
-                    </div>
-                    <div class="flex gap-3">
-                        <button id="backToUserBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
-                            👤 หน้าผู้ใช้
-                        </button>
-                        <button id="adminLogoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-200">
-                            ออกจากระบบ
-                        </button>
+        <!-- Spreadsheet View -->
+        <div id="spreadsheetView" class="bg-card rounded-xl shadow-lg p-4 border border-custom">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-primary flex items-center">
+                    <span class="mr-2">📊</span>ตารางข้อมูลค่าเช่าแผง
+                </h3>
+                <div class="flex items-center space-x-4">
+                    <span id="recordCount" class="text-sm bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 px-3 py-1 rounded-full">0 รายการ</span>
+                    <div class="text-sm text-secondary">
+                        รวม: <span id="totalAmount" class="font-semibold text-green-600 dark:text-green-400">0</span> บาท
                     </div>
                 </div>
             </div>
+            
+            <div class="table-container">
+                <table class="spreadsheet-table">
+                    <thead>
+                        <tr>
+                            <th class="row-number">#</th>
+                            <th style="min-width: 120px;">ชื่อผู้เช่า</th>
+                            <th style="min-width: 80px;">อาคาร</th>
+                            <th style="min-width: 80px;">หมายเลขแผง</th>
+                            <th style="min-width: 100px;">ประเภทสินค้า</th>
+                            <th style="min-width: 120px;">เบอร์โทรศัพท์</th>
+                            <th style="min-width: 80px;">ค่าล็อค</th>
+                            <th style="min-width: 80px;">ค่าส่วนกลาง</th>
+                            <th style="min-width: 80px;">รวม</th>
+                            <th style="min-width: 100px;">วันเริ่มสัญญา</th>
+                            <th style="min-width: 80px;">ระยะเวลา</th>
+                            <th style="min-width: 100px;">วันสิ้นสุดสัญญา</th>
+                            <th style="min-width: 80px;">วันที่เหลือ</th>
+                            <th style="min-width: 120px;">สถานะการทำสัญญา</th>
+                            <th style="min-width: 120px;">รูปแบบการชำระ</th>
+                            <th style="min-width: 120px;">ผู้ค้ำประกัน</th>
+                            <th style="min-width: 120px;">เบอร์ผู้ค้ำประกัน</th>
+                            <th style="min-width: 150px;">หมายเหตุ</th>
+                            <th style="min-width: 80px;">การจัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="spreadsheetBody">
+                        <tr>
+                            <td colspan="19" class="text-center text-secondary py-8">
+                                <div>
+                                    <span class="text-4xl mb-2 block">📊</span>
+                                    <p>ยังไม่มีข้อมูลค่าเช่าแผง</p>
+                                    <p class="text-sm">เริ่มต้นโดยเพิ่มข้อมูลรายการแรก</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-            <!-- Add Message Form -->
-            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">➕ เพิ่มข้อความใหม่</h2>
-                <form id="addMessageForm" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อข้อความ</label>
-                            <input type="text" id="messageTitle" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกชื่อข้อความ" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">หมวดหมู่</label>
-                            <select id="messageCategory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="general">ทั่วไป</option>
-                                <option value="business">ธุรกิจ</option>
-                                <option value="personal">ส่วนตัว</option>
-                                <option value="education">การศึกษา</option>
-                                <option value="vip">VIP เท่านั้น</option>
-                            </select>
-                        </div>
+        <!-- Success/Error Message -->
+        <div id="successMessage" class="fixed top-4 left-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg transform -translate-y-full opacity-0 transition-all duration-300 z-50">
+            <div class="flex items-center">
+                <span class="mr-2">✅</span>
+                <span>บันทึกข้อมูลเรียบร้อยแล้ว!</span>
+            </div>
+        </div>
+
+        <!-- Paste from Sheets Modal -->
+        <div id="pasteFromSheetsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-card rounded-xl p-6 mx-4 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-custom">
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-semibold text-primary flex items-center">
+                            <span class="mr-2">📥</span>นำเข้าข้อมูลจาก Google Sheets
+                        </h3>
+                        <button onclick="closePasteFromSheetsModal()" class="text-secondary hover:text-primary text-xl">
+                            ✕
+                        </button>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">เนื้อหาข้อความ</label>
-                        <textarea id="messageContent" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="กรอกเนื้อหาข้อความ" required></textarea>
+                    <p class="text-secondary text-sm mb-4">วางข้อมูลที่คัดลอกจาก Google Sheets ลงในช่องด้านล่าง</p>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-primary mb-2">ข้อมูลจาก Google Sheets:</label>
+                    <textarea id="sheetsDataInput" 
+                              class="w-full h-64 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-mono"
+                              placeholder="วางข้อมูลที่คัดลอกจาก Google Sheets ที่นี่...&#10;&#10;ตัวอย่าง:&#10;ชื่อผู้เช่า	อาคาร	หมายเลขแผง	ประเภทสินค้า&#10;นายสมชาย	อาคาร A	01	ผัก-ผลไม้&#10;นางสมหญิง	อาคาร B	02	เนื้อสัตว์"></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="radio" name="importMode" value="replace" checked class="mr-2">
+                            <span class="text-sm text-primary">แทนที่ข้อมูลเดิมทั้งหมด</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="importMode" value="append" class="mr-2">
+                            <span class="text-sm text-primary">เพิ่มเข้าไปในข้อมูลเดิม</span>
+                        </label>
                     </div>
-                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition duration-200">
-                        ➕ เพิ่มข้อความ
+                </div>
+
+                <div class="flex space-x-3">
+                    <button onclick="importFromSheets()" 
+                            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg flex items-center justify-center">
+                        <span class="mr-2">📥</span>นำเข้าข้อมูล
                     </button>
-                </form>
-            </div>
-
-            <!-- Admin Tabs -->
-            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                <div class="flex border-b border-gray-200 mb-6">
-                    <button id="messagesTab" class="px-4 py-2 border-b-2 border-blue-600 text-blue-600 font-medium">📋 จัดการข้อความ</button>
-                    <button id="usersTab" class="px-4 py-2 text-gray-600 hover:text-blue-600 font-medium ml-4">👥 จัดการผู้ใช้</button>
-                </div>
-
-                <!-- Messages Management -->
-                <div id="messagesManagement">
-                    <div id="adminLoading" class="text-center py-12 hidden">
-                        <div class="loading mx-auto mb-4"></div>
-                        <p class="text-gray-600">กำลังโหลดข้อมูล...</p>
-                    </div>
-                    <div id="adminMessagesTable" class="overflow-x-auto">
-                        <!-- Admin messages table will be loaded here -->
-                    </div>
-                </div>
-
-                <!-- Users Management -->
-                <div id="usersManagement" class="hidden">
-                    <div id="adminUsersTable" class="overflow-x-auto">
-                        <!-- Admin users table will be loaded here -->
-                    </div>
+                    <button onclick="closePasteFromSheetsModal()" 
+                            class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg">
+                        ยกเลิก
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Message Popup -->
-    <div id="messagePopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
-            <div class="p-6 border-b border-gray-200">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h2 id="popupTitle" class="text-2xl font-bold text-gray-800 mb-2"></h2>
-                        <span id="popupCategory" class="px-3 py-1 rounded-full text-xs font-medium"></span>
-                    </div>
-                    <button onclick="closeMessagePopup()" class="text-gray-500 hover:text-gray-700 text-2xl">
+        <!-- Notifications Modal -->
+        <div id="notificationsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-card rounded-xl p-6 mx-4 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-custom">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-primary flex items-center">
+                        <span class="mr-2">🔔</span>การแจ้งเตือน
+                    </h3>
+                    <button onclick="closeNotificationsModal()" class="text-secondary hover:text-primary text-xl">
                         ✕
                     </button>
                 </div>
-            </div>
-            
-            <div class="p-6 overflow-y-auto max-h-96">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">เนื้อหาข้อความ:</label>
-                    <textarea id="popupContent" readonly class="w-full h-48 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                
+                <div id="notificationsList" class="space-y-3">
+                    <!-- Notifications will be rendered here -->
                 </div>
                 
-                <div class="flex gap-3">
-                    <button onclick="copyToClipboard()" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg transition duration-200 font-medium">
-                        📋 คัดลอกข้อความ
+                <div class="mt-4 pt-4 border-t border-custom">
+                    <button onclick="markAllNotificationsRead()" 
+                            class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg">
+                        ทำเครื่องหมายอ่านทั้งหมด
                     </button>
-                    <button onclick="downloadCurrentMessage()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition duration-200 font-medium">
-                        💾 บันทึกไฟล์
-                    </button>
-                </div>
-                
-                <div class="mt-4 text-center">
-                    <p class="text-sm text-gray-500">
-                        📥 ดาวน์โหลด: <span id="popupDownloads"></span> ครั้ง
-                    </p>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- VIP Upgrade Popup -->
-    <div id="vipPopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-            <div class="p-6 border-b border-gray-200">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-gray-800">⭐ อัพเกรด VIP</h2>
-                    <button onclick="closeVipPopup()" class="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
+        <!-- Confirmation Modal -->
+        <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-card rounded-xl p-6 mx-4 max-w-sm w-full border border-custom">
+                <div class="text-center mb-4">
+                    <span class="text-4xl mb-2 block">⚠️</span>
+                    <h3 class="text-lg font-semibold text-primary mb-2">ยืนยันการดำเนินการ</h3>
+                    <p id="confirmText" class="text-secondary text-sm"></p>
                 </div>
-            </div>
-            
-            <div class="p-6">
-                <div class="space-y-4">
-                    <div class="border-2 border-yellow-300 rounded-lg p-4 bg-yellow-50">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 class="text-lg font-bold text-yellow-800">🌟 VIP สมาชิก</h3>
-                            <span class="text-2xl font-bold text-yellow-600">฿99/เดือน</span>
-                        </div>
-                        <ul class="text-sm text-yellow-700 space-y-1">
-                            <li>✅ ดาวน์โหลดได้ไม่จำกัด</li>
-                            <li>✅ เข้าถึงเนื้อหา VIP</li>
-                            <li>✅ ไม่มีโฆษณา</li>
-                            <li>✅ ดาวน์โหลดความละเอียดสูง</li>
-                        </ul>
-                        <button onclick="contactTeam()" class="w-full mt-4 bg-yellow-600 hover:bg-yellow-700 text-white py-2 rounded-lg transition duration-200">
-                            📞 ติดต่อทีมงาน
-                        </button>
-                    </div>
+                <div class="flex space-x-3">
+                    <button id="confirmYes" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg">
+                        ยืนยัน
+                    </button>
+                    <button id="confirmNo" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg">
+                        ยกเลิก
+                    </button>
                 </div>
-                
-                <div class="mt-4 text-center text-xs text-gray-500">
-                    💳 รองรับการชำระเงินผ่าน QR Code, บัตรเครดิต
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Message Popup -->
-    <div id="editMessagePopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
-            <div class="p-6 border-b border-gray-200">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-gray-800">✏️ แก้ไขข้อความ</h2>
-                    <button onclick="closeEditMessagePopup()" class="text-gray-500 hover:text-gray-700 text-2xl">✕</button>
-                </div>
-            </div>
-            
-            <div class="p-6 overflow-y-auto max-h-96">
-                <form id="editMessageForm" class="space-y-4">
-                    <input type="hidden" id="editMessageId">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อข้อความ</label>
-                            <input type="text" id="editMessageTitle" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">หมวดหมู่</label>
-                            <select id="editMessageCategory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="general">ทั่วไป</option>
-                                <option value="business">ธุรกิจ</option>
-                                <option value="personal">ส่วนตัว</option>
-                                <option value="education">การศึกษา</option>
-                                <option value="vip">VIP เท่านั้น</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">เนื้อหาข้อความ</label>
-                        <textarea id="editMessageContent" rows="6" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required></textarea>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">จำนวนดาวน์โหลด</label>
-                            <input type="number" id="editMessageDownloads" min="0" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">เวอร์ชั่น</label>
-                            <input type="number" id="editMessageVersion" min="1" step="1" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="1">
-                        </div>
-                    </div>
-                    <div class="flex gap-3">
-                        <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200">
-                            💾 บันทึกการแก้ไข
-                        </button>
-                        <button type="button" onclick="closeEditMessagePopup()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition duration-200">
-                            ❌ ยกเลิก
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
 
     <script>
-        // Global variables
-        let currentUser = null;
-        let currentUserData = null;
-        let allMessages = [];
-        let filteredMessages = [];
-        let currentPopupMessage = null;
-        let currentEditMessage = null;
+        let rentals = JSON.parse(localStorage.getItem('marketRentals')) || [];
+        let nextId = parseInt(localStorage.getItem('nextRentalId')) || 1;
+        let currentView = 'spreadsheet';
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        let showDashboard = true;
 
-        // Page elements
-        const loginPage = document.getElementById('loginPage');
-        const registerPage = document.getElementById('registerPage');
-        const userDashboard = document.getElementById('userDashboard');
-        const adminDashboard = document.getElementById('adminDashboard');
-
-        // Initialize app
-        function init() {
-            showLoginPage();
-            setupEventListeners();
-            
-            // Check authentication state
-            window.authFunctions.onAuthStateChanged(window.auth, (user) => {
-                if (user) {
-                    currentUser = user;
-                    loadUserData();
-                } else {
-                    currentUser = null;
-                    currentUserData = null;
-                    showLoginPage();
-                }
-            });
+        function initTheme() {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            updateThemeIcon();
         }
 
-        function setupEventListeners() {
-            // Login form
-            document.getElementById('loginForm').addEventListener('submit', handleLogin);
-            document.getElementById('showRegister').addEventListener('click', showRegisterPage);
-            
-            // Register form
-            document.getElementById('registerForm').addEventListener('submit', handleRegister);
-            document.getElementById('showLogin').addEventListener('click', showLoginPage);
-            
-            // User dashboard
-            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-            document.getElementById('adminBtn').addEventListener('click', showAdminDashboard);
-            document.getElementById('upgradeBtn').addEventListener('click', showVipPopup);
-            document.getElementById('searchBtn').addEventListener('click', handleSearch);
-            document.getElementById('searchInput').addEventListener('keyup', function(e) {
-                if (e.key === 'Enter') handleSearch();
-            });
-            
-            // Admin dashboard
-            document.getElementById('backToUserBtn').addEventListener('click', showUserDashboard);
-            document.getElementById('adminLogoutBtn').addEventListener('click', handleLogout);
-            document.getElementById('addMessageForm').addEventListener('submit', handleAddMessage);
-            document.getElementById('messagesTab').addEventListener('click', showMessagesTab);
-            document.getElementById('usersTab').addEventListener('click', showUsersTab);
-            document.getElementById('editMessageForm').addEventListener('submit', handleEditMessage);
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+            updateThemeIcon();
         }
 
-        // Firebase Functions
-        async function loadUserData() {
-            try {
-                const usersRef = window.firestore.collection(window.db, 'users');
-                const q = window.firestore.query(usersRef, window.firestore.where('email', '==', currentUser.email));
-                const querySnapshot = await window.firestore.getDocs(q);
-                
-                if (!querySnapshot.empty) {
-                    const userDoc = querySnapshot.docs[0];
-                    currentUserData = { id: userDoc.id, ...userDoc.data() };
-                } else {
-                    // Create new user document
-                    currentUserData = {
-                        email: currentUser.email,
-                        username: currentUser.email.split('@')[0],
-                        role: 'user',
-                        vipLevel: 'free',
-                        vipExpiry: null,
-                        status: 'active',
-                        createdAt: new Date().toISOString()
-                    };
-                    
-                    const docRef = await window.firestore.addDoc(window.firestore.collection(window.db, 'users'), currentUserData);
-                    currentUserData.id = docRef.id;
-                }
-                
-                showUserDashboard();
-            } catch (error) {
-                console.error('Error loading user data:', error);
-                showNotification('เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้', 'error');
-            }
-        }
-
-        async function loadMessages() {
-            try {
-                showLoading('messagesLoading');
-                
-                const messagesRef = window.firestore.collection(window.db, 'messages');
-                const q = window.firestore.query(messagesRef, window.firestore.orderBy('createdAt', 'desc'));
-                const querySnapshot = await window.firestore.getDocs(q);
-                
-                allMessages = [];
-                querySnapshot.forEach((doc) => {
-                    allMessages.push({ id: doc.id, ...doc.data() });
-                });
-                
-                filteredMessages = [...allMessages];
-                renderMessages();
-                hideLoading('messagesLoading');
-            } catch (error) {
-                console.error('Error loading messages:', error);
-                hideLoading('messagesLoading');
-                showNotification('เกิดข้อผิดพลาดในการโหลดข้อความ', 'error');
-            }
-        }
-
-        async function loadAdminMessages() {
-            try {
-                showLoading('adminLoading');
-                
-                const messagesRef = window.firestore.collection(window.db, 'messages');
-                const q = window.firestore.query(messagesRef, window.firestore.orderBy('createdAt', 'desc'));
-                const querySnapshot = await window.firestore.getDocs(q);
-                
-                const messages = [];
-                querySnapshot.forEach((doc) => {
-                    messages.push({ id: doc.id, ...doc.data() });
-                });
-                
-                renderAdminMessages(messages);
-                hideLoading('adminLoading');
-            } catch (error) {
-                console.error('Error loading admin messages:', error);
-                hideLoading('adminLoading');
-                showNotification('เกิดข้อผิดพลาดในการโหลดข้อความ', 'error');
-            }
-        }
-
-        // Authentication Functions
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+        function toggleCustomProductType() {
+            const productTypeSelect = document.getElementById('productType');
+            const customProductTypeInput = document.getElementById('customProductType');
             
-            setButtonLoading('loginBtn', true);
-            
-            try {
-                await window.authFunctions.signInWithEmailAndPassword(window.auth, email, password);
-                showNotification('เข้าสู่ระบบสำเร็จ!', 'success');
-            } catch (error) {
-                console.error('Login error:', error);
-                let errorMessage = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
-                
-                switch (error.code) {
-                    case 'auth/user-not-found':
-                        errorMessage = 'ไม่พบอีเมลนี้ในระบบ';
-                        break;
-                    case 'auth/wrong-password':
-                        errorMessage = 'รหัสผ่านไม่ถูกต้อง';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
-                        break;
-                    case 'auth/too-many-requests':
-                        errorMessage = 'มีการพยายามเข้าสู่ระบบมากเกินไป กรุณาลองใหม่ภายหลัง';
-                        break;
-                }
-                
-                showNotification(errorMessage, 'error');
-            }
-            
-            setButtonLoading('loginBtn', false);
-        }
-
-        async function handleRegister(e) {
-            e.preventDefault();
-            const username = document.getElementById('regUsername').value;
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPassword').value;
-            
-            if (password.length < 6) {
-                showNotification('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร', 'error');
-                return;
-            }
-            
-            setButtonLoading('registerBtn', true);
-            
-            try {
-                const userCredential = await window.authFunctions.createUserWithEmailAndPassword(window.auth, email, password);
-                
-                // Create user document in Firestore
-                const userData = {
-                    email: email,
-                    username: username,
-                    role: 'user',
-                    vipLevel: 'free',
-                    vipExpiry: null,
-                    status: 'active',
-                    createdAt: new Date().toISOString()
-                };
-                
-                await window.firestore.addDoc(window.firestore.collection(window.db, 'users'), userData);
-                
-                showNotification('สมัครสมาชิกสำเร็จ!', 'success');
-                showLoginPage();
-            } catch (error) {
-                console.error('Register error:', error);
-                let errorMessage = 'เกิดข้อผิดพลาดในการสมัครสมาชิก';
-                
-                switch (error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = 'อีเมลนี้ถูกใช้งานแล้ว';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = 'รหัสผ่านไม่ปลอดภัย กรุณาใช้รหัสผ่านที่แข็งแกร่งกว่า';
-                        break;
-                }
-                
-                showNotification(errorMessage, 'error');
-            }
-            
-            setButtonLoading('registerBtn', false);
-        }
-
-        async function handleLogout() {
-            try {
-                await window.authFunctions.signOut(window.auth);
-                showNotification('ออกจากระบบสำเร็จ', 'success');
-            } catch (error) {
-                console.error('Logout error:', error);
-                showNotification('เกิดข้อผิดพลาดในการออกจากระบบ', 'error');
-            }
-        }
-
-        // Message Functions
-        async function handleAddMessage(e) {
-            e.preventDefault();
-            
-            if (!currentUserData || currentUserData.role !== 'admin') {
-                showNotification('คุณไม่มีสิทธิ์เพิ่มข้อความ', 'error');
-                return;
-            }
-            
-            const title = document.getElementById('messageTitle').value;
-            const category = document.getElementById('messageCategory').value;
-            const content = document.getElementById('messageContent').value;
-            
-            try {
-                const messageData = {
-                    title: title,
-                    content: content,
-                    category: category,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    version: 1,
-                    downloads: 0,
-                    createdBy: currentUserData.id
-                };
-                
-                await window.firestore.addDoc(window.firestore.collection(window.db, 'messages'), messageData);
-                
-                // Reset form
-                document.getElementById('addMessageForm').reset();
-                
-                // Reload messages
-                loadAdminMessages();
-                
-                showNotification('เพิ่มข้อความสำเร็จ!', 'success');
-            } catch (error) {
-                console.error('Error adding message:', error);
-                showNotification('เกิดข้อผิดพลาดในการเพิ่มข้อความ', 'error');
-            }
-        }
-
-        async function handleEditMessage(e) {
-            e.preventDefault();
-            
-            if (!currentEditMessage) return;
-            
-            const title = document.getElementById('editMessageTitle').value;
-            const category = document.getElementById('editMessageCategory').value;
-            const content = document.getElementById('editMessageContent').value;
-            const downloads = parseInt(document.getElementById('editMessageDownloads').value) || 0;
-            const version = parseInt(document.getElementById('editMessageVersion').value) || 1;
-            
-            try {
-                const messageRef = window.firestore.doc(window.db, 'messages', currentEditMessage.id);
-                await window.firestore.updateDoc(messageRef, {
-                    title: title,
-                    category: category,
-                    content: content,
-                    downloads: downloads,
-                    version: version,
-                    updatedAt: new Date().toISOString()
-                });
-                
-                closeEditMessagePopup();
-                loadAdminMessages();
-                loadMessages(); // Refresh user messages too
-                
-                showNotification('แก้ไขข้อความสำเร็จ!', 'success');
-            } catch (error) {
-                console.error('Error updating message:', error);
-                showNotification('เกิดข้อผิดพลาดในการแก้ไขข้อความ', 'error');
-            }
-        }
-
-        async function deleteMessage(messageId) {
-            if (!confirm('คุณแน่ใจหรือไม่ที่จะลบข้อความนี้?')) return;
-            
-            try {
-                await window.firestore.deleteDoc(window.firestore.doc(window.db, 'messages', messageId));
-                loadAdminMessages();
-                loadMessages(); // Refresh user messages too
-                showNotification('ลบข้อความสำเร็จ!', 'success');
-            } catch (error) {
-                console.error('Error deleting message:', error);
-                showNotification('เกิดข้อผิดพลาดในการลบข้อความ', 'error');
-            }
-        }
-
-        async function downloadMessage(messageId) {
-            const message = allMessages.find(m => m.id === messageId);
-            if (!message) return;
-            
-            // Check VIP access
-            if (message.category === 'vip' && currentUserData.vipLevel !== 'vip' && currentUserData.role !== 'admin') {
-                showNotification('เนื้อหานี้สำหรับสมาชิก VIP เท่านั้น!', 'error');
-                showVipPopup();
-                return;
-            }
-            
-            try {
-                // Create and download file
-                const blob = new Blob([message.content], { type: 'text/plain;charset=utf-8' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${message.title}.txt`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-                
-                // Update download count
-                const messageRef = window.firestore.doc(window.db, 'messages', messageId);
-                await window.firestore.updateDoc(messageRef, {
-                    downloads: (message.downloads || 0) + 1
-                });
-                
-                // Update local data
-                message.downloads = (message.downloads || 0) + 1;
-                renderMessages();
-                
-                showNotification('ดาวน์โหลดสำเร็จ!', 'success');
-            } catch (error) {
-                console.error('Error downloading message:', error);
-                showNotification('เกิดข้อผิดพลาดในการดาวน์โหลด', 'error');
-            }
-        }
-
-        // UI Functions
-        function showLoginPage() {
-            hideAllPages();
-            loginPage.classList.remove('hidden');
-        }
-
-        function showRegisterPage() {
-            hideAllPages();
-            registerPage.classList.remove('hidden');
-        }
-
-        function showUserDashboard() {
-            hideAllPages();
-            userDashboard.classList.remove('hidden');
-            updateUserInfo();
-            loadMessages();
-        }
-
-        function showAdminDashboard() {
-            if (!currentUserData || currentUserData.role !== 'admin') {
-                showNotification('คุณไม่มีสิทธิ์เข้าถึงหน้าแอดมิน', 'error');
-                return;
-            }
-            hideAllPages();
-            adminDashboard.classList.remove('hidden');
-            loadAdminMessages();
-        }
-
-        function hideAllPages() {
-            loginPage.classList.add('hidden');
-            registerPage.classList.add('hidden');
-            userDashboard.classList.add('hidden');
-            adminDashboard.classList.add('hidden');
-        }
-
-        function updateUserInfo() {
-            if (!currentUserData) return;
-            
-            document.getElementById('currentUser').textContent = currentUserData.username || currentUserData.email;
-            
-            // Update VIP badge
-            const vipBadge = document.getElementById('userVipBadge');
-            if (currentUserData.vipLevel === 'vip') {
-                vipBadge.className = 'px-3 py-1 rounded-full text-xs font-medium vip-badge';
-                vipBadge.textContent = '⭐ VIP';
+            if (productTypeSelect.value === 'อื่นๆ (ระบุ)') {
+                customProductTypeInput.classList.remove('hidden');
+                customProductTypeInput.required = true;
+                customProductTypeInput.focus();
             } else {
-                vipBadge.className = 'px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800';
-                vipBadge.textContent = 'ฟรี';
-            }
-            
-            // Show upgrade button for non-VIP users
-            if (currentUserData.vipLevel !== 'vip') {
-                document.getElementById('upgradeBtn').classList.remove('hidden');
-            }
-            
-            // Show admin button if user is admin
-            if (currentUserData.role === 'admin') {
-                document.getElementById('adminBtn').classList.remove('hidden');
+                customProductTypeInput.classList.add('hidden');
+                customProductTypeInput.required = false;
+                customProductTypeInput.value = '';
             }
         }
 
-        function handleSearch() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            filteredMessages = allMessages.filter(msg => 
-                msg.title.toLowerCase().includes(searchTerm) ||
-                msg.content.toLowerCase().includes(searchTerm) ||
-                msg.category.toLowerCase().includes(searchTerm)
-            );
-            renderMessages();
+        function updateThemeIcon() {
+            const themeIcon = document.getElementById('themeIcon');
+            themeIcon.textContent = currentTheme === 'light' ? '🌙' : '☀️';
         }
 
-        function renderMessages() {
-            const grid = document.getElementById('messagesGrid');
-            grid.innerHTML = '';
+        function saveToStorage() {
+            localStorage.setItem('marketRentals', JSON.stringify(rentals));
+            localStorage.setItem('nextRentalId', nextId.toString());
+        }
+
+        function getDaysUntilExpiry(endDate) {
+            if (!endDate) return null;
+            const today = new Date();
+            const expiry = new Date(endDate);
+            const diffTime = expiry - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        }
+
+        function getDurationText(duration) {
+            switch(duration) {
+                case '3m': return '3 เดือน';
+                case '6m': return '6 เดือน';
+                case '1y': return '1 ปี';
+                case '2y': return '2 ปี';
+                case '3y': return '3 ปี';
+                case 'custom': return 'กำหนดเอง';
+                default: return '';
+            }
+        }
+
+        function calculateEndDate() {
+            const startDate = document.getElementById('contractStartDate').value;
+            const duration = document.getElementById('contractDuration').value;
+            const endDateInput = document.getElementById('contractEndDate');
             
-            if (filteredMessages.length === 0) {
-                grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">ไม่พบข้อความที่ค้นหา</div>';
+            if (!startDate || !duration || duration === 'custom') {
+                if (duration === 'custom') {
+                    endDateInput.disabled = false;
+                    endDateInput.focus();
+                }
                 return;
             }
             
-            filteredMessages.forEach(message => {
-                const messageCard = createMessageCard(message);
-                grid.appendChild(messageCard);
-            });
-        }
-
-        function createMessageCard(message) {
-            const card = document.createElement('div');
-            card.className = 'bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition duration-200';
+            const start = new Date(startDate);
+            let endDate = new Date(start);
             
-            const categoryColors = {
-                general: 'bg-blue-100 text-blue-800',
-                business: 'bg-green-100 text-green-800',
-                personal: 'bg-purple-100 text-purple-800',
-                education: 'bg-orange-100 text-orange-800',
-                vip: 'vip-badge'
-            };
-            
-            const canAccess = message.category !== 'vip' || currentUserData.vipLevel === 'vip' || currentUserData.role === 'admin';
-            
-            card.innerHTML = `
-                <div class="p-6">
-                    <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-lg font-bold text-gray-800">${message.title}</h3>
-                        <span class="px-3 py-1 rounded-full text-xs font-medium ${categoryColors[message.category] || categoryColors.general}">
-                            ${getCategoryName(message.category)}
-                        </span>
-                    </div>
-                    <p class="text-gray-600 mb-4 line-clamp-3">${message.content.substring(0, 100)}${message.content.length > 100 ? '...' : ''}</p>
-                    <div class="flex justify-between items-center">
-                        <div class="text-sm text-gray-500">
-                            <span>📥 ${message.downloads || 0} ครั้ง</span>
-                        </div>
-                        <div class="flex gap-2">
-                            ${canAccess ? `
-                                <button onclick="showMessagePopup('${message.id}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg transition duration-200 text-sm">
-                                    👁️ ดู
-                                </button>
-                                <button onclick="downloadMessage('${message.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition duration-200 text-sm">
-                                    📥 ดาวน์โหลด
-                                </button>
-                            ` : `
-                                <button onclick="showVipPopup()" class="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-2 rounded-lg transition duration-200 text-sm">
-                                    ⭐ อัพเกรด VIP
-                                </button>
-                            `}
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            return card;
-        }
-
-        function renderAdminMessages(messages) {
-            const table = document.getElementById('adminMessagesTable');
-            
-            if (messages.length === 0) {
-                table.innerHTML = '<p class="text-gray-500 text-center py-8">ไม่มีข้อความ</p>';
-                return;
+            switch(duration) {
+                case '3m':
+                    endDate.setMonth(endDate.getMonth() + 3);
+                    break;
+                case '6m':
+                    endDate.setMonth(endDate.getMonth() + 6);
+                    break;
+                case '1y':
+                    endDate.setFullYear(endDate.getFullYear() + 1);
+                    break;
+                case '2y':
+                    endDate.setFullYear(endDate.getFullYear() + 2);
+                    break;
+                case '3y':
+                    endDate.setFullYear(endDate.getFullYear() + 3);
+                    break;
             }
             
-            table.innerHTML = `
-                <table class="w-full">
-                    <thead>
-                        <tr class="border-b">
-                            <th class="text-left py-3 px-4">ชื่อข้อความ</th>
-                            <th class="text-left py-3 px-4">หมวดหมู่</th>
-                            <th class="text-left py-3 px-4">เวอร์ชั่น</th>
-                            <th class="text-left py-3 px-4">ดาวน์โหลด</th>
-                            <th class="text-left py-3 px-4">อัพเดตล่าสุด</th>
-                            <th class="text-left py-3 px-4">จัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${messages.map(message => `
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="py-3 px-4 font-medium">${message.title}</td>
-                                <td class="py-3 px-4">${getCategoryName(message.category)}</td>
-                                <td class="py-3 px-4">v${message.version || 1}</td>
-                                <td class="py-3 px-4">${message.downloads || 0}</td>
-                                <td class="py-3 px-4">${new Date(message.updatedAt || message.createdAt).toLocaleDateString('th-TH')}</td>
-                                <td class="py-3 px-4">
-                                    <div class="flex gap-2">
-                                        <button onclick="editMessage('${message.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition duration-200">
-                                            ✏️ แก้ไข
-                                        </button>
-                                        <button onclick="deleteMessage('${message.id}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition duration-200">
-                                            🗑️ ลบ
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
+            endDate.setDate(endDate.getDate() - 1);
+            endDateInput.value = endDate.toISOString().split('T')[0];
+            endDateInput.disabled = true;
         }
 
-        function getCategoryName(category) {
-            const names = {
-                general: 'ทั่วไป',
-                business: 'ธุรกิจ',
-                personal: 'ส่วนตัว',
-                education: 'การศึกษา',
-                vip: '⭐ VIP'
-            };
-            return names[category] || 'ทั่วไป';
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('th-TH').format(amount);
         }
 
-        // Popup Functions
-        function showMessagePopup(messageId) {
-            const message = allMessages.find(m => m.id === messageId);
-            if (!message) return;
-            
-            // Check VIP access
-            if (message.category === 'vip' && currentUserData.vipLevel !== 'vip' && currentUserData.role !== 'admin') {
-                showNotification('เนื้อหานี้สำหรับสมาชิก VIP เท่านั้น!', 'error');
-                showVipPopup();
-                return;
-            }
-            
-            currentPopupMessage = message;
-            
-            // Update popup content
-            document.getElementById('popupTitle').textContent = message.title;
-            document.getElementById('popupContent').value = message.content;
-            document.getElementById('popupDownloads').textContent = message.downloads || 0;
-            
-            // Update category badge
-            const categoryBadge = document.getElementById('popupCategory');
-            const categoryColors = {
-                general: 'bg-blue-100 text-blue-800',
-                business: 'bg-green-100 text-green-800',
-                personal: 'bg-purple-100 text-purple-800',
-                education: 'bg-orange-100 text-orange-800',
-                vip: 'vip-badge'
-            };
-            categoryBadge.className = `px-3 py-1 rounded-full text-xs font-medium ${categoryColors[message.category] || categoryColors.general}`;
-            categoryBadge.textContent = getCategoryName(message.category);
-            
-            // Show popup
-            document.getElementById('messagePopup').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            return new Date(dateString).toLocaleDateString('th-TH');
         }
 
-        function closeMessagePopup() {
-            document.getElementById('messagePopup').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-            currentPopupMessage = null;
-        }
-
-        function showVipPopup() {
-            document.getElementById('vipPopup').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeVipPopup() {
-            document.getElementById('vipPopup').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        function editMessage(messageId) {
-            const message = allMessages.find(m => m.id === messageId);
-            if (!message) return;
-            
-            currentEditMessage = message;
-            
-            document.getElementById('editMessageId').value = message.id;
-            document.getElementById('editMessageTitle').value = message.title;
-            document.getElementById('editMessageCategory').value = message.category;
-            document.getElementById('editMessageContent').value = message.content;
-            document.getElementById('editMessageDownloads').value = message.downloads || 0;
-            document.getElementById('editMessageVersion').value = message.version || 1;
-            
-            document.getElementById('editMessagePopup').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeEditMessagePopup() {
-            document.getElementById('editMessagePopup').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-            currentEditMessage = null;
-        }
-
-        // Utility Functions
-        function copyToClipboard() {
-            if (!currentPopupMessage) return;
-            
-            const textarea = document.getElementById('popupContent');
-            textarea.select();
-            textarea.setSelectionRange(0, 99999);
-            
-            try {
-                document.execCommand('copy');
-                showNotification('คัดลอกข้อความสำเร็จ!', 'success');
-            } catch (err) {
-                navigator.clipboard.writeText(currentPopupMessage.content).then(() => {
-                    showNotification('คัดลอกข้อความสำเร็จ!', 'success');
-                }).catch(() => {
-                    showNotification('ไม่สามารถคัดลอกได้', 'error');
-                });
+        function getStatusClass(status) {
+            switch(status) {
+                case 'ทำสัญญาแล้ว': return 'status-paid';
+                case 'รอทำสัญญา': return 'status-pending';
+                case 'สัญญาหมดอายุ': return 'status-overdue';
+                case 'ย้ายออกแล้ว': return 'status-moved-out';
+                default: return '';
             }
         }
 
-        function downloadCurrentMessage() {
-            if (!currentPopupMessage) return;
+        function showMessage(text, type = 'success') {
+            const message = document.getElementById('successMessage');
+            const messageText = message.querySelector('span:last-child');
+            const messageIcon = message.querySelector('span:first-child');
             
-            downloadMessage(currentPopupMessage.id);
-            closeMessagePopup();
-        }
-
-        function contactTeam() {
-            const teamContact = `
-📞 ติดต่อทีมงานเพื่ออัพเกรดสมาชิก VIP
-
-📱 Line: @vip_team
-📧 Email: vip@example.com  
-☎️ Tel: 02-123-4567
-💬 Facebook: VIP Download System
-
-⏰ เวลาทำการ: จันทร์-ศุกร์ 9:00-18:00
-
-💰 แพ็คเกจ VIP:
-- VIP (99฿/เดือน): เข้าถึงเนื้อหา VIP ทั้งหมด
-- ดาวน์โหลดได้ไม่จำกัด
-- ไม่มีโฆษณา
-
-🎁 โปรโมชั่นพิเศษ: สมัครวันนี้ลด 20%!
-            `;
+            messageText.textContent = text;
             
-            alert(teamContact);
-            closeVipPopup();
-        }
-
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg text-white z-50 transition-all duration-300 ${
-                type === 'success' ? 'bg-green-600' : 
-                type === 'error' ? 'bg-red-600' : 
-                type === 'warning' ? 'bg-yellow-600' : 'bg-blue-600'
-            }`;
-            notification.textContent = message;
+            message.className = 'fixed top-4 left-4 right-4 p-4 rounded-lg shadow-lg transform -translate-y-full opacity-0 transition-all duration-300 z-50';
             
-            document.body.appendChild(notification);
+            if (type === 'success') {
+                message.classList.add('bg-green-500', 'text-white');
+                messageIcon.textContent = '✅';
+            } else if (type === 'error') {
+                message.classList.add('bg-red-500', 'text-white');
+                messageIcon.textContent = '❌';
+            } else if (type === 'warning') {
+                message.classList.add('bg-yellow-500', 'text-white');
+                messageIcon.textContent = '⚠️';
+            }
             
+            message.style.transform = 'translateY(0)';
+            message.style.opacity = '1';
             setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => {
-                    if (document.body.contains(notification)) {
-                        document.body.removeChild(notification);
-                    }
-                }, 300);
+                message.style.transform = 'translateY(-100%)';
+                message.style.opacity = '0';
             }, 3000);
         }
 
-        function showLoading(elementId) {
-            document.getElementById(elementId).classList.remove('hidden');
-        }
-
-        function hideLoading(elementId) {
-            document.getElementById(elementId).classList.add('hidden');
-        }
-
-        function setButtonLoading(buttonId, isLoading) {
-            const button = document.getElementById(buttonId);
-            const originalText = button.textContent;
+        function showConfirmModal(text, onConfirm) {
+            const modal = document.getElementById('confirmModal');
+            const confirmText = document.getElementById('confirmText');
+            const confirmYes = document.getElementById('confirmYes');
+            const confirmNo = document.getElementById('confirmNo');
             
-            if (isLoading) {
-                button.disabled = true;
-                button.innerHTML = '<div class="loading"></div> กำลังดำเนินการ...';
+            confirmText.textContent = text;
+            modal.classList.remove('hidden');
+            
+            confirmYes.onclick = () => {
+                modal.classList.add('hidden');
+                onConfirm();
+            };
+            
+            confirmNo.onclick = () => {
+                modal.classList.add('hidden');
+            };
+        }
+
+        function toggleView() {
+            const formView = document.getElementById('formView');
+            const viewToggle = document.querySelector('button[onclick="toggleView()"]');
+            
+            if (currentView === 'spreadsheet') {
+                currentView = 'form';
+                formView.style.display = 'block';
+                viewToggle.innerHTML = '<span class="mr-2">📊</span>ตาราง';
             } else {
-                button.disabled = false;
-                button.textContent = originalText;
+                currentView = 'spreadsheet';
+                formView.style.display = 'none';
+                viewToggle.innerHTML = '<span class="mr-2">📋</span>แบบฟอร์ม';
             }
         }
 
-        // Admin tab functions
-        function showMessagesTab() {
-            document.getElementById('messagesTab').className = 'px-4 py-2 border-b-2 border-blue-600 text-blue-600 font-medium';
-            document.getElementById('usersTab').className = 'px-4 py-2 text-gray-600 hover:text-blue-600 font-medium ml-4';
-            document.getElementById('messagesManagement').classList.remove('hidden');
-            document.getElementById('usersManagement').classList.add('hidden');
-        }
-
-        function showUsersTab() {
-            document.getElementById('usersTab').className = 'px-4 py-2 border-b-2 border-blue-600 text-blue-600 font-medium ml-4';
-            document.getElementById('messagesTab').className = 'px-4 py-2 text-gray-600 hover:text-blue-600 font-medium';
-            document.getElementById('usersManagement').classList.remove('hidden');
-            document.getElementById('messagesManagement').classList.add('hidden');
-            loadAdminUsers();
-        }
-
-        async function loadAdminUsers() {
-            try {
-                const usersRef = window.firestore.collection(window.db, 'users');
-                const q = window.firestore.query(usersRef, window.firestore.orderBy('createdAt', 'desc'));
-                const querySnapshot = await window.firestore.getDocs(q);
-                
-                const users = [];
-                querySnapshot.forEach((doc) => {
-                    users.push({ id: doc.id, ...doc.data() });
-                });
-                
-                renderAdminUsers(users);
-            } catch (error) {
-                console.error('Error loading users:', error);
-                showNotification('เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้', 'error');
-            }
-        }
-
-        function renderAdminUsers(users) {
-            const table = document.getElementById('adminUsersTable');
+        function toggleDashboard() {
+            const dashboardView = document.getElementById('dashboardView');
+            const dashboardToggle = document.querySelector('button[onclick="toggleDashboard()"]');
             
-            if (users.length === 0) {
-                table.innerHTML = '<p class="text-gray-500 text-center py-8">ไม่มีผู้ใช้</p>';
+            showDashboard = !showDashboard;
+            
+            if (showDashboard) {
+                dashboardView.style.display = 'block';
+                dashboardToggle.innerHTML = '<span class="mr-2">📊</span>ซ่อนแดชบอร์ด';
+                updateDashboard();
+            } else {
+                dashboardView.style.display = 'none';
+                dashboardToggle.innerHTML = '<span class="mr-2">📈</span>แดชบอร์ด';
+            }
+        }
+
+        function updateDashboard() {
+            if (!showDashboard) return;
+            
+            const stats = calculateStatistics();
+            
+            document.getElementById('totalRevenue').textContent = formatCurrency(stats.totalRevenue) + ' บาท';
+            document.getElementById('totalStalls').textContent = stats.totalStalls + ' แผง';
+            document.getElementById('expiringSoon').textContent = stats.expiringSoon + ' สัญญา';
+            document.getElementById('expiredContracts').textContent = stats.expired + ' สัญญา';
+            
+            renderBuildingChart(stats.buildingDistribution);
+            renderStatusChart(stats.statusDistribution);
+            renderExpiringContractsTable();
+        }
+
+        function calculateStatistics() {
+            const now = new Date();
+            const stats = {
+                totalRevenue: 0,
+                totalStalls: rentals.length,
+                expiringSoon: 0,
+                expired: 0,
+                buildingDistribution: {},
+                statusDistribution: {}
+            };
+
+            rentals.forEach(rental => {
+                stats.totalRevenue += (parseFloat(rental.lockFee) || 0) + (parseFloat(rental.commonFee) || 0);
+                
+                if (rental.contractEndDate) {
+                    const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
+                    if (daysLeft !== null) {
+                        if (daysLeft <= 0) {
+                            stats.expired++;
+                        } else if (daysLeft <= 30) {
+                            stats.expiringSoon++;
+                        }
+                    }
+                }
+                
+                const building = rental.building || 'ไม่ระบุ';
+                stats.buildingDistribution[building] = (stats.buildingDistribution[building] || 0) + 1;
+                
+                const status = rental.paymentStatus || 'ไม่ระบุ';
+                stats.statusDistribution[status] = (stats.statusDistribution[status] || 0) + 1;
+            });
+
+            return stats;
+        }
+
+        function renderBuildingChart(distribution) {
+            const chartContainer = document.getElementById('buildingChart');
+            const total = Object.values(distribution).reduce((sum, count) => sum + count, 0);
+            
+            if (total === 0) {
+                chartContainer.innerHTML = '<p class="text-secondary text-center py-4">ไม่มีข้อมูล</p>';
+                return;
+            }
+
+            const colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500'];
+            let colorIndex = 0;
+
+            chartContainer.innerHTML = Object.entries(distribution)
+                .sort(([,a], [,b]) => b - a)
+                .map(([building, count]) => {
+                    const percentage = ((count / total) * 100).toFixed(1);
+                    const color = colors[colorIndex % colors.length];
+                    colorIndex++;
+                    
+                    return `
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center flex-1">
+                                <div class="w-4 h-4 ${color} rounded mr-3"></div>
+                                <span class="text-sm text-primary">${building}</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-3">
+                                    <div class="${color} h-2 rounded-full" style="width: ${percentage}%"></div>
+                                </div>
+                                <span class="text-sm font-semibold text-primary w-12 text-right">${count}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+        }
+
+        function renderStatusChart(distribution) {
+            const chartContainer = document.getElementById('statusChart');
+            const total = Object.values(distribution).reduce((sum, count) => sum + count, 0);
+            
+            if (total === 0) {
+                chartContainer.innerHTML = '<p class="text-secondary text-center py-4">ไม่มีข้อมูล</p>';
+                return;
+            }
+
+            const statusColors = {
+                'ทำสัญญาแล้ว': 'bg-green-500',
+                'รอทำสัญญา': 'bg-yellow-500',
+                'สัญญาหมดอายุ': 'bg-red-500',
+                'ย้ายออกแล้ว': 'bg-blue-500',
+                'ไม่ระบุ': 'bg-gray-500'
+            };
+
+            chartContainer.innerHTML = Object.entries(distribution)
+                .sort(([,a], [,b]) => b - a)
+                .map(([status, count]) => {
+                    const percentage = ((count / total) * 100).toFixed(1);
+                    const color = statusColors[status] || 'bg-gray-500';
+                    
+                    return `
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center flex-1">
+                                <div class="w-4 h-4 ${color} rounded mr-3"></div>
+                                <span class="text-sm text-primary">${status}</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-3">
+                                    <div class="${color} h-2 rounded-full" style="width: ${percentage}%"></div>
+                                </div>
+                                <span class="text-sm font-semibold text-primary w-12 text-right">${count}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+        }
+
+        function renderExpiringContractsTable(daysFilter = 30) {
+            const tableBody = document.getElementById('expiringContractsTable');
+            const now = new Date();
+            
+            const expiringContracts = rentals
+                .filter(rental => {
+                    if (!rental.contractEndDate) return false;
+                    const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
+                    if (daysFilter === 0) return daysLeft !== null;
+                    return daysLeft !== null && daysLeft <= daysFilter && daysLeft >= 0;
+                })
+                .sort((a, b) => {
+                    const daysA = getDaysUntilExpiry(a.contractEndDate);
+                    const daysB = getDaysUntilExpiry(b.contractEndDate);
+                    return daysA - daysB;
+                });
+
+            if (expiringContracts.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-secondary">
+                            ไม่มีสัญญาที่ต้องติดตาม${daysFilter > 0 ? ` (${daysFilter} วัน)` : ''}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tableBody.innerHTML = expiringContracts.map(rental => {
+                const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
+                const urgencyClass = daysLeft <= 7 ? 'text-red-600 font-bold' : 
+                                   daysLeft <= 15 ? 'text-yellow-600 font-semibold' : 
+                                   'text-orange-600';
+                
+                return `
+                    <tr class="border-b border-custom hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <td class="py-2 px-3 text-primary">${rental.tenantName}</td>
+                        <td class="py-2 px-3 text-primary">${rental.building} - ${rental.stallNumber}</td>
+                        <td class="py-2 px-3 text-primary">${formatDate(rental.contractEndDate)}</td>
+                        <td class="py-2 px-3 ${urgencyClass}">${daysLeft} วัน</td>
+                        <td class="py-2 px-3">
+                            ${rental.phone ? `<a href="tel:${rental.phone}" class="text-blue-600 hover:underline">${rental.phone}</a>` : '-'}
+                        </td>
+                        <td class="py-2 px-3">
+                            <div class="flex space-x-1">
+                                <button onclick="callTenant('${rental.phone}')" 
+                                        class="text-green-600 hover:text-green-800 p-1 rounded" 
+                                        title="โทรหา" ${!rental.phone ? 'disabled' : ''}>
+                                    📞
+                                </button>
+                                <button onclick="editRental(${rental.id})" 
+                                        class="text-blue-600 hover:text-blue-800 p-1 rounded" 
+                                        title="แก้ไข">
+                                    ✏️
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterExpiringContracts(days) {
+            renderExpiringContractsTable(days);
+        }
+
+        function callTenant(phone) {
+            if (phone) {
+                window.open(`tel:${phone}`, '_self');
+            }
+        }
+
+        function editRental(id) {
+            const rental = rentals.find(r => r.id === id);
+            if (!rental) return;
+            
+            document.getElementById('tenantName').value = rental.tenantName;
+            document.getElementById('building').value = rental.building || '';
+            document.getElementById('stallNumber').value = rental.stallNumber;
+            
+            const productTypeSelect = document.getElementById('productType');
+            const customProductTypeInput = document.getElementById('customProductType');
+            const standardTypes = ['ผัก-ผลไม้', 'เนื้อสัตว์', 'อาหารแห้ง', 'เครื่องปรุง', 'ขนม-เครื่องดื่ม', 'เสื้อผ้า', 'ของใช้ในบ้าน', 'เครื่องสำอาง'];
+            
+            if (standardTypes.includes(rental.productType)) {
+                productTypeSelect.value = rental.productType;
+                customProductTypeInput.classList.add('hidden');
+                customProductTypeInput.required = false;
+            } else {
+                productTypeSelect.value = 'อื่นๆ (ระบุ)';
+                customProductTypeInput.value = rental.productType;
+                customProductTypeInput.classList.remove('hidden');
+                customProductTypeInput.required = true;
+            }
+            
+            document.getElementById('phoneNumber').value = rental.phone || '';
+            document.getElementById('lockFee').value = rental.lockFee || 0;
+            document.getElementById('commonFee').value = rental.commonFee || 0;
+            document.getElementById('contractStartDate').value = rental.contractStartDate;
+            document.getElementById('contractEndDate').value = rental.contractEndDate;
+            document.getElementById('paymentStatus').value = rental.paymentStatus;
+            document.getElementById('paymentDate').value = rental.paymentDate || '';
+            document.getElementById('guarantorName').value = rental.guarantorName || '';
+            document.getElementById('guarantorPhone').value = rental.guarantorPhone || '';
+            document.getElementById('guarantorRelation').value = rental.guarantorRelation || '';
+            document.getElementById('guarantorAddress').value = rental.guarantorAddress || '';
+            document.getElementById('notes').value = rental.notes || '';
+            
+            const formView = document.getElementById('formView');
+            formView.style.display = 'block';
+            currentView = 'form';
+            document.querySelector('button[onclick="toggleView()"]').innerHTML = '<span class="mr-2">📊</span>ตาราง';
+            
+            formView.scrollIntoView({ behavior: 'smooth' });
+            
+            rentals = rentals.filter(r => r.id !== id);
+            saveToStorage();
+            updateDashboard();
+            renderSpreadsheet();
+            
+            showMessage('กรอกข้อมูลใหม่และกดบันทึกเพื่อแก้ไข', 'warning');
+        }
+
+        function renderSpreadsheet(rentalsToRender = rentals) {
+            const spreadsheetBody = document.getElementById('spreadsheetBody');
+            const recordCount = document.getElementById('recordCount');
+            const totalAmount = document.getElementById('totalAmount');
+            
+            const sortedRentals = [...rentalsToRender].sort((a, b) => {
+                const buildingA = a.building || '';
+                const buildingB = b.building || '';
+                if (buildingA !== buildingB) {
+                    return buildingA.localeCompare(buildingB, 'th');
+                }
+                
+                const stallA = a.stallNumber || '';
+                const stallB = b.stallNumber || '';
+                
+                const numA = parseInt(stallA);
+                const numB = parseInt(stallB);
+                
+                if (!isNaN(numA) && !isNaN(numB)) {
+                    return numA - numB;
+                }
+                
+                return stallA.localeCompare(stallB, 'th');
+            });
+            
+            recordCount.textContent = `${sortedRentals.length} รายการ`;
+            
+            const total = sortedRentals.reduce((sum, rental) => sum + (parseFloat(rental.lockFee) || 0) + (parseFloat(rental.commonFee) || 0), 0);
+            totalAmount.textContent = formatCurrency(total);
+
+            if (sortedRentals.length === 0) {
+                spreadsheetBody.innerHTML = `
+                    <tr>
+                        <td colspan="19" class="text-center text-secondary py-8">
+                            <div>
+                                <span class="text-4xl mb-2 block">📊</span>
+                                <p>ไม่พบข้อมูลค่าเช่าแผง</p>
+                                <p class="text-sm">ลองค้นหาด้วยคำอื่น หรือเพิ่มข้อมูลใหม่</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            spreadsheetBody.innerHTML = sortedRentals.map((rental, index) => {
+                const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
+                const daysLeftText = daysLeft !== null ? 
+                    (daysLeft <= 0 ? 'หมดอายุแล้ว' : `${daysLeft} วัน`) : 
+                    'ไม่ระบุ';
+                
+                return `
+                    <tr class="fade-in">
+                        <td class="row-number">${index + 1}</td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'tenantName', this)">${rental.tenantName}</td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'building', this)">${rental.building || ''}</td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'stallNumber', this)">${rental.stallNumber}</td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'productType', this)">${rental.productType}</td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'phone', this)">
+                            ${rental.phone ? `<a href="tel:${rental.phone}" class="text-blue-600 hover:underline">${rental.phone}</a>` : ''}
+                        </td>
+                        <td class="editable-cell text-right" onclick="editCell(${rental.id}, 'lockFee', this)">${formatCurrency(rental.lockFee || 0)}</td>
+                        <td class="editable-cell text-right" onclick="editCell(${rental.id}, 'commonFee', this)">${formatCurrency(rental.commonFee || 0)}</td>
+                        <td class="text-right font-semibold text-green-600 dark:text-green-400">${formatCurrency((rental.lockFee || 0) + (rental.commonFee || 0))}</td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'contractStartDate', this)">${formatDate(rental.contractStartDate)}</td>
+                        <td class="text-center">${getDurationText(rental.contractDuration)}</td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'contractEndDate', this)">${formatDate(rental.contractEndDate)}</td>
+                        <td class="text-center ${daysLeft !== null && daysLeft <= 7 ? 'text-red-600 font-bold' : daysLeft !== null && daysLeft <= 15 ? 'text-yellow-600 font-semibold' : ''}">${daysLeftText}</td>
+                        <td class="editable-cell ${getStatusClass(rental.paymentStatus)}" onclick="editCell(${rental.id}, 'paymentStatus', this)">${rental.paymentStatus}</td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'paymentDate', this)">${rental.paymentDate || ''}</td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'guarantorName', this)">${rental.guarantorName || ''}</td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'guarantorPhone', this)">
+                            ${rental.guarantorPhone ? `<a href="tel:${rental.guarantorPhone}" class="text-blue-600 hover:underline">${rental.guarantorPhone}</a>` : ''}
+                        </td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'notes', this)">${rental.notes || ''}</td>
+                        <td class="text-center">
+                            <button onclick="deleteRental(${rental.id})" 
+                                    class="text-red-500 hover:text-red-700 p-1 rounded" title="ลบ">
+                                🗑️
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function editCell(id, field, cellElement) {
+            const rental = rentals.find(r => r.id === id);
+            if (!rental) return;
+            
+            const currentValue = rental[field] || '';
+            const originalContent = cellElement.innerHTML;
+            
+            let inputElement;
+            if (field === 'building') {
+                inputElement = document.createElement('select');
+                inputElement.className = 'cell-input';
+                inputElement.innerHTML = `
+                    <option value="">เลือกอาคาร</option>
+                    <option value="อาคาร A" ${currentValue === 'อาคาร A' ? 'selected' : ''}>อาคาร A</option>
+                    <option value="อาคาร B" ${currentValue === 'อาคาร B' ? 'selected' : ''}>อาคาร B</option>
+                    <option value="อาคาร C" ${currentValue === 'อาคาร C' ? 'selected' : ''}>อาคาร C</option>
+                    <option value="อาคาร D" ${currentValue === 'อาคาร D' ? 'selected' : ''}>อาคาร D</option>
+                    <option value="อาคาร E" ${currentValue === 'อาคาร E' ? 'selected' : ''}>อาคาร E</option>
+                    <option value="โซนกลางแจ้ง" ${currentValue === 'โซนกลางแจ้ง' ? 'selected' : ''}>โซนกลางแจ้ง</option>
+                `;
+            } else if (field === 'productType') {
+                inputElement = document.createElement('select');
+                inputElement.className = 'cell-input';
+                inputElement.innerHTML = `
+                    <option value="">เลือกประเภทสินค้า</option>
+                    <option value="ผัก-ผลไม้" ${currentValue === 'ผัก-ผลไม้' ? 'selected' : ''}>ผัก-ผลไม้</option>
+                    <option value="เนื้อสัตว์" ${currentValue === 'เนื้อสัตว์' ? 'selected' : ''}>เนื้อสัตว์</option>
+                    <option value="อาหารแห้ง" ${currentValue === 'อาหารแห้ง' ? 'selected' : ''}>อาหารแห้ง</option>
+                    <option value="เครื่องปรุง" ${currentValue === 'เครื่องปรุง' ? 'selected' : ''}>เครื่องปรุง</option>
+                    <option value="ขนม-เครื่องดื่ม" ${currentValue === 'ขนม-เครื่องดื่ม' ? 'selected' : ''}>ขนม-เครื่องดื่ม</option>
+                    <option value="เสื้อผ้า" ${currentValue === 'เสื้อผ้า' ? 'selected' : ''}>เสื้อผ้า</option>
+                    <option value="ของใช้ในบ้าน" ${currentValue === 'ของใช้ในบ้าน' ? 'selected' : ''}>ของใช้ในบ้าน</option>
+                    <option value="เครื่องสำอาง" ${currentValue === 'เครื่องสำอาง' ? 'selected' : ''}>เครื่องสำอาง</option>
+                    <option value="อื่นๆ (ระบุ)" ${!['ผัก-ผลไม้', 'เนื้อสัตว์', 'อาหารแห้ง', 'เครื่องปรุง', 'ขนม-เครื่องดื่ม', 'เสื้อผ้า', 'ของใช้ในบ้าน', 'เครื่องสำอาง'].includes(currentValue) && currentValue ? 'selected' : ''}>อื่นๆ (ระบุ)</option>
+                `;
+            } else if (field === 'paymentStatus') {
+                inputElement = document.createElement('select');
+                inputElement.className = 'cell-input';
+                inputElement.innerHTML = `
+                    <option value="">เลือกสถานะ</option>
+                    <option value="ทำสัญญาแล้ว" ${currentValue === 'ทำสัญญาแล้ว' ? 'selected' : ''}>ทำสัญญาแล้ว</option>
+                    <option value="รอทำสัญญา" ${currentValue === 'รอทำสัญญา' ? 'selected' : ''}>รอทำสัญญา</option>
+                    <option value="สัญญาหมดอายุ" ${currentValue === 'สัญญาหมดอายุ' ? 'selected' : ''}>สัญญาหมดอายุ</option>
+                    <option value="ย้ายออกแล้ว" ${currentValue === 'ย้ายออกแล้ว' ? 'selected' : ''}>ย้ายออกแล้ว</option>
+                `;
+            } else if (field === 'lockFee' || field === 'commonFee') {
+                inputElement = document.createElement('input');
+                inputElement.type = 'number';
+                inputElement.className = 'cell-input';
+                inputElement.value = currentValue;
+            } else if (field === 'contractStartDate' || field === 'contractEndDate') {
+                inputElement = document.createElement('input');
+                inputElement.type = 'date';
+                inputElement.className = 'cell-input';
+                inputElement.value = currentValue;
+            } else if (field === 'paymentDate') {
+                inputElement = document.createElement('select');
+                inputElement.className = 'cell-input';
+                inputElement.innerHTML = `
+                    <option value="">เลือกรูปแบบการชำระ</option>
+                    <option value="รายเดือน" ${currentValue === 'รายเดือน' ? 'selected' : ''}>รายเดือน</option>
+                    <option value="ราย10วัน" ${currentValue === 'ราย10วัน' ? 'selected' : ''}>ราย10วัน</option>
+                `;
+            } else {
+                inputElement = document.createElement('input');
+                inputElement.type = 'text';
+                inputElement.className = 'cell-input';
+                inputElement.value = currentValue;
+            }
+            
+            cellElement.innerHTML = '';
+            cellElement.appendChild(inputElement);
+            inputElement.focus();
+            
+            function saveEdit() {
+                const newValue = inputElement.value;
+                rental[field] = newValue;
+                saveToStorage();
+                renderSpreadsheet();
+                updateDashboard();
+                showMessage('แก้ไขข้อมูลเรียบร้อยแล้ว!', 'success');
+            }
+            
+            function cancelEdit() {
+                cellElement.innerHTML = originalContent;
+            }
+            
+            inputElement.addEventListener('blur', saveEdit);
+            inputElement.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    saveEdit();
+                } else if (e.key === 'Escape') {
+                    cancelEdit();
+                }
+            });
+        }
+
+        function deleteRental(id) {
+            showConfirmModal(
+                'ต้องการลบข้อมูลนี้หรือไม่?',
+                () => {
+                    rentals = rentals.filter(rental => rental.id !== id);
+                    saveToStorage();
+                    renderSpreadsheet();
+                    updateDashboard();
+                    showMessage('ลบข้อมูลเรียบร้อยแล้ว!', 'success');
+                }
+            );
+        }
+
+        function addNewRow() {
+            const newRental = {
+                id: nextId++,
+                tenantName: '',
+                building: '',
+                stallNumber: '',
+                productType: '',
+                phone: '',
+                lockFee: 0,
+                commonFee: 0,
+                contractStartDate: '',
+                contractEndDate: '',
+                paymentStatus: '',
+                paymentDate: '',
+                guarantorName: '',
+                guarantorPhone: '',
+                guarantorRelation: '',
+                guarantorAddress: '',
+                notes: '',
+                createdAt: new Date().toISOString()
+            };
+            
+            rentals.unshift(newRental);
+            saveToStorage();
+            renderSpreadsheet();
+            updateDashboard();
+            showMessage('เพิ่มแถวใหม่เรียบร้อยแล้ว!', 'success');
+        }
+
+        function exportData() {
+            if (rentals.length === 0) {
+                showMessage('ไม่มีข้อมูลให้ส่งออก', 'warning');
+                return;
+            }
+
+            const headers = ['ชื่อผู้เช่า', 'อาคาร', 'หมายเลขแผง', 'ประเภทสินค้า', 'เบอร์โทรศัพท์', 'ค่าล็อค', 'ค่าส่วนกลาง', 'รวม', 'วันเริ่มสัญญา', 'วันสิ้นสุดสัญญา', 'วันที่เหลือ', 'สถานะการทำสัญญา', 'รูปแบบการชำระ', 'ผู้ค้ำประกัน', 'เบอร์ผู้ค้ำประกัน', 'ความสัมพันธ์', 'ที่อยู่ผู้ค้ำประกัน', 'หมายเหตุ'];
+            const csvContent = [
+                headers.join(','),
+                ...rentals.map(rental => {
+                    const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
+                    const daysLeftText = daysLeft !== null ? 
+                        (daysLeft <= 0 ? 'หมดอายุแล้ว' : `${daysLeft} วัน`) : 
+                        'ไม่ระบุ';
+                    
+                    return [
+                        `"${rental.tenantName}"`,
+                        `"${rental.building || ''}"`,
+                        `"${rental.stallNumber}"`,
+                        `"${rental.productType}"`,
+                        `"${rental.phone || ''}"`,
+                        `"${rental.lockFee || 0}"`,
+                        `"${rental.commonFee || 0}"`,
+                        `"${(rental.lockFee || 0) + (rental.commonFee || 0)}"`,
+                        `"${formatDate(rental.contractStartDate)}"`,
+                        `"${formatDate(rental.contractEndDate)}"`,
+                        `"${daysLeftText}"`,
+                        `"${rental.paymentStatus || ''}"`,
+                        `"${rental.paymentDate || ''}"`,
+                        `"${rental.guarantorName || ''}"`,
+                        `"${rental.guarantorPhone || ''}"`,
+                        `"${rental.guarantorRelation || ''}"`,
+                        `"${rental.guarantorAddress || ''}"`,
+                        `"${rental.notes || ''}"`
+                    ].join(',');
+                })
+            ].join('\n');
+
+            const encoder = new TextEncoder();
+            const utf8Data = encoder.encode('\ufeff' + csvContent);
+            const blob = new Blob([utf8Data], { type: 'text/csv;charset=utf-8;' });
+            
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `ข้อมูลค่าเช่าแผง_${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showMessage('ส่งออกข้อมูลเรียบร้อยแล้ว!', 'success');
+        }
+
+        function backupData() {
+            if (rentals.length === 0) {
+                showMessage('ไม่มีข้อมูลให้สำรอง', 'warning');
+                return;
+            }
+
+            const backupData = {
+                rentals: rentals,
+                nextId: nextId,
+                backupDate: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `สำรองข้อมูลค่าเช่าแผง_${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}.json`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showMessage('สำรองข้อมูลเรียบร้อยแล้ว!', 'success');
+        }
+
+        function copyForGoogleSheets() {
+            if (rentals.length === 0) {
+                showMessage('ไม่มีข้อมูลให้คัดลอก', 'warning');
+                return;
+            }
+
+            const headers = ['ชื่อผู้เช่า', 'อาคาร', 'หมายเลขแผง', 'ประเภทสินค้า', 'เบอร์โทรศัพท์', 'ค่าล็อค', 'ค่าส่วนกลาง', 'รวม', 'วันเริ่มสัญญา', 'วันสิ้นสุดสัญญา', 'วันที่เหลือ', 'สถานะการทำสัญญา', 'รูปแบบการชำระ', 'ผู้ค้ำประกัน', 'เบอร์ผู้ค้ำประกัน', 'ความสัมพันธ์', 'ที่อยู่ผู้ค้ำประกัน', 'หมายเหตุ'];
+            
+            const data = rentals.map(rental => {
+                const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
+                const daysLeftText = daysLeft !== null ? 
+                    (daysLeft <= 0 ? 'หมดอายุแล้ว' : `${daysLeft} วัน`) : 
+                    'ไม่ระบุ';
+                
+                return [
+                    rental.tenantName || '',
+                    rental.building || '',
+                    rental.stallNumber || '',
+                    rental.productType || '',
+                    rental.phone || '',
+                    rental.lockFee || 0,
+                    rental.commonFee || 0,
+                    (rental.lockFee || 0) + (rental.commonFee || 0),
+                    formatDate(rental.contractStartDate),
+                    formatDate(rental.contractEndDate),
+                    daysLeftText,
+                    rental.paymentStatus || '',
+                    rental.paymentDate || '',
+                    rental.guarantorName || '',
+                    rental.guarantorPhone || '',
+                    rental.guarantorRelation || '',
+                    rental.guarantorAddress || '',
+                    rental.notes || ''
+                ];
+            });
+
+            const allData = [headers, ...data];
+            const tsvContent = allData.map(row => row.join('\t')).join('\n');
+            
+            // ลองใช้ Clipboard API ก่อน
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(tsvContent).then(() => {
+                    showMessage(`คัดลอกข้อมูล ${rentals.length} รายการเรียบร้อย! ไปวางใน Google Sheets ได้เลย`, 'success');
+                }).catch((err) => {
+                    console.log('Clipboard API failed, trying fallback:', err);
+                    copyToClipboardFallback(tsvContent);
+                });
+            } else {
+                // ใช้วิธีสำรอง
+                copyToClipboardFallback(tsvContent);
+            }
+        }
+
+        function copyToClipboardFallback(text) {
+            try {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (successful) {
+                    showMessage(`คัดลอกข้อมูล ${rentals.length} รายการเรียบร้อย! ไปวางใน Google Sheets ได้เลย`, 'success');
+                } else {
+                    showMessage('ไม่สามารถคัดลอกได้ กรุณาลองใหม่อีกครั้ง', 'error');
+                }
+            } catch (err) {
+                console.error('Copy failed:', err);
+                showMessage('เกิดข้อผิดพลาดในการคัดลอก กรุณาลองใหม่อีกครั้ง', 'error');
+            }
+        }
+
+        function showPasteFromSheetsModal() {
+            const modal = document.getElementById('pasteFromSheetsModal');
+            const textarea = document.getElementById('sheetsDataInput');
+            
+            if (modal && textarea) {
+                modal.classList.remove('hidden');
+                textarea.value = '';
+                setTimeout(() => {
+                    textarea.focus();
+                }, 100);
+            } else {
+                console.error('Modal elements not found');
+                showMessage('เกิดข้อผิดพลาดในการเปิดหน้าต่าง', 'error');
+            }
+        }
+
+        function closePasteFromSheetsModal() {
+            const modal = document.getElementById('pasteFromSheetsModal');
+            modal.classList.add('hidden');
+        }
+
+        function importFromSheets() {
+            const textarea = document.getElementById('sheetsDataInput');
+            const importModeElement = document.querySelector('input[name="importMode"]:checked');
+            
+            if (!textarea) {
+                showMessage('ไม่พบช่องข้อมูล', 'error');
                 return;
             }
             
-            table.innerHTML = `
-                <table class="w-full">
-                    <thead>
-                        <tr class="border-b">
-                            <th class="text-left py-3 px-4">ชื่อผู้ใช้</th>
-                            <th class="text-left py-3 px-4">อีเมล</th>
-                            <th class="text-left py-3 px-4">ระดับสมาชิก</th>
-                            <th class="text-left py-3 px-4">สถานะ</th>
-                            <th class="text-left py-3 px-4">วันที่สมัคร</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${users.map(user => `
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="py-3 px-4 font-medium">${user.username || user.email.split('@')[0]}</td>
-                                <td class="py-3 px-4">${user.email}</td>
-                                <td class="py-3 px-4">
-                                    <span class="px-2 py-1 rounded-full text-xs font-medium ${user.vipLevel === 'vip' ? 'vip-badge' : 'bg-gray-100 text-gray-800'}">
-                                        ${user.vipLevel === 'vip' ? '⭐ VIP' : 'ฟรี'}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4">
-                                    <span class="px-2 py-1 rounded-full text-xs font-medium ${user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                                        ${user.status === 'active' ? '✅ ใช้งานได้' : '🚫 ถูกแบน'}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4">${new Date(user.createdAt).toLocaleDateString('th-TH')}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
+            if (!importModeElement) {
+                showMessage('กรุณาเลือกรูปแบบการนำเข้า', 'warning');
+                return;
+            }
+            
+            const importMode = importModeElement.value;
+            const data = textarea.value.trim();
+            
+            if (!data) {
+                showMessage('กรุณาวางข้อมูลจาก Google Sheets', 'warning');
+                return;
+            }
+
+            try {
+                const lines = data.split('\n').filter(line => line.trim());
+                if (lines.length < 2) {
+                    showMessage('ข้อมูลไม่ครบถ้วน กรุณาตรวจสอบว่ามีหัวตารางและข้อมูลอย่างน้อย 1 แถว', 'error');
+                    return;
+                }
+
+                const headerLine = lines[0];
+                const expectedHeaders = ['ชื่อผู้เช่า', 'อาคาร', 'หมายเลขแผง', 'ประเภทสินค้า'];
+                const hasValidHeaders = expectedHeaders.some(header => headerLine.includes(header));
+                
+                if (!hasValidHeaders) {
+                    showMessage('ไม่พบหัวตารางที่ถูกต้อง กรุณาตรวจสอบว่าได้คัดลอกหัวตารางมาด้วย', 'error');
+                    return;
+                }
+
+                const importedRentals = [];
+                const dataLines = lines.slice(1);
+
+                for (let i = 0; i < dataLines.length; i++) {
+                    const line = dataLines[i].trim();
+                    if (!line) continue;
+
+                    let columns = line.split('\t');
+                    if (columns.length === 1) {
+                        columns = line.split(',');
+                    }
+
+                    if (columns.length >= 3 && columns[0].trim() && columns[2].trim()) {
+                        const parseThaiDate = (dateStr) => {
+                            if (!dateStr) return '';
+                            const cleanStr = dateStr.trim();
+                            
+                            // ตรวจสอบรูปแบบ dd/mm/yyyy
+                            const parts = cleanStr.split('/');
+                            if (parts.length === 3) {
+                                const day = parts[0].padStart(2, '0');
+                                const month = parts[1].padStart(2, '0');
+                                const year = parts[2];
+                                return `${year}-${month}-${day}`;
+                            }
+                            
+                            // ถ้าเป็นรูปแบบ yyyy-mm-dd อยู่แล้ว
+                            if (cleanStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                                return cleanStr;
+                            }
+                            
+                            return '';
+                        };
+
+                        const rental = {
+                            id: nextId++,
+                            tenantName: columns[0].trim(),
+                            building: columns[1] ? columns[1].trim() : '',
+                            stallNumber: columns[2].trim(),
+                            productType: columns[3] ? columns[3].trim() : '',
+                            phone: columns[4] ? columns[4].trim() : '',
+                            lockFee: columns[5] ? parseFloat(columns[5].replace(/[^\d.-]/g, '')) || 0 : 0,
+                            commonFee: columns[6] ? parseFloat(columns[6].replace(/[^\d.-]/g, '')) || 0 : 0,
+                            contractStartDate: columns[8] ? parseThaiDate(columns[8]) : '',
+                            contractEndDate: columns[9] ? parseThaiDate(columns[9]) : '',
+                            paymentStatus: columns[11] ? columns[11].trim() : '',
+                            paymentDate: columns[12] ? columns[12].trim() : '',
+                            guarantorName: columns[13] ? columns[13].trim() : '',
+                            guarantorPhone: columns[14] ? columns[14].trim() : '',
+                            guarantorRelation: columns[15] ? columns[15].trim() : '',
+                            guarantorAddress: columns[16] ? columns[16].trim() : '',
+                            notes: columns[17] ? columns[17].trim() : '',
+                            createdAt: new Date().toISOString()
+                        };
+
+                        importedRentals.push(rental);
+                    }
+                }
+
+                if (importedRentals.length === 0) {
+                    showMessage('ไม่พบข้อมูลที่ถูกต้องในข้อมูลที่วาง กรุณาตรวจสอบรูปแบบข้อมูล', 'error');
+                    return;
+                }
+
+                if (importMode === 'replace') {
+                    rentals = importedRentals;
+                } else {
+                    rentals = [...importedRentals, ...rentals];
+                }
+
+                saveToStorage();
+                renderSpreadsheet();
+                updateDashboard();
+                closePasteFromSheetsModal();
+                
+                const modeText = importMode === 'replace' ? 'แทนที่ข้อมูลเดิม' : 'เพิ่มเข้าไปในข้อมูลเดิม';
+                showMessage(`นำเข้าข้อมูล ${importedRentals.length} รายการเรียบร้อย (${modeText})`, 'success');
+
+            } catch (error) {
+                console.error('Import error:', error);
+                showMessage('เกิดข้อผิดพลาดในการนำเข้าข้อมูล: ' + error.message, 'error');
+            }
         }
 
-        // Event listeners for popups
-        document.addEventListener('click', function(e) {
-            // Close popups when clicking outside
-            if (e.target.id === 'messagePopup') closeMessagePopup();
-            if (e.target.id === 'vipPopup') closeVipPopup();
-            if (e.target.id === 'editMessagePopup') closeEditMessagePopup();
-        });
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                if (!document.getElementById('messagePopup').classList.contains('hidden')) closeMessagePopup();
-                if (!document.getElementById('vipPopup').classList.contains('hidden')) closeVipPopup();
-                if (!document.getElementById('editMessagePopup').classList.contains('hidden')) closeEditMessagePopup();
+        function printReport() {
+            if (rentals.length === 0) {
+                showMessage('ไม่มีข้อมูลให้พิมพ์', 'warning');
+                return;
             }
+
+            const stats = calculateStatistics();
+            const now = new Date();
+            const printWindow = window.open('', '_blank');
+            
+            const printContent = `
+                <!DOCTYPE html>
+                <html lang="th">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>รายงานข้อมูลค่าเช่าแผงในตลาด</title>
+                    <style>
+                        body { font-family: 'Sarabun', Arial, sans-serif; margin: 20px; color: #333; }
+                        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 15px; }
+                        .header h1 { margin: 0; font-size: 24px; }
+                        .header p { margin: 5px 0; color: #666; }
+                        .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+                        .summary-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #f9f9f9; }
+                        .summary-card h3 { margin: 0 0 10px 0; font-size: 14px; color: #666; }
+                        .summary-card .value { font-size: 20px; font-weight: bold; color: #333; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f5f5f5; font-weight: bold; }
+                        .text-right { text-align: right; }
+                        .text-center { text-align: center; }
+                        .status-paid { background: #dcfce7; }
+                        .status-pending { background: #fef3c7; }
+                        .status-overdue { background: #fee2e2; }
+                        .status-moved-out { background: #e0e7ff; }
+                        .urgent { color: #dc2626; font-weight: bold; }
+                        .warning { color: #d97706; font-weight: bold; }
+                        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; border-top: 1px solid #ddd; padding-top: 15px; }
+                        @media print {
+                            body { margin: 0; }
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>รายงานข้อมูลค่าเช่าแผงในตลาด</h1>
+                        <p>วันที่พิมพ์: ${now.toLocaleDateString('th-TH', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric',
+                            weekday: 'long'
+                        })}</p>
+                        <p>เวลา: ${now.toLocaleTimeString('th-TH')}</p>
+                    </div>
+
+                    <div class="summary">
+                        <div class="summary-card">
+                            <h3>💰 รายได้รวมต่อเดือน</h3>
+                            <div class="value">${formatCurrency(stats.totalRevenue)} บาท</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>🏪 จำนวนแผงที่เช่า</h3>
+                            <div class="value">${stats.totalStalls} แผง</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>⏰ สัญญาใกล้หมดอายุ (30 วัน)</h3>
+                            <div class="value">${stats.expiringSoon} สัญญา</div>
+                        </div>
+                        <div class="summary-card">
+                            <h3>🚨 สัญญาหมดอายุแล้ว</h3>
+                            <div class="value">${stats.expired} สัญญา</div>
+                        </div>
+                    </div>
+
+                    <h2>📋 รายละเอียดข้อมูลทั้งหมด</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ลำดับ</th>
+                                <th>ชื่อผู้เช่า</th>
+                                <th>อาคาร-แผง</th>
+                                <th>ประเภทสินค้า</th>
+                                <th>เบอร์โทร</th>
+                                <th class="text-right">ค่าล็อค</th>
+                                <th class="text-right">ค่าส่วนกลาง</th>
+                                <th class="text-right">รวม</th>
+                                <th>วันสิ้นสุดสัญญา</th>
+                                <th class="text-center">วันที่เหลือ</th>
+                                <th>สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rentals.map((rental, index) => {
+                                const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
+                                const daysLeftText = daysLeft !== null ? 
+                                    (daysLeft <= 0 ? 'หมดอายุแล้ว' : `${daysLeft} วัน`) : 
+                                    'ไม่ระบุ';
+                                const urgencyClass = daysLeft !== null && daysLeft <= 7 ? 'urgent' : 
+                                                   daysLeft !== null && daysLeft <= 15 ? 'warning' : '';
+                                
+                                return `
+                                    <tr>
+                                        <td class="text-center">${index + 1}</td>
+                                        <td>${rental.tenantName}</td>
+                                        <td>${rental.building} - ${rental.stallNumber}</td>
+                                        <td>${rental.productType}</td>
+                                        <td>${rental.phone || '-'}</td>
+                                        <td class="text-right">${formatCurrency(rental.lockFee || 0)}</td>
+                                        <td class="text-right">${formatCurrency(rental.commonFee || 0)}</td>
+                                        <td class="text-right">${formatCurrency((rental.lockFee || 0) + (rental.commonFee || 0))}</td>
+                                        <td>${formatDate(rental.contractEndDate)}</td>
+                                        <td class="text-center ${urgencyClass}">${daysLeftText}</td>
+                                        <td class="${getStatusClass(rental.paymentStatus)}">${rental.paymentStatus}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+
+                    <div class="footer">
+                        <p>รายงานนี้สร้างโดยระบบบันทึกข้อมูลผู้ค้าในตลาด</p>
+                        <p>จำนวนรายการทั้งหมด: ${rentals.length} รายการ | รายได้รวม: ${formatCurrency(stats.totalRevenue)} บาท</p>
+                    </div>
+
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+            
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+        }
+
+        function clearAllData() {
+            if (rentals.length === 0) {
+                showMessage('ไม่มีข้อมูลให้ล้าง', 'warning');
+                return;
+            }
+            
+            showConfirmModal(
+                `ต้องการล้างข้อมูลทั้งหมด ${rentals.length} รายการหรือไม่? การกระทำนี้ไม่สามารถยกเลิกได้`,
+                () => {
+                    rentals = [];
+                    nextId = 1;
+                    saveToStorage();
+                    renderSpreadsheet();
+                    updateDashboard();
+                    showMessage('ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว!', 'success');
+                }
+            );
+        }
+
+        function showNotifications() {
+            // Placeholder function for notifications
+            showMessage('ฟีเจอร์การแจ้งเตือนจะเพิ่มในอนาคต', 'warning');
+        }
+
+        function closeNotificationsModal() {
+            // Placeholder function
+        }
+
+        function markAllNotificationsRead() {
+            // Placeholder function
+        }
+
+        document.getElementById('rentalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const productTypeSelect = document.getElementById('productType').value;
+            const customProductType = document.getElementById('customProductType').value;
+            const finalProductType = productTypeSelect === 'อื่นๆ (ระบุ)' ? customProductType : productTypeSelect;
+            
+            const formData = {
+                id: nextId++,
+                tenantName: document.getElementById('tenantName').value,
+                building: document.getElementById('building').value,
+                stallNumber: document.getElementById('stallNumber').value,
+                productType: finalProductType,
+                phone: document.getElementById('phoneNumber').value,
+                lockFee: parseFloat(document.getElementById('lockFee').value) || 0,
+                commonFee: parseFloat(document.getElementById('commonFee').value) || 0,
+                contractStartDate: document.getElementById('contractStartDate').value,
+                contractDuration: document.getElementById('contractDuration').value,
+                contractEndDate: document.getElementById('contractEndDate').value,
+                paymentStatus: document.getElementById('paymentStatus').value,
+                paymentDate: document.getElementById('paymentDate').value,
+                guarantorName: document.getElementById('guarantorName').value,
+                guarantorPhone: document.getElementById('guarantorPhone').value,
+                guarantorRelation: document.getElementById('guarantorRelation').value,
+                guarantorAddress: document.getElementById('guarantorAddress').value,
+                notes: document.getElementById('notes').value,
+                createdAt: new Date().toISOString()
+            };
+            
+            rentals.unshift(formData);
+            saveToStorage();
+            renderSpreadsheet();
+            updateDashboard();
+            this.reset();
+            
+            // Reset custom product type field
+            const customProductTypeInput = document.getElementById('customProductType');
+            customProductTypeInput.classList.add('hidden');
+            customProductTypeInput.required = false;
+            
+            showMessage('บันทึกข้อมูลเรียบร้อยแล้ว!', 'success');
         });
 
-        // Initialize app when page loads
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'982fc0d27403ef6e',t:'MTc1ODUyMjYyMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-</html>
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            if (!searchTerm) {
+                renderSpreadsheet();
+                return;
+            }
+            
+            const filteredRentals = rentals.filter(rental => 
+                rental.tenantName.toLowerCase().includes(searchTerm) ||
+                rental.building.toLowerCase().includes(searchTerm) ||
+                rental.stallNumber.toLowerCase().includes(searchTerm) ||
+                rental.productType.toLowerCase().includes(searchTerm) ||
+                (rental.phone && rental.phone.includes(searchTerm)) ||
+                (rental.guarantorName && rental.guarantorName.toLowerCase().includes(searchTerm))
+            );
+            
+            renderSpreadsheet(filteredRentals);
+        });
+
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    if (file.name.endsWith('.csv')) {
+                        const text = e.target.result;
+                        const lines = text.split('\n');
+                        const importedRentals = [];
+                        
+                        for (let i = 1; i < lines.length; i++) {
+                            const line = lines[i].trim();
+                            if (!line) continue;
+                            
+                            const columns = line.split(',').map(col => col.replace(/"/g, '').trim());
+                            if (columns.length >= 2 && columns[0] && columns[2]) {
+                                importedRentals.push({
+                                    id: nextId++,
+                                    tenantName: columns[0],
+                                    building: columns[1] || '',
+                                    stallNumber: columns[2],
+                                    productType: columns[3] || '',
+                                    phone: columns[4] || '',
+                                    lockFee: parseFloat(columns[5]) || 0,
+                                    commonFee: parseFloat(columns[6]) || 0,
+                                    contractStartDate: columns[8] || '',
+                                    contractEndDate: columns[9] || '',
+                                    paymentStatus: columns[11] || '',
+                                    paymentDate: columns[12] || '',
+                                    guarantorName: columns[13] || '',
+                                    guarantorPhone: columns[14] || '',
+                                    guarantorRelation: columns[15] || '',
+                                    guarantorAddress: columns[16] || '',
+                                    notes: columns[17] || '',
+                                    createdAt: new Date().toISOString()
+                                });
+                            }
+                        }
+                        
+                        if (importedRentals.length > 0) {
+                            rentals = [...importedRentals, ...rentals];
+                            saveToStorage();
+                            renderSpreadsheet();
+                            updateDashboard();
+                            showMessage(`นำเข้าข้อมูล ${importedRentals.length} รายการเรียบร้อย!`, 'success');
+                        } else {
+                            showMessage('ไม่พบข้อมูลที่ถูกต้องในไฟล์', 'error');
+                        }
+                    } else if (file.name.endsWith('.json
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e4383c450a9e3b',t:'MTc2MDQxNDk1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
