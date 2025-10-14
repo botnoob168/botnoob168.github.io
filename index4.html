@@ -378,15 +378,30 @@
                     <label class="block text-sm font-medium text-primary mb-1">ระยะเวลาสัญญา</label>
                     <select id="contractDuration" 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            onchange="calculateEndDate()">
+                            onchange="toggleCustomDuration()">
                         <option value="">เลือกระยะเวลา</option>
                         <option value="3m">3 เดือน</option>
                         <option value="6m">6 เดือน</option>
                         <option value="1y">1 ปี</option>
                         <option value="2y">2 ปี</option>
                         <option value="3y">3 ปี</option>
-                        <option value="custom">กำหนดเอง</option>
+                        <option value="custom">ระบุเอง</option>
                     </select>
+                    <div id="customDurationContainer" class="mt-2 hidden">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" id="customDurationValue" min="1" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="จำนวน" onchange="calculateEndDate()">
+                            <select id="customDurationUnit" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    onchange="calculateEndDate()">
+                                <option value="">หน่วย</option>
+                                <option value="days">วัน</option>
+                                <option value="months">เดือน</option>
+                                <option value="years">ปี</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
@@ -412,8 +427,9 @@
                     <select id="paymentDate" 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">เลือกรูปแบบการชำระ</option>
-                        <option value="รายเดือน">รายเดือน</option>
+                        <option value="รายวัน">รายวัน</option>
                         <option value="ราย10วัน">ราย10วัน</option>
+                        <option value="รายเดือน">รายเดือน</option>
                     </select>
                 </div>
 
@@ -798,53 +814,108 @@
             return diffDays;
         }
 
-        function getDurationText(duration) {
-            switch(duration) {
+        function getDurationText(rental) {
+            if (!rental.contractDuration) return '';
+            
+            switch(rental.contractDuration) {
                 case '3m': return '3 เดือน';
                 case '6m': return '6 เดือน';
                 case '1y': return '1 ปี';
                 case '2y': return '2 ปี';
                 case '3y': return '3 ปี';
-                case 'custom': return 'กำหนดเอง';
+                case 'custom': 
+                    if (rental.customDurationValue && rental.customDurationUnit) {
+                        const unitText = {
+                            'days': 'วัน',
+                            'months': 'เดือน', 
+                            'years': 'ปี'
+                        };
+                        return `${rental.customDurationValue} ${unitText[rental.customDurationUnit] || rental.customDurationUnit}`;
+                    }
+                    return 'กำหนดเอง';
                 default: return '';
             }
+        }
+
+        function toggleCustomDuration() {
+            const duration = document.getElementById('contractDuration').value;
+            const customContainer = document.getElementById('customDurationContainer');
+            const customValue = document.getElementById('customDurationValue');
+            const customUnit = document.getElementById('customDurationUnit');
+            
+            if (duration === 'custom') {
+                customContainer.classList.remove('hidden');
+                customValue.required = true;
+                customUnit.required = true;
+                customValue.focus();
+            } else {
+                customContainer.classList.add('hidden');
+                customValue.required = false;
+                customUnit.required = false;
+                customValue.value = '';
+                customUnit.value = '';
+            }
+            
+            calculateEndDate();
         }
 
         function calculateEndDate() {
             const startDate = document.getElementById('contractStartDate').value;
             const duration = document.getElementById('contractDuration').value;
+            const customValue = document.getElementById('customDurationValue').value;
+            const customUnit = document.getElementById('customDurationUnit').value;
             const endDateInput = document.getElementById('contractEndDate');
             
-            if (!startDate || !duration || duration === 'custom') {
-                if (duration === 'custom') {
-                    endDateInput.disabled = false;
-                    endDateInput.focus();
-                }
+            if (!startDate) {
                 return;
             }
             
             const start = new Date(startDate);
             let endDate = new Date(start);
             
-            switch(duration) {
-                case '3m':
-                    endDate.setMonth(endDate.getMonth() + 3);
-                    break;
-                case '6m':
-                    endDate.setMonth(endDate.getMonth() + 6);
-                    break;
-                case '1y':
-                    endDate.setFullYear(endDate.getFullYear() + 1);
-                    break;
-                case '2y':
-                    endDate.setFullYear(endDate.getFullYear() + 2);
-                    break;
-                case '3y':
-                    endDate.setFullYear(endDate.getFullYear() + 3);
-                    break;
+            if (duration === 'custom') {
+                if (!customValue || !customUnit) {
+                    endDateInput.disabled = false;
+                    return;
+                }
+                
+                const value = parseInt(customValue);
+                switch(customUnit) {
+                    case 'days':
+                        endDate.setDate(endDate.getDate() + value);
+                        break;
+                    case 'months':
+                        endDate.setMonth(endDate.getMonth() + value);
+                        break;
+                    case 'years':
+                        endDate.setFullYear(endDate.getFullYear() + value);
+                        break;
+                }
+                endDate.setDate(endDate.getDate() - 1);
+            } else if (duration) {
+                switch(duration) {
+                    case '3m':
+                        endDate.setMonth(endDate.getMonth() + 3);
+                        break;
+                    case '6m':
+                        endDate.setMonth(endDate.getMonth() + 6);
+                        break;
+                    case '1y':
+                        endDate.setFullYear(endDate.getFullYear() + 1);
+                        break;
+                    case '2y':
+                        endDate.setFullYear(endDate.getFullYear() + 2);
+                        break;
+                    case '3y':
+                        endDate.setFullYear(endDate.getFullYear() + 3);
+                        break;
+                }
+                endDate.setDate(endDate.getDate() - 1);
+            } else {
+                endDateInput.disabled = false;
+                return;
             }
             
-            endDate.setDate(endDate.getDate() - 1);
             endDateInput.value = endDate.toISOString().split('T')[0];
             endDateInput.disabled = true;
         }
@@ -1260,7 +1331,7 @@
                         <td class="editable-cell text-right" onclick="editCell(${rental.id}, 'commonFee', this)">${formatCurrency(rental.commonFee || 0)}</td>
                         <td class="text-right font-semibold text-green-600 dark:text-green-400">${formatCurrency((rental.lockFee || 0) + (rental.commonFee || 0))}</td>
                         <td class="editable-cell" onclick="editCell(${rental.id}, 'contractStartDate', this)">${formatDate(rental.contractStartDate)}</td>
-                        <td class="text-center">${getDurationText(rental.contractDuration)}</td>
+                        <td class="text-center">${getDurationText(rental)}</td>
                         <td class="editable-cell" onclick="editCell(${rental.id}, 'contractEndDate', this)">${formatDate(rental.contractEndDate)}</td>
                         <td class="text-center ${daysLeft !== null && daysLeft <= 7 ? 'text-red-600 font-bold' : daysLeft !== null && daysLeft <= 15 ? 'text-yellow-600 font-semibold' : ''}">${daysLeftText}</td>
                         <td class="editable-cell ${getStatusClass(rental.paymentStatus)}" onclick="editCell(${rental.id}, 'paymentStatus', this)">${rental.paymentStatus}</td>
@@ -1341,8 +1412,9 @@
                 inputElement.className = 'cell-input';
                 inputElement.innerHTML = `
                     <option value="">เลือกรูปแบบการชำระ</option>
-                    <option value="รายเดือน" ${currentValue === 'รายเดือน' ? 'selected' : ''}>รายเดือน</option>
+                    <option value="รายวัน" ${currentValue === 'รายวัน' ? 'selected' : ''}>รายวัน</option>
                     <option value="ราย10วัน" ${currentValue === 'ราย10วัน' ? 'selected' : ''}>ราย10วัน</option>
+                    <option value="รายเดือน" ${currentValue === 'รายเดือน' ? 'selected' : ''}>รายเดือน</option>
                 `;
             } else {
                 inputElement = document.createElement('input');
@@ -1540,10 +1612,10 @@
             const tsvContent = allData.map(row => row.join('\t')).join('\n');
             
             // ลองใช้ Clipboard API ก่อน
-            if (navigator.clipboard && navigator.clipboard.writeText) {
+            if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(tsvContent).then(() => {
-                    showMessage(`คัดลอกข้อมูล ${rentals.length} รายการเรียบร้อย! ไปวางใน Google Sheets ได้เลย`, 'success');
-                }).catch((err) => {
+                    showMessage(`✅ คัดลอกข้อมูล ${rentals.length} รายการเรียบร้อย! ไปวางใน Google Sheets ได้เลย`, 'success');
+                }).catch(err => {
                     console.log('Clipboard API failed, trying fallback:', err);
                     copyToClipboardFallback(tsvContent);
                 });
@@ -1555,42 +1627,90 @@
 
         function copyToClipboardFallback(text) {
             try {
+                // สร้าง textarea ชั่วคราว
                 const textArea = document.createElement('textarea');
                 textArea.value = text;
-                textArea.style.position = 'fixed';
-                textArea.style.left = '-999999px';
-                textArea.style.top = '-999999px';
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
+                textArea.style.position = 'absolute';
+                textArea.style.left = '-9999px';
+                textArea.style.top = '0';
+                textArea.style.opacity = '0';
+                textArea.style.pointerEvents = 'none';
+                textArea.setAttribute('readonly', '');
+                textArea.setAttribute('tabindex', '-1');
                 
-                const successful = document.execCommand('copy');
+                document.body.appendChild(textArea);
+                
+                // เลือกข้อความ
+                textArea.select();
+                textArea.setSelectionRange(0, textArea.value.length);
+                
+                // คัดลอก
+                let successful = false;
+                try {
+                    successful = document.execCommand('copy');
+                } catch (err) {
+                    console.error('execCommand failed:', err);
+                }
+                
+                // ลบ textarea
                 document.body.removeChild(textArea);
                 
                 if (successful) {
-                    showMessage(`คัดลอกข้อมูล ${rentals.length} รายการเรียบร้อย! ไปวางใน Google Sheets ได้เลย`, 'success');
+                    showMessage(`✅ คัดลอกข้อมูล ${rentals.length} รายการเรียบร้อย! ไปวางใน Google Sheets ได้เลย`, 'success');
                 } else {
-                    showMessage('ไม่สามารถคัดลอกได้ กรุณาลองใหม่อีกครั้ง', 'error');
+                    // ถ้าไม่สำเร็จ ให้แสดงข้อมูลในหน้าต่างใหม่
+                    showCopyDataModal(text);
                 }
             } catch (err) {
                 console.error('Copy failed:', err);
-                showMessage('เกิดข้อผิดพลาดในการคัดลอก กรุณาลองใหม่อีกครั้ง', 'error');
+                showCopyDataModal(text);
             }
+        }
+
+        function showCopyDataModal(data) {
+            // สร้างหน้าต่างแสดงข้อมูลให้คัดลอกเอง
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 mx-4 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">📋 ข้อมูลสำหรับ Google Sheets</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">กรุณาเลือกข้อความด้านล่างทั้งหมด แล้วคัดลอก (Ctrl+C หรือ Cmd+C)</p>
+                    </div>
+                    <textarea readonly class="w-full h-96 p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-mono bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" onclick="this.select()">${data}</textarea>
+                    <div class="mt-4 flex space-x-3">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove(); showMessage('คัดลอกข้อมูลแล้วไปวางใน Google Sheets', 'success');" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg">
+                            ✅ คัดลอกแล้ว
+                        </button>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove();" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg">
+                            ปิด
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // เลือกข้อความทั้งหมดใน textarea
+            const textarea = modal.querySelector('textarea');
+            setTimeout(() => {
+                textarea.focus();
+                textarea.select();
+            }, 100);
         }
 
         function showPasteFromSheetsModal() {
             const modal = document.getElementById('pasteFromSheetsModal');
-            const textarea = document.getElementById('sheetsDataInput');
-            
-            if (modal && textarea) {
+            if (modal) {
                 modal.classList.remove('hidden');
-                textarea.value = '';
-                setTimeout(() => {
-                    textarea.focus();
-                }, 100);
+                const textarea = document.getElementById('sheetsDataInput');
+                if (textarea) {
+                    textarea.value = '';
+                    setTimeout(() => {
+                        textarea.focus();
+                    }, 100);
+                }
             } else {
-                console.error('Modal elements not found');
-                showMessage('เกิดข้อผิดพลาดในการเปิดหน้าต่าง', 'error');
+                showMessage('ไม่พบหน้าต่างสำหรับวางข้อมูล', 'error');
             }
         }
 
@@ -1622,13 +1742,19 @@
             }
 
             try {
+                console.log('Raw data:', data);
+                
                 const lines = data.split('\n').filter(line => line.trim());
+                console.log('Lines found:', lines.length);
+                
                 if (lines.length < 2) {
                     showMessage('ข้อมูลไม่ครบถ้วน กรุณาตรวจสอบว่ามีหัวตารางและข้อมูลอย่างน้อย 1 แถว', 'error');
                     return;
                 }
 
                 const headerLine = lines[0];
+                console.log('Header line:', headerLine);
+                
                 const expectedHeaders = ['ชื่อผู้เช่า', 'อาคาร', 'หมายเลขแผง', 'ประเภทสินค้า'];
                 const hasValidHeaders = expectedHeaders.some(header => headerLine.includes(header));
                 
@@ -1644,10 +1770,14 @@
                     const line = dataLines[i].trim();
                     if (!line) continue;
 
+                    // ลองแยกด้วย Tab ก่อน แล้วค่อย Comma
                     let columns = line.split('\t');
                     if (columns.length === 1) {
                         columns = line.split(',');
                     }
+                    
+                    console.log(`Line ${i + 1}:`, line);
+                    console.log(`Columns (${columns.length}):`, columns);
 
                     if (columns.length >= 3 && columns[0].trim() && columns[2].trim()) {
                         const parseThaiDate = (dateStr) => {
@@ -1692,9 +1822,14 @@
                             createdAt: new Date().toISOString()
                         };
 
+                        console.log('Created rental:', rental);
                         importedRentals.push(rental);
+                    } else {
+                        console.log(`Skipping line ${i + 1}: insufficient data or empty required fields`);
                     }
                 }
+
+                console.log('Total imported rentals:', importedRentals.length);
 
                 if (importedRentals.length === 0) {
                     showMessage('ไม่พบข้อมูลที่ถูกต้องในข้อมูลที่วาง กรุณาตรวจสอบรูปแบบข้อมูล', 'error');
@@ -1713,7 +1848,7 @@
                 closePasteFromSheetsModal();
                 
                 const modeText = importMode === 'replace' ? 'แทนที่ข้อมูลเดิม' : 'เพิ่มเข้าไปในข้อมูลเดิม';
-                showMessage(`นำเข้าข้อมูล ${importedRentals.length} รายการเรียบร้อย (${modeText})`, 'success');
+                showMessage(`✅ นำเข้าข้อมูล ${importedRentals.length} รายการเรียบร้อย (${modeText})`, 'success');
 
             } catch (error) {
                 console.error('Import error:', error);
@@ -1898,6 +2033,7 @@
             const customProductType = document.getElementById('customProductType').value;
             const finalProductType = productTypeSelect === 'อื่นๆ (ระบุ)' ? customProductType : productTypeSelect;
             
+            const contractDuration = document.getElementById('contractDuration').value;
             const formData = {
                 id: nextId++,
                 tenantName: document.getElementById('tenantName').value,
@@ -1908,7 +2044,7 @@
                 lockFee: parseFloat(document.getElementById('lockFee').value) || 0,
                 commonFee: parseFloat(document.getElementById('commonFee').value) || 0,
                 contractStartDate: document.getElementById('contractStartDate').value,
-                contractDuration: document.getElementById('contractDuration').value,
+                contractDuration: contractDuration,
                 contractEndDate: document.getElementById('contractEndDate').value,
                 paymentStatus: document.getElementById('paymentStatus').value,
                 paymentDate: document.getElementById('paymentDate').value,
@@ -1920,6 +2056,12 @@
                 createdAt: new Date().toISOString()
             };
             
+            // เพิ่มข้อมูลระยะเวลาแบบกำหนดเองถ้าเลือก custom
+            if (contractDuration === 'custom') {
+                formData.customDurationValue = document.getElementById('customDurationValue').value;
+                formData.customDurationUnit = document.getElementById('customDurationUnit').value;
+            }
+            
             rentals.unshift(formData);
             saveToStorage();
             renderSpreadsheet();
@@ -1930,6 +2072,14 @@
             const customProductTypeInput = document.getElementById('customProductType');
             customProductTypeInput.classList.add('hidden');
             customProductTypeInput.required = false;
+            
+            // Reset custom duration fields
+            const customDurationContainer = document.getElementById('customDurationContainer');
+            const customDurationValue = document.getElementById('customDurationValue');
+            const customDurationUnit = document.getElementById('customDurationUnit');
+            customDurationContainer.classList.add('hidden');
+            customDurationValue.required = false;
+            customDurationUnit.required = false;
             
             showMessage('บันทึกข้อมูลเรียบร้อยแล้ว!', 'success');
         });
@@ -2003,5 +2153,47 @@
                         } else {
                             showMessage('ไม่พบข้อมูลที่ถูกต้องในไฟล์', 'error');
                         }
-                    } else if (file.name.endsWith('.json
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e4383c450a9e3b',t:'MTc2MDQxNDk1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+                    } else if (file.name.endsWith('.json')) {
+                        const backupData = JSON.parse(e.target.result);
+                        if (backupData.rentals && Array.isArray(backupData.rentals)) {
+                            rentals = backupData.rentals;
+                            nextId = backupData.nextId || rentals.length + 1;
+                            saveToStorage();
+                            renderSpreadsheet();
+                            updateDashboard();
+                            showMessage(`กู้คืนข้อมูล ${rentals.length} รายการเรียบร้อย!`, 'success');
+                        } else {
+                            showMessage('ไฟล์สำรองข้อมูลไม่ถูกต้อง', 'error');
+                        }
+                    }
+                } catch (error) {
+                    showMessage('เกิดข้อผิดพลาดในการอ่านไฟล์: ' + error.message, 'error');
+                }
+            };
+            
+            if (file.name.endsWith('.csv')) {
+                reader.readAsText(file, 'UTF-8');
+            } else if (file.name.endsWith('.json')) {
+                reader.readAsText(file);
+            } else {
+                showMessage('รองรับเฉพาะไฟล์ .csv และ .json เท่านั้น', 'error');
+            }
+            
+            // Reset file input
+            e.target.value = '';
+        });
+
+        // Initialize the application
+        initTheme();
+        renderSpreadsheet();
+        updateDashboard();
+        
+        // Set initial view
+        if (currentView === 'form') {
+            document.getElementById('formView').style.display = 'block';
+        } else {
+            document.getElementById('formView').style.display = 'none';
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e4452206039e3b',t:'MTc2MDQxNTQ3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
