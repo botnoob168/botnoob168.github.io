@@ -6,9 +6,49 @@
     <title>ระบบบันทึกข้อมูลผู้ค้าในตลาด</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        :root {
+            --bg-primary: #f9fafb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f8f9fa;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --hover-bg: #f3f4f6;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --bg-tertiary: #374151;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --border-color: #4b5563;
+            --hover-bg: #374151;
+        }
+
         body {
             box-sizing: border-box;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
+        
+        .bg-card {
+            background-color: var(--bg-secondary);
+        }
+        
+        .border-custom {
+            border-color: var(--border-color);
+        }
+        
+        .text-primary {
+            color: var(--text-primary);
+        }
+        
+        .text-secondary {
+            color: var(--text-secondary);
+        }
+
         .fade-in {
             animation: fadeIn 0.3s ease-in;
         }
@@ -18,37 +58,38 @@
         }
         .table-container {
             overflow-x: auto;
-            border: 1px solid #e5e7eb;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
         }
         .spreadsheet-table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
+            background: var(--bg-secondary);
             font-size: 14px;
         }
         .spreadsheet-table th {
-            background: #f8f9fa;
-            border: 1px solid #e5e7eb;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
             padding: 8px 12px;
             text-align: left;
             font-weight: 600;
-            color: #374151;
+            color: var(--text-primary);
             position: sticky;
             top: 0;
             z-index: 10;
         }
         .spreadsheet-table td {
-            border: 1px solid #e5e7eb;
+            border: 1px solid var(--border-color);
             padding: 8px 12px;
             vertical-align: top;
+            background: var(--bg-secondary);
         }
-        .spreadsheet-table tr:hover {
-            background: #f9fafb;
+        .spreadsheet-table tr:hover td {
+            background: var(--hover-bg);
         }
         .row-number {
-            background: #f8f9fa;
-            color: #6b7280;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
             font-weight: 500;
             text-align: center;
             width: 50px;
@@ -59,12 +100,13 @@
             min-height: 20px;
         }
         .editable-cell:hover {
-            background: #f3f4f6;
+            background: var(--hover-bg);
         }
         .cell-input {
             border: 2px solid #3b82f6;
             outline: none;
-            background: white;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
             width: 100%;
             padding: 4px;
             font-size: 14px;
@@ -72,103 +114,31 @@
         .status-paid { background: #dcfce7; color: #166534; }
         .status-pending { background: #fef3c7; color: #92400e; }
         .status-overdue { background: #fee2e2; color: #dc2626; }
+        .status-moved-out { background: #e0e7ff; color: #3730a3; }
         
-        /* Stall styles */
-        .stall {
-            width: 60px;
-            height: 60px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .stall:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .stall-available {
-            background: #dcfce7;
-            border-color: #16a34a;
-            color: #166534;
-        }
-        .stall-occupied {
-            background: #dbeafe;
-            border-color: #2563eb;
-            color: #1e40af;
-        }
-        .stall-booked {
-            background: #fef3c7;
-            border-color: #d97706;
-            color: #92400e;
-        }
-        .stall-expired {
-            background: #fee2e2;
-            border-color: #dc2626;
-            color: #dc2626;
-        }
-        .stall-expiring {
-            background: #fef3c7;
-            border-color: #f59e0b;
-            color: #92400e;
-            animation: pulse 2s infinite;
+        /* Dark mode adjustments for status colors */
+        [data-theme="dark"] .status-paid { background: #065f46; color: #a7f3d0; }
+        [data-theme="dark"] .status-pending { background: #92400e; color: #fde68a; }
+        [data-theme="dark"] .status-overdue { background: #991b1b; color: #fca5a5; }
+        [data-theme="dark"] .status-moved-out { background: #3730a3; color: #c7d2fe; }
+        
+        /* Form inputs dark mode */
+        [data-theme="dark"] input, 
+        [data-theme="dark"] select, 
+        [data-theme="dark"] textarea {
+            background-color: var(--bg-tertiary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
         }
         
-        /* Notification styles */
-        .notification-item {
-            border-left: 4px solid #e5e7eb;
-            transition: all 0.2s;
-        }
-        .notification-critical {
-            border-left-color: #dc2626;
-            background: #fef2f2;
-        }
-        .notification-warning {
-            border-left-color: #f59e0b;
-            background: #fffbeb;
-        }
-        .notification-info {
-            border-left-color: #3b82f6;
-            background: #eff6ff;
-        }
-        .notification-filter.active {
-            background: #3b82f6 !important;
-            color: white !important;
-        }
-        
-        /* Expiring row highlight */
-        .row-expiring-critical {
-            background: #fef2f2 !important;
-        }
-        .row-expiring-warning {
-            background: #fffbeb !important;
-        }
-        .row-expiring-info {
-            background: #eff6ff !important;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        
-        .notification-badge {
-            animation: bounce 1s infinite;
-        }
-        
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
+        [data-theme="dark"] input:focus, 
+        [data-theme="dark"] select:focus, 
+        [data-theme="dark"] textarea:focus {
+            background-color: var(--bg-secondary);
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-full">
+<body class="min-h-full">
     <div class="container mx-auto px-4 py-6">
         <!-- Header -->
         <div class="flex items-center justify-between mb-6">
@@ -177,78 +147,165 @@
                     <span class="text-white text-xl">📊</span>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-800">ระบบบันทึกค่าเช่าแผงในตลาด</h1>
-                    <p class="text-gray-600 text-sm">จัดการข้อมูลการชำระเงินค่าเช่าแผง</p>
+                    <h1 class="text-2xl font-bold text-primary">ระบบบันทึกค่าเช่าแผงในตลาด</h1>
+                    <p class="text-secondary text-sm">จัดการข้อมูลการชำระเงินค่าเช่าแผง</p>
                 </div>
             </div>
             <div class="flex items-center space-x-2">
-                <button id="notificationToggle" onclick="toggleNotifications()" 
-                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm flex items-center relative">
-                    <span class="mr-2">🔔</span>แจ้งเตือน
-                    <span id="notificationBadge" class="absolute -top-2 -right-2 bg-yellow-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden notification-badge">0</span>
+                <button onclick="toggleTheme()" 
+                        class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm flex items-center">
+                    <span id="themeIcon" class="mr-1">🌙</span>
                 </button>
-                <button id="mapViewToggle" onclick="toggleMapView()" 
+                <button onclick="toggleDashboard()" 
                         class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm flex items-center">
-                    <span class="mr-2">🗺️</span>แผนผังตลาด
+                    <span class="mr-2">📈</span>แดชบอร์ด
                 </button>
-                <button id="viewToggle" onclick="toggleView()" 
+                <button onclick="toggleView()" 
                         class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm flex items-center">
                     <span class="mr-2">📋</span>แบบฟอร์ม
                 </button>
             </div>
         </div>
 
-        <!-- Notifications Panel -->
-        <div id="notificationsPanel" class="bg-white rounded-xl shadow-lg p-6 mb-6 hidden">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                    <span class="mr-2">🔔</span>การแจ้งเตือนสัญญาหมดอายุ
-                </h3>
-                <button onclick="markAllAsRead()" class="text-sm text-blue-600 hover:text-blue-800">
-                    ทำเครื่องหมายอ่านทั้งหมด
-                </button>
+        <!-- Dashboard -->
+        <div id="dashboardView" class="mb-6">
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- Total Revenue Card -->
+                <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-green-100 text-sm font-medium">รายได้รวมต่อเดือน</p>
+                            <p id="totalRevenue" class="text-2xl font-bold">0 บาท</p>
+                        </div>
+                        <div class="bg-green-400 bg-opacity-30 rounded-full p-3">
+                            <span class="text-2xl">💰</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Stalls Card -->
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-blue-100 text-sm font-medium">จำนวนแผงที่เช่า</p>
+                            <p id="totalStalls" class="text-2xl font-bold">0 แผง</p>
+                        </div>
+                        <div class="bg-blue-400 bg-opacity-30 rounded-full p-3">
+                            <span class="text-2xl">🏪</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expiring Soon Card -->
+                <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-orange-100 text-sm font-medium">สัญญาใกล้หมดอายุ (30 วัน)</p>
+                            <p id="expiringSoon" class="text-2xl font-bold">0 สัญญา</p>
+                        </div>
+                        <div class="bg-orange-400 bg-opacity-30 rounded-full p-3">
+                            <span class="text-2xl">⏰</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expired Card -->
+                <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-6 text-white shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-red-100 text-sm font-medium">สัญญาหมดอายุแล้ว</p>
+                            <p id="expiredContracts" class="text-2xl font-bold">0 สัญญา</p>
+                        </div>
+                        <div class="bg-red-400 bg-opacity-30 rounded-full p-3">
+                            <span class="text-2xl">🚨</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            
-            <!-- Notification Filters -->
-            <div class="flex flex-wrap gap-2 mb-4">
-                <button onclick="filterNotifications('all')" 
-                        class="notification-filter active px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                    ทั้งหมด (<span id="countAll">0</span>)
-                </button>
-                <button onclick="filterNotifications('critical')" 
-                        class="notification-filter px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-800">
-                    เร่งด่วน ≤7 วัน (<span id="countCritical">0</span>)
-                </button>
-                <button onclick="filterNotifications('warning')" 
-                        class="notification-filter px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600 hover:bg-yellow-100 hover:text-yellow-800">
-                    เตือน ≤15 วัน (<span id="countWarning">0</span>)
-                </button>
-                <button onclick="filterNotifications('info')" 
-                        class="notification-filter px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-800">
-                    แจ้งให้ทราบ ≤30 วัน (<span id="countInfo">0</span>)
-                </button>
+
+            <!-- Charts and Details -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <!-- Building Distribution -->
+                <div class="bg-card rounded-xl shadow-lg p-6 border border-custom">
+                    <h3 class="text-lg font-semibold text-primary mb-4 flex items-center">
+                        <span class="mr-2">🏢</span>การกระจายตามอาคาร
+                    </h3>
+                    <div id="buildingChart" class="space-y-3">
+                        <!-- Building distribution will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Contract Status -->
+                <div class="bg-card rounded-xl shadow-lg p-6 border border-custom">
+                    <h3 class="text-lg font-semibold text-primary mb-4 flex items-center">
+                        <span class="mr-2">📋</span>สถานะสัญญา
+                    </h3>
+                    <div id="statusChart" class="space-y-3">
+                        <!-- Status distribution will be rendered here -->
+                    </div>
+                </div>
             </div>
-            
-            <!-- Notifications List -->
-            <div id="notificationsList" class="space-y-3 max-h-96 overflow-y-auto">
-                <!-- Notifications will be rendered here -->
+
+            <!-- Expiring Contracts Table -->
+            <div class="bg-card rounded-xl shadow-lg p-6 border border-custom">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-primary flex items-center">
+                        <span class="mr-2">⚠️</span>สัญญาที่ต้องติดตาม
+                    </h3>
+                    <div class="flex space-x-2">
+                        <button onclick="filterExpiringContracts(7)" 
+                                class="text-sm bg-red-100 hover:bg-red-200 dark:bg-red-800 dark:hover:bg-red-700 text-red-800 dark:text-red-200 px-3 py-1 rounded-lg">
+                            7 วัน
+                        </button>
+                        <button onclick="filterExpiringContracts(15)" 
+                                class="text-sm bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-800 dark:hover:bg-yellow-700 text-yellow-800 dark:text-yellow-200 px-3 py-1 rounded-lg">
+                            15 วัน
+                        </button>
+                        <button onclick="filterExpiringContracts(30)" 
+                                class="text-sm bg-orange-100 hover:bg-orange-200 dark:bg-orange-800 dark:hover:bg-orange-700 text-orange-800 dark:text-orange-200 px-3 py-1 rounded-lg">
+                            30 วัน
+                        </button>
+                        <button onclick="filterExpiringContracts(0)" 
+                                class="text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-lg">
+                            ทั้งหมด
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-custom">
+                                <th class="text-left py-2 px-3 text-primary">ชื่อผู้เช่า</th>
+                                <th class="text-left py-2 px-3 text-primary">อาคาร-แผง</th>
+                                <th class="text-left py-2 px-3 text-primary">วันสิ้นสุด</th>
+                                <th class="text-left py-2 px-3 text-primary">วันที่เหลือ</th>
+                                <th class="text-left py-2 px-3 text-primary">เบอร์โทร</th>
+                                <th class="text-left py-2 px-3 text-primary">การดำเนินการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expiringContractsTable">
+                            <!-- Expiring contracts will be rendered here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <!-- Add Rental Form -->
-        <div id="formView" class="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+        <div id="formView" class="bg-card rounded-xl shadow-lg p-6 mb-6 border border-custom">
+            <h2 class="text-lg font-semibold text-primary mb-4 flex items-center">
                 <span class="mr-2">➕</span>เพิ่มข้อมูลค่าเช่าแผง
             </h2>
             <form id="rentalForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อผู้เช่า</label>
+                    <label class="block text-sm font-medium text-primary mb-1">ชื่อผู้เช่า</label>
                     <input type="text" id="tenantName" required 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">อาคาร</label>
+                    <label class="block text-sm font-medium text-primary mb-1">อาคาร</label>
                     <select id="building" required 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">เลือกอาคาร</option>
@@ -257,41 +314,20 @@
                         <option value="อาคาร C">อาคาร C</option>
                         <option value="อาคาร D">อาคาร D</option>
                         <option value="อาคาร E">อาคาร E</option>
-                        <option value="อาคาร F">อาคาร F</option>
-                        <option value="อาคาร G">อาคาร G</option>
-                        <option value="อาคาร H">อาคาร H</option>
-                        <option value="อาคาร I">อาคาร I</option>
-                        <option value="อาคาร J">อาคาร J</option>
-                        <option value="อาคาร K">อาคาร K</option>
-                        <option value="อาคาร L">อาคาร L</option>
-                        <option value="อาคาร M">อาคาร M</option>
-                        <option value="อาคาร N">อาคาร N</option>
-                        <option value="อาคาร O">อาคาร O</option>
-                        <option value="อาคาร P">อาคาร P</option>
-                        <option value="อาคาร Q">อาคาร Q</option>
-                        <option value="อาคาร R">อาคาร R</option>
-                        <option value="อาคาร S">อาคาร S</option>
-                        <option value="อาคาร T">อาคาร T</option>
-                        <option value="อาคาร U">อาคาร U</option>
-                        <option value="อาคาร V">อาคาร V</option>
-                        <option value="อาคาร W">อาคาร W</option>
-                        <option value="อาคาร X">อาคาร X</option>
-                        <option value="อาคาร Y">อาคาร Y</option>
-                        <option value="อาคาร Z">อาคาร Z</option>
                         <option value="โซนกลางแจ้ง">โซนกลางแจ้ง</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">หมายเลขแผง</label>
+                    <label class="block text-sm font-medium text-primary mb-1">หมายเลขแผง</label>
                     <input type="text" id="stallNumber" required 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="เช่น 01, 02, 03">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">ประเภทสินค้า</label>
-                    <select id="productType" required onchange="toggleCustomProductType()"
+                    <label class="block text-sm font-medium text-primary mb-1">ประเภทสินค้า</label>
+                    <select id="productType" required 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">เลือกประเภทสินค้า</option>
                         <option value="ผัก-ผลไม้">ผัก-ผลไม้</option>
@@ -300,74 +336,72 @@
                         <option value="เครื่องปรุง">เครื่องปรุง</option>
                         <option value="ขนม-เครื่องดื่ม">ขนม-เครื่องดื่ม</option>
                         <option value="อื่นๆ">อื่นๆ</option>
-                        <option value="custom">อื่นๆ (ระบุ)</option>
                     </select>
-                    <input type="text" id="customProductType" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mt-2 hidden"
-                           placeholder="ระบุประเภทสินค้า เช่น มะม่วง, ปลาทู, ขนมครก">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">เบอร์โทรศัพท์</label>
+                    <label class="block text-sm font-medium text-primary mb-1">เบอร์โทรศัพท์</label>
                     <input type="tel" id="phoneNumber" 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="08X-XXX-XXXX">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">ค่าล็อค/เดือน</label>
+                    <label class="block text-sm font-medium text-primary mb-1">ค่าล็อค/เดือน</label>
                     <input type="number" id="lockFee" required 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="0">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">ค่าส่วนกลาง/เดือน</label>
+                    <label class="block text-sm font-medium text-primary mb-1">ค่าส่วนกลาง/เดือน</label>
                     <input type="number" id="commonFee" required 
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="0">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">วันที่เริ่มสัญญา</label>
-                    <input type="date" id="contractStartDate" required onchange="calculateEndDate()"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <label class="block text-sm font-medium text-primary mb-1">วันที่เริ่มสัญญา</label>
+                    <input type="date" id="contractStartDate" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           onchange="calculateEndDate()">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">ระยะเวลาในการทำสัญญา</label>
-                    <select id="rentMonth" required onchange="calculateEndDate()"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <label class="block text-sm font-medium text-primary mb-1">ระยะเวลาสัญญา</label>
+                    <select id="contractDuration" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onchange="calculateEndDate()">
                         <option value="">เลือกระยะเวลา</option>
-                        <option value="1">1 เดือน</option>
-                        <option value="3">3 เดือน</option>
-                        <option value="6">6 เดือน</option>
-                        <option value="12">1 ปี</option>
-                        <option value="24">2 ปี</option>
-                        <option value="36">3 ปี</option>
-                        <option value="60">5 ปี</option>
+                        <option value="3m">3 เดือน</option>
+                        <option value="6m">6 เดือน</option>
+                        <option value="1y">1 ปี</option>
+                        <option value="2y">2 ปี</option>
+                        <option value="3y">3 ปี</option>
+                        <option value="custom">กำหนดเอง</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">วันที่สิ้นสุดสัญญา</label>
-                    <input type="date" id="contractEndDate" readonly 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600">
+                    <label class="block text-sm font-medium text-primary mb-1">วันที่สิ้นสุดสัญญา</label>
+                    <input type="date" id="contractEndDate" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">สถานะการทำสัญญา</label>
+                    <label class="block text-sm font-medium text-primary mb-1">สถานะการทำสัญญา</label>
                     <select id="paymentStatus" required 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">เลือกสถานะ</option>
                         <option value="ทำสัญญาแล้ว">ทำสัญญาแล้ว</option>
                         <option value="รอทำสัญญา">รอทำสัญญา</option>
                         <option value="สัญญาหมดอายุ">สัญญาหมดอายุ</option>
+                        <option value="ย้ายออกแล้ว">ย้ายออกแล้ว</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">ชำระรายเดือนหรือราย10วัน</label>
+                    <label class="block text-sm font-medium text-primary mb-1">รูปแบบการชำระ</label>
                     <select id="paymentDate" 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">เลือกรูปแบบการชำระ</option>
@@ -376,8 +410,52 @@
                     </select>
                 </div>
 
+                <!-- ข้อมูลผู้ค้ำประกัน -->
                 <div class="md:col-span-2 lg:col-span-3">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">หมายเหตุ</label>
+                    <h3 class="text-md font-semibold text-primary mb-3 flex items-center border-t pt-4 border-custom">
+                        <span class="mr-2">👥</span>ข้อมูลผู้ค้ำประกัน / ผู้ติดต่อฉุกเฉิน
+                    </h3>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">ชื่อผู้ค้ำประกัน</label>
+                    <input type="text" id="guarantorName" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="ชื่อ-นามสกุล ผู้ค้ำประกัน">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">เบอร์โทรผู้ค้ำประกัน</label>
+                    <input type="tel" id="guarantorPhone" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="08X-XXX-XXXX">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-primary mb-1">ความสัมพันธ์</label>
+                    <select id="guarantorRelation" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">เลือกความสัมพันธ์</option>
+                        <option value="คู่สมรส">คู่สมรส</option>
+                        <option value="บิดา">บิดา</option>
+                        <option value="มารดา">มารดา</option>
+                        <option value="บุตร">บุตร</option>
+                        <option value="พี่น้อง">พี่น้อง</option>
+                        <option value="ญาติ">ญาติ</option>
+                        <option value="เพื่อน">เพื่อน</option>
+                        <option value="อื่นๆ">อื่นๆ</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2 lg:col-span-3">
+                    <label class="block text-sm font-medium text-primary mb-1">ที่อยู่ผู้ค้ำประกัน</label>
+                    <textarea id="guarantorAddress" rows="2" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="ที่อยู่ผู้ค้ำประกัน..."></textarea>
+                </div>
+
+                <div class="md:col-span-2 lg:col-span-3">
+                    <label class="block text-sm font-medium text-primary mb-1">หมายเหตุ</label>
                     <textarea id="notes" rows="2" 
                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               placeholder="ข้อมูลเพิ่มเติม..."></textarea>
@@ -392,50 +470,39 @@
             </form>
         </div>
 
-        <!-- Market Map View -->
-        <div id="mapView" class="bg-white rounded-xl shadow-lg p-6 mb-6 hidden">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-semibold text-gray-800 flex items-center">
-                    <span class="mr-2">🗺️</span>แผนผังตลาด
-                </h3>
-                <div class="flex items-center space-x-4">
-                    <div class="flex items-center space-x-2 text-sm">
-                        <div class="w-4 h-4 bg-green-500 rounded"></div>
-                        <span>ว่าง</span>
-                        <div class="w-4 h-4 bg-blue-500 rounded ml-4"></div>
-                        <span>เช่าแล้ว</span>
-                        <div class="w-4 h-4 bg-yellow-500 rounded ml-4"></div>
-                        <span>จองแล้ว</span>
-                        <div class="w-4 h-4 bg-red-500 rounded ml-4"></div>
-                        <span>หมดอายุ</span>
-                        <div class="w-4 h-4 bg-orange-500 rounded ml-4 animate-pulse"></div>
-                        <span>ใกล้หมดอายุ</span>
+        <!-- Google Sheets Instructions -->
+        <div class="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-xl p-4 mb-6">
+            <div class="flex items-start">
+                <span class="text-2xl mr-3">📊</span>
+                <div class="flex-1">
+                    <h3 class="font-semibold text-blue-800 dark:text-blue-200 mb-3">การซิงค์ข้อมูลกับ Google Sheets</h3>
+                    
+                    <!-- Export Instructions -->
+                    <div class="mb-4">
+                        <h4 class="font-medium text-blue-700 dark:text-blue-300 mb-2">📤 ส่งออกข้อมูลไป Sheets:</h4>
+                        <div class="text-sm text-blue-700 dark:text-blue-300 space-y-1 ml-4">
+                            <p><strong>1.</strong> คลิก "คัดลอกสำหรับ Sheets" เพื่อคัดลอกข้อมูลทั้งหมด</p>
+                            <p><strong>2.</strong> เปิด <a href="https://sheets.google.com" target="_blank" rel="noopener noreferrer" class="underline hover:text-blue-900 dark:hover:text-blue-100">Google Sheets</a> และสร้างไฟล์ใหม่</p>
+                            <p><strong>3.</strong> วางข้อมูลที่คัดลอกไว้ในเซลล์ A1</p>
+                        </div>
+                    </div>
+
+                    <!-- Import Instructions -->
+                    <div>
+                        <h4 class="font-medium text-blue-700 dark:text-blue-300 mb-2">📥 นำเข้าข้อมูลจาก Sheets:</h4>
+                        <div class="text-sm text-blue-700 dark:text-blue-300 space-y-1 ml-4">
+                            <p><strong>1.</strong> เลือกข้อมูลทั้งหมดใน Google Sheets (รวมหัวตาราง)</p>
+                            <p><strong>2.</strong> คัดลอกข้อมูล (Ctrl+C หรือ Cmd+C)</p>
+                            <p><strong>3.</strong> คลิก "วางจาก Sheets" ด้านล่าง</p>
+                            <p><strong>4.</strong> วางข้อมูลในช่องที่ปรากฏขึ้น</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Building Selection -->
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-2">เลือกอาคาร</label>
-                <select id="buildingSelect" onchange="renderBuildingMap()" 
-                        class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="อาคาร A">อาคาร A</option>
-                    <option value="อาคาร B">อาคาร B</option>
-                    <option value="อาคาร C">อาคาร C</option>
-                    <option value="อาคาร D">อาคาร D</option>
-                    <option value="อาคาร E">อาคาร E</option>
-                    <option value="โซนกลางแจ้ง">โซนกลางแจ้ง</option>
-                </select>
-            </div>
-            
-            <!-- Building Map Grid -->
-            <div id="buildingMap" class="grid grid-cols-10 gap-2 max-w-4xl mx-auto">
-                <!-- Stalls will be rendered here -->
-            </div>
         </div>
 
-        <!-- Search Bar & Data Management -->
-        <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
+        <!-- Data Management -->
+        <div class="bg-card rounded-xl shadow-lg p-4 mb-6 border border-custom">
             <div class="flex flex-col md:flex-row gap-4 mb-4">
                 <div class="relative flex-1">
                     <input type="text" id="searchInput" placeholder="ค้นหาข้อมูล..." 
@@ -449,7 +516,7 @@
             </div>
             
             <!-- Data Management Buttons -->
-            <div class="grid grid-cols-2 md:grid-cols-6 gap-2">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                 <button onclick="exportData()" 
                         class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
                     <span class="mr-1">📤</span>ส่งออก CSV
@@ -458,17 +525,17 @@
                         class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
                     <span class="mr-1">📥</span>นำเข้าไฟล์
                 </button>
-                <button onclick="showGoogleSheetsModal()" 
-                        class="bg-indigo-500 hover:bg-indigo-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
-                    <span class="mr-1">📊</span>จาก Sheets
-                </button>
                 <button onclick="backupData()" 
                         class="bg-purple-500 hover:bg-purple-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
                     <span class="mr-1">💾</span>สำรองข้อมูล
                 </button>
-                <button onclick="document.getElementById('restoreFile').click()" 
-                        class="bg-orange-500 hover:bg-orange-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
-                    <span class="mr-1">🔄</span>กู้คืนข้อมูล
+                <button onclick="copyForGoogleSheets()" 
+                        class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
+                    <span class="mr-1">📋</span>คัดลอกสำหรับ Sheets
+                </button>
+                <button onclick="showPasteFromSheetsModal()" 
+                        class="bg-blue-500 hover:bg-blue-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
+                    <span class="mr-1">📥</span>วางจาก Sheets
                 </button>
                 <button onclick="clearAllData()" 
                         class="bg-red-500 hover:bg-red-600 text-white text-sm py-2 px-3 rounded-lg flex items-center justify-center transition duration-200">
@@ -477,20 +544,19 @@
             </div>
             
             <!-- Hidden file inputs -->
-            <input type="file" id="importFile" accept=".csv,.json" style="display: none;" onchange="importData(event)">
-            <input type="file" id="restoreFile" accept=".json" style="display: none;" onchange="restoreData(event)">
+            <input type="file" id="importFile" accept=".csv,.json" style="display: none;">
         </div>
 
         <!-- Spreadsheet View -->
-        <div id="spreadsheetView" class="bg-white rounded-xl shadow-lg p-4">
+        <div id="spreadsheetView" class="bg-card rounded-xl shadow-lg p-4 border border-custom">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                <h3 class="text-lg font-semibold text-primary flex items-center">
                     <span class="mr-2">📊</span>ตารางข้อมูลค่าเช่าแผง
                 </h3>
                 <div class="flex items-center space-x-4">
-                    <span id="recordCount" class="text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full">0 รายการ</span>
-                    <div class="text-sm text-gray-600">
-                        รวม: <span id="totalAmount" class="font-semibold text-green-600">0</span> บาท
+                    <span id="recordCount" class="text-sm bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 px-3 py-1 rounded-full">0 รายการ</span>
+                    <div class="text-sm text-secondary">
+                        รวม: <span id="totalAmount" class="font-semibold text-green-600 dark:text-green-400">0</span> บาท
                     </div>
                 </div>
             </div>
@@ -509,17 +575,20 @@
                             <th style="min-width: 80px;">ค่าส่วนกลาง</th>
                             <th style="min-width: 80px;">รวม</th>
                             <th style="min-width: 100px;">วันเริ่มสัญญา</th>
+                            <th style="min-width: 80px;">ระยะเวลา</th>
                             <th style="min-width: 100px;">วันสิ้นสุดสัญญา</th>
                             <th style="min-width: 80px;">วันที่เหลือ</th>
                             <th style="min-width: 120px;">สถานะการทำสัญญา</th>
                             <th style="min-width: 120px;">รูปแบบการชำระ</th>
+                            <th style="min-width: 120px;">ผู้ค้ำประกัน</th>
+                            <th style="min-width: 120px;">เบอร์ผู้ค้ำประกัน</th>
                             <th style="min-width: 150px;">หมายเหตุ</th>
                             <th style="min-width: 80px;">การจัดการ</th>
                         </tr>
                     </thead>
                     <tbody id="spreadsheetBody">
                         <tr>
-                            <td colspan="16" class="text-center text-gray-500 py-8">
+                            <td colspan="19" class="text-center text-secondary py-8">
                                 <div>
                                     <span class="text-4xl mb-2 block">📊</span>
                                     <p>ยังไม่มีข้อมูลค่าเช่าแผง</p>
@@ -540,97 +609,47 @@
             </div>
         </div>
 
-        <!-- Stall Booking Modal -->
-        <div id="stallBookingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-            <div class="bg-white rounded-xl p-6 mx-4 max-w-md w-full">
-                <div class="text-center mb-4">
-                    <span class="text-4xl mb-2 block">🏪</span>
-                    <h3 class="text-lg font-semibold text-gray-800 mb-2">จองแผง</h3>
-                    <p id="stallInfo" class="text-gray-600 text-sm mb-4"></p>
-                </div>
-                
-                <form id="bookingForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อผู้จอง</label>
-                        <input type="text" id="bookingName" required 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <!-- Paste from Sheets Modal -->
+        <div id="pasteFromSheetsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-card rounded-xl p-6 mx-4 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-custom">
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-semibold text-primary flex items-center">
+                            <span class="mr-2">📥</span>นำเข้าข้อมูลจาก Google Sheets
+                        </h3>
+                        <button onclick="closePasteFromSheetsModal()" class="text-secondary hover:text-primary text-xl">
+                            ✕
+                        </button>
                     </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">เบอร์โทรศัพท์</label>
-                        <input type="tel" id="bookingPhone" required 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">ประเภทสินค้า</label>
-                        <select id="bookingProductType" required 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">เลือกประเภทสินค้า</option>
-                            <option value="ผัก-ผลไม้">ผัก-ผลไม้</option>
-                            <option value="เนื้อสัตว์">เนื้อสัตว์</option>
-                            <option value="อาหารแห้ง">อาหารแห้ง</option>
-                            <option value="เครื่องปรุง">เครื่องปรุง</option>
-                            <option value="ขนม-เครื่องดื่ม">ขนม-เครื่องดื่ม</option>
-                            <option value="อื่นๆ">อื่นๆ</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">วันที่จอง</label>
-                        <input type="date" id="bookingDate" required 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">หมายเหตุ</label>
-                        <textarea id="bookingNotes" rows="2" 
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                  placeholder="ข้อมูลเพิ่มเติม..."></textarea>
-                    </div>
-                </form>
-                
-                <div class="flex space-x-3 mt-6">
-                    <button onclick="confirmBooking()" 
-                            class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-lg">
-                        จองแผง
-                    </button>
-                    <button onclick="closeBookingModal()" 
-                            class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg">
-                        ยกเลิก
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Google Sheets Import Modal -->
-        <div id="googleSheetsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-            <div class="bg-white rounded-xl p-6 mx-4 max-w-md w-full">
-                <div class="text-center mb-4">
-                    <span class="text-4xl mb-2 block">📊</span>
-                    <h3 class="text-lg font-semibold text-gray-800 mb-2">นำเข้าจาก Google Sheets</h3>
-                    <p class="text-gray-600 text-sm mb-4">วางลิงก์ Google Sheets ที่ต้องการนำเข้าข้อมูล</p>
+                    <p class="text-secondary text-sm mb-4">วางข้อมูลที่คัดลอกจาก Google Sheets ลงในช่องด้านล่าง</p>
                 </div>
                 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">ลิงก์ Google Sheets</label>
-                    <input type="url" id="googleSheetsUrl" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="https://docs.google.com/spreadsheets/d/...">
+                    <label class="block text-sm font-medium text-primary mb-2">ข้อมูลจาก Google Sheets:</label>
+                    <textarea id="sheetsDataInput" 
+                              class="w-full h-64 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-mono"
+                              placeholder="วางข้อมูลที่คัดลอกจาก Google Sheets ที่นี่...&#10;&#10;ตัวอย่าง:&#10;ชื่อผู้เช่า	อาคาร	หมายเลขแผง	ประเภทสินค้า&#10;นายสมชาย	อาคาร A	01	ผัก-ผลไม้&#10;นางสมหญิง	อาคาร B	02	เนื้อสัตว์"></textarea>
                 </div>
-                
-                <div class="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <p class="text-sm text-yellow-800">
-                        <strong>หมายเหตุ:</strong> Google Sheets ต้องเปิดให้ทุกคนดูได้ (Public) เพื่อให้สามารถนำเข้าข้อมูลได้
-                    </p>
+
+                <div class="mb-4">
+                    <div class="flex items-center space-x-4">
+                        <label class="flex items-center">
+                            <input type="radio" name="importMode" value="replace" checked class="mr-2">
+                            <span class="text-sm text-primary">แทนที่ข้อมูลเดิมทั้งหมด</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="importMode" value="append" class="mr-2">
+                            <span class="text-sm text-primary">เพิ่มเข้าไปในข้อมูลเดิม</span>
+                        </label>
+                    </div>
                 </div>
-                
+
                 <div class="flex space-x-3">
-                    <button onclick="importFromGoogleSheets()" 
-                            class="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-lg">
-                        นำเข้าข้อมูล
+                    <button onclick="importFromSheets()" 
+                            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg flex items-center justify-center">
+                        <span class="mr-2">📥</span>นำเข้าข้อมูล
                     </button>
-                    <button onclick="closeGoogleSheetsModal()" 
+                    <button onclick="closePasteFromSheetsModal()" 
                             class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-2 px-4 rounded-lg">
                         ยกเลิก
                     </button>
@@ -640,11 +659,11 @@
 
         <!-- Confirmation Modal -->
         <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-            <div class="bg-white rounded-xl p-6 mx-4 max-w-sm w-full">
+            <div class="bg-card rounded-xl p-6 mx-4 max-w-sm w-full border border-custom">
                 <div class="text-center mb-4">
                     <span class="text-4xl mb-2 block">⚠️</span>
-                    <h3 class="text-lg font-semibold text-gray-800 mb-2">ยืนยันการกู้คืนข้อมูล</h3>
-                    <p id="confirmText" class="text-gray-600 text-sm"></p>
+                    <h3 class="text-lg font-semibold text-primary mb-2">ยืนยันการดำเนินการ</h3>
+                    <p id="confirmText" class="text-secondary text-sm"></p>
                 </div>
                 <div class="flex space-x-3">
                     <button id="confirmYes" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg">
@@ -660,32 +679,32 @@
 
     <script>
         let rentals = JSON.parse(localStorage.getItem('marketRentals')) || [];
-        let bookings = JSON.parse(localStorage.getItem('marketBookings')) || [];
         let nextId = parseInt(localStorage.getItem('nextRentalId')) || 1;
-        let nextBookingId = parseInt(localStorage.getItem('nextBookingId')) || 1;
-        let currentView = 'spreadsheet'; // 'form' or 'spreadsheet'
-        let currentSelectedStall = null;
-        let notifications = [];
-        let currentNotificationFilter = 'all';
+        let currentView = 'spreadsheet';
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        let showDashboard = true;
+
+        // Initialize theme
+        function initTheme() {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            updateThemeIcon();
+        }
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const themeIcon = document.getElementById('themeIcon');
+            themeIcon.textContent = currentTheme === 'light' ? '🌙' : '☀️';
+        }
 
         function saveToStorage() {
             localStorage.setItem('marketRentals', JSON.stringify(rentals));
-            localStorage.setItem('marketBookings', JSON.stringify(bookings));
             localStorage.setItem('nextRentalId', nextId.toString());
-            localStorage.setItem('nextBookingId', nextBookingId.toString());
-        }
-
-        function calculateEndDate() {
-            const startDate = document.getElementById('contractStartDate').value;
-            const duration = document.getElementById('rentMonth').value;
-            
-            if (startDate && duration) {
-                const start = new Date(startDate);
-                const end = new Date(start);
-                end.setMonth(end.getMonth() + parseInt(duration));
-                
-                document.getElementById('contractEndDate').value = end.toISOString().split('T')[0];
-            }
         }
 
         function getDaysUntilExpiry(endDate) {
@@ -697,400 +716,57 @@
             return diffDays;
         }
 
-        function getExpiryStatus(daysLeft) {
-            if (daysLeft === null) return null;
-            if (daysLeft <= 0) return 'expired';
-            if (daysLeft <= 7) return 'critical';
-            if (daysLeft <= 15) return 'warning';
-            if (daysLeft <= 30) return 'info';
-            return 'normal';
-        }
-
-        function generateNotifications() {
-            notifications = [];
-            const today = new Date();
-            
-            rentals.forEach(rental => {
-                if (!rental.contractEndDate || rental.paymentStatus === 'สัญญาหมดอายุ') return;
-                
-                const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
-                const status = getExpiryStatus(daysLeft);
-                
-                if (status === 'critical' || status === 'warning' || status === 'info') {
-                    let priority = status;
-                    let message = '';
-                    let icon = '';
-                    
-                    if (status === 'critical') {
-                        message = `สัญญาหมดอายุใน ${daysLeft} วัน - ต้องดำเนินการด่วน!`;
-                        icon = '🚨';
-                    } else if (status === 'warning') {
-                        message = `สัญญาหมดอายุใน ${daysLeft} วัน - ควรเตรียมต่อสัญญา`;
-                        icon = '⚠️';
-                    } else if (status === 'info') {
-                        message = `สัญญาหมดอายุใน ${daysLeft} วัน - แจ้งให้ทราบล่วงหน้า`;
-                        icon = 'ℹ️';
-                    }
-                    
-                    notifications.push({
-                        id: `${rental.id}_${status}`,
-                        rentalId: rental.id,
-                        type: status,
-                        priority: priority,
-                        title: `${rental.tenantName} - ${rental.building} แผง ${rental.stallNumber}`,
-                        message: message,
-                        icon: icon,
-                        daysLeft: daysLeft,
-                        endDate: rental.contractEndDate,
-                        phone: rental.phone,
-                        createdAt: today.toISOString(),
-                        read: false
-                    });
-                }
-            });
-            
-            // Sort by priority and days left
-            notifications.sort((a, b) => {
-                const priorityOrder = { critical: 0, warning: 1, info: 2 };
-                if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
-                    return priorityOrder[a.priority] - priorityOrder[b.priority];
-                }
-                return a.daysLeft - b.daysLeft;
-            });
-        }
-
-        function updateNotificationBadge() {
-            const badge = document.getElementById('notificationBadge');
-            const unreadCount = notifications.filter(n => !n.read).length;
-            
-            if (unreadCount > 0) {
-                badge.textContent = unreadCount;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
+        function getDurationText(duration) {
+            switch(duration) {
+                case '3m': return '3 เดือน';
+                case '6m': return '6 เดือน';
+                case '1y': return '1 ปี';
+                case '2y': return '2 ปี';
+                case '3y': return '3 ปี';
+                case 'custom': return 'กำหนดเอง';
+                default: return '';
             }
         }
 
-        function renderNotifications() {
-            const notificationsList = document.getElementById('notificationsList');
+        function calculateEndDate() {
+            const startDate = document.getElementById('contractStartDate').value;
+            const duration = document.getElementById('contractDuration').value;
+            const endDateInput = document.getElementById('contractEndDate');
             
-            let filteredNotifications = notifications;
-            if (currentNotificationFilter !== 'all') {
-                filteredNotifications = notifications.filter(n => n.type === currentNotificationFilter);
-            }
-            
-            // Update counts
-            document.getElementById('countAll').textContent = notifications.length;
-            document.getElementById('countCritical').textContent = notifications.filter(n => n.type === 'critical').length;
-            document.getElementById('countWarning').textContent = notifications.filter(n => n.type === 'warning').length;
-            document.getElementById('countInfo').textContent = notifications.filter(n => n.type === 'info').length;
-            
-            if (filteredNotifications.length === 0) {
-                notificationsList.innerHTML = `
-                    <div class="text-center py-8 text-gray-500">
-                        <span class="text-4xl block mb-2">🎉</span>
-                        <p>ไม่มีการแจ้งเตือน</p>
-                        <p class="text-sm">สัญญาทั้งหมดยังไม่ใกล้หมดอายุ</p>
-                    </div>
-                `;
+            if (!startDate || !duration || duration === 'custom') {
+                if (duration === 'custom') {
+                    endDateInput.disabled = false;
+                    endDateInput.focus();
+                }
                 return;
             }
             
-            notificationsList.innerHTML = filteredNotifications.map(notification => `
-                <div class="notification-item notification-${notification.type} p-4 rounded-lg ${notification.read ? 'opacity-75' : ''}">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center mb-2">
-                                <span class="text-lg mr-2">${notification.icon}</span>
-                                <h4 class="font-semibold text-gray-800">${notification.title}</h4>
-                                ${notification.daysLeft <= 7 ? '<span class="ml-2 px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">เร่งด่วน</span>' : ''}
-                            </div>
-                            <p class="text-sm text-gray-600 mb-2">${notification.message}</p>
-                            <div class="flex items-center text-xs text-gray-500 space-x-4">
-                                <span>📅 หมดอายุ: ${new Date(notification.endDate).toLocaleDateString('th-TH')}</span>
-                                ${notification.phone ? `<span>📞 ${notification.phone}</span>` : ''}
-                            </div>
-                        </div>
-                        <div class="flex flex-col space-y-1 ml-4">
-                            <button onclick="markAsRead('${notification.id}')" 
-                                    class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200">
-                                ${notification.read ? 'อ่านแล้ว' : 'ทำเครื่องหมาย'}
-                            </button>
-                            <button onclick="goToRental(${notification.rentalId})" 
-                                    class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200">
-                                ดูรายละเอียด
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function toggleNotifications() {
-            const panel = document.getElementById('notificationsPanel');
-            const toggle = document.getElementById('notificationToggle');
+            const start = new Date(startDate);
+            let endDate = new Date(start);
             
-            if (panel.classList.contains('hidden')) {
-                generateNotifications();
-                renderNotifications();
-                updateNotificationBadge();
-                panel.classList.remove('hidden');
-                toggle.innerHTML = '<span class="mr-2">🔔</span>ซ่อนแจ้งเตือน';
-            } else {
-                panel.classList.add('hidden');
-                toggle.innerHTML = '<span class="mr-2">🔔</span>แจ้งเตือน';
-            }
-        }
-
-        function filterNotifications(type) {
-            currentNotificationFilter = type;
-            
-            // Update active filter button
-            document.querySelectorAll('.notification-filter').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            renderNotifications();
-        }
-
-        function markAsRead(notificationId) {
-            const notification = notifications.find(n => n.id === notificationId);
-            if (notification) {
-                notification.read = true;
-                renderNotifications();
-                updateNotificationBadge();
-            }
-        }
-
-        function markAllAsRead() {
-            notifications.forEach(n => n.read = true);
-            renderNotifications();
-            updateNotificationBadge();
-            showMessage('ทำเครื่องหมายอ่านทั้งหมดแล้ว!', 'success');
-        }
-
-        function goToRental(rentalId) {
-            // Close notifications panel
-            document.getElementById('notificationsPanel').classList.add('hidden');
-            document.getElementById('notificationToggle').innerHTML = '<span class="mr-2">🔔</span>แจ้งเตือน';
-            
-            // Highlight the rental row
-            const rental = rentals.find(r => r.id === rentalId);
-            if (rental) {
-                // Search for the rental to filter the table
-                document.getElementById('searchInput').value = rental.tenantName;
-                document.getElementById('searchInput').dispatchEvent(new Event('input'));
-                
-                // Scroll to spreadsheet
-                document.getElementById('spreadsheetView').scrollIntoView({ behavior: 'smooth' });
-                
-                showMessage(`แสดงข้อมูล ${rental.tenantName} - ${rental.building} แผง ${rental.stallNumber}`, 'info');
-            }
-        }
-
-        function toggleCustomProductType() {
-            const productType = document.getElementById('productType');
-            const customProductType = document.getElementById('customProductType');
-            
-            if (productType.value === 'custom') {
-                customProductType.classList.remove('hidden');
-                customProductType.required = true;
-                customProductType.focus();
-            } else {
-                customProductType.classList.add('hidden');
-                customProductType.required = false;
-                customProductType.value = '';
-            }
-        }
-
-        function toggleView() {
-            const formView = document.getElementById('formView');
-            const viewToggle = document.getElementById('viewToggle');
-            
-            if (currentView === 'spreadsheet') {
-                currentView = 'form';
-                formView.style.display = 'block';
-                viewToggle.innerHTML = '<span class="mr-2">📊</span>ตาราง';
-            } else {
-                currentView = 'spreadsheet';
-                formView.style.display = 'none';
-                viewToggle.innerHTML = '<span class="mr-2">📋</span>แบบฟอร์ม';
-            }
-        }
-
-        function toggleMapView() {
-            const mapView = document.getElementById('mapView');
-            const mapViewToggle = document.getElementById('mapViewToggle');
-            
-            if (mapView.classList.contains('hidden')) {
-                mapView.classList.remove('hidden');
-                mapViewToggle.innerHTML = '<span class="mr-2">📊</span>ตาราง';
-                renderBuildingMap();
-            } else {
-                mapView.classList.add('hidden');
-                mapViewToggle.innerHTML = '<span class="mr-2">🗺️</span>แผนผังตลาด';
-            }
-        }
-
-        function getStallStatus(building, stallNumber) {
-            // Check if stall is rented
-            const rental = rentals.find(r => r.building === building && r.stallNumber === stallNumber);
-            if (rental) {
-                if (rental.paymentStatus === 'สัญญาหมดอายุ') return 'expired';
-                
-                // Check if contract is expiring soon
-                const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
-                const expiryStatus = getExpiryStatus(daysLeft);
-                if (expiryStatus === 'critical' || expiryStatus === 'warning') {
-                    return 'expiring';
-                }
-                
-                return 'occupied';
+            switch(duration) {
+                case '3m':
+                    endDate.setMonth(endDate.getMonth() + 3);
+                    break;
+                case '6m':
+                    endDate.setMonth(endDate.getMonth() + 6);
+                    break;
+                case '1y':
+                    endDate.setFullYear(endDate.getFullYear() + 1);
+                    break;
+                case '2y':
+                    endDate.setFullYear(endDate.getFullYear() + 2);
+                    break;
+                case '3y':
+                    endDate.setFullYear(endDate.getFullYear() + 3);
+                    break;
             }
             
-            // Check if stall is booked
-            const booking = bookings.find(b => b.building === building && b.stallNumber === stallNumber);
-            if (booking) return 'booked';
+            // ลบ 1 วันเพื่อให้สัญญาสิ้นสุดในวันก่อนหน้า
+            endDate.setDate(endDate.getDate() - 1);
             
-            return 'available';
-        }
-
-        function renderBuildingMap() {
-            const selectedBuilding = document.getElementById('buildingSelect').value;
-            const buildingMap = document.getElementById('buildingMap');
-            
-            // Generate 50 stalls (5 rows x 10 columns) for each building
-            let stallsHtml = '';
-            for (let i = 1; i <= 50; i++) {
-                const stallNumber = i.toString().padStart(2, '0');
-                const status = getStallStatus(selectedBuilding, stallNumber);
-                const rental = rentals.find(r => r.building === selectedBuilding && r.stallNumber === stallNumber);
-                const booking = bookings.find(b => b.building === selectedBuilding && b.stallNumber === stallNumber);
-                
-                let statusClass = 'stall-available';
-                let statusText = 'ว่าง';
-                let ownerInfo = '';
-                
-                if (status === 'occupied') {
-                    statusClass = 'stall-occupied';
-                    statusText = 'เช่า';
-                    ownerInfo = rental ? rental.tenantName : '';
-                } else if (status === 'booked') {
-                    statusClass = 'stall-booked';
-                    statusText = 'จอง';
-                    ownerInfo = booking ? booking.name : '';
-                } else if (status === 'expired') {
-                    statusClass = 'stall-expired';
-                    statusText = 'หมดอายุ';
-                    ownerInfo = rental ? rental.tenantName : '';
-                } else if (status === 'expiring') {
-                    statusClass = 'stall-expiring';
-                    statusText = 'ใกล้หมดอายุ';
-                    ownerInfo = rental ? rental.tenantName : '';
-                }
-                
-                stallsHtml += `
-                    <div class="stall ${statusClass}" 
-                         onclick="handleStallClick('${selectedBuilding}', '${stallNumber}', '${status}')"
-                         title="${selectedBuilding} แผง ${stallNumber} - ${statusText}${ownerInfo ? ' (' + ownerInfo + ')' : ''}">
-                        <div class="text-xs">${stallNumber}</div>
-                        <div class="text-xs">${statusText}</div>
-                        ${ownerInfo ? `<div class="text-xs truncate w-full text-center">${ownerInfo}</div>` : ''}
-                    </div>
-                `;
-            }
-            
-            buildingMap.innerHTML = stallsHtml;
-        }
-
-        function handleStallClick(building, stallNumber, status) {
-            if (status === 'available') {
-                // Open booking modal for available stalls
-                openBookingModal(building, stallNumber);
-            } else {
-                // Show stall information for occupied/booked stalls
-                showStallInfo(building, stallNumber, status);
-            }
-        }
-
-        function openBookingModal(building, stallNumber) {
-            currentSelectedStall = { building, stallNumber };
-            document.getElementById('stallInfo').textContent = `${building} แผง ${stallNumber}`;
-            document.getElementById('bookingDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('stallBookingModal').classList.remove('hidden');
-            document.getElementById('bookingName').focus();
-        }
-
-        function closeBookingModal() {
-            document.getElementById('stallBookingModal').classList.add('hidden');
-            document.getElementById('bookingForm').reset();
-            currentSelectedStall = null;
-        }
-
-        function confirmBooking() {
-            if (!currentSelectedStall) return;
-            
-            const name = document.getElementById('bookingName').value;
-            const phone = document.getElementById('bookingPhone').value;
-            const productType = document.getElementById('bookingProductType').value;
-            const bookingDate = document.getElementById('bookingDate').value;
-            const notes = document.getElementById('bookingNotes').value;
-            
-            if (!name || !phone || !productType || !bookingDate) {
-                showMessage('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
-                return;
-            }
-            
-            const booking = {
-                id: nextBookingId++,
-                building: currentSelectedStall.building,
-                stallNumber: currentSelectedStall.stallNumber,
-                name: name,
-                phone: phone,
-                productType: productType,
-                bookingDate: bookingDate,
-                notes: notes,
-                createdAt: new Date().toISOString()
-            };
-            
-            bookings.push(booking);
-            saveToStorage();
-            closeBookingModal();
-            renderBuildingMap();
-            showMessage(`จองแผง ${currentSelectedStall.building} แผง ${currentSelectedStall.stallNumber} เรียบร้อยแล้ว!`, 'success');
-        }
-
-        function showStallInfo(building, stallNumber, status) {
-            let info = `${building} แผง ${stallNumber}\n`;
-            
-            if (status === 'occupied' || status === 'expired' || status === 'expiring') {
-                const rental = rentals.find(r => r.building === building && r.stallNumber === stallNumber);
-                if (rental) {
-                    info += `ผู้เช่า: ${rental.tenantName}\n`;
-                    info += `โทร: ${rental.phone || 'ไม่ระบุ'}\n`;
-                    info += `ประเภทสินค้า: ${rental.productType}\n`;
-                    info += `สถานะ: ${rental.paymentStatus}`;
-                    
-                    if (rental.contractEndDate) {
-                        const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
-                        if (daysLeft !== null) {
-                            info += `\nวันที่เหลือ: ${daysLeft} วัน`;
-                            info += `\nหมดอายุ: ${new Date(rental.contractEndDate).toLocaleDateString('th-TH')}`;
-                        }
-                    }
-                }
-            } else if (status === 'booked') {
-                const booking = bookings.find(b => b.building === building && b.stallNumber === stallNumber);
-                if (booking) {
-                    info += `ผู้จอง: ${booking.name}\n`;
-                    info += `โทร: ${booking.phone}\n`;
-                    info += `ประเภทสินค้า: ${booking.productType}\n`;
-                    info += `วันที่จอง: ${new Date(booking.bookingDate).toLocaleDateString('th-TH')}`;
-                }
-            }
-            
-            showMessage(info, 'warning');
+            endDateInput.value = endDate.toISOString().split('T')[0];
+            endDateInput.disabled = true;
         }
 
         function formatCurrency(amount) {
@@ -1107,16 +783,9 @@
                 case 'ทำสัญญาแล้ว': return 'status-paid';
                 case 'รอทำสัญญา': return 'status-pending';
                 case 'สัญญาหมดอายุ': return 'status-overdue';
+                case 'ย้ายออกแล้ว': return 'status-moved-out';
                 default: return '';
             }
-        }
-
-        function getRowExpiryClass(daysLeft) {
-            if (daysLeft === null || daysLeft > 30) return '';
-            if (daysLeft <= 7) return 'row-expiring-critical';
-            if (daysLeft <= 15) return 'row-expiring-warning';
-            if (daysLeft <= 30) return 'row-expiring-info';
-            return '';
         }
 
         function showMessage(text, type = 'success') {
@@ -1126,7 +795,6 @@
             
             messageText.textContent = text;
             
-            // Reset classes
             message.className = 'fixed top-4 left-4 right-4 p-4 rounded-lg shadow-lg transform -translate-y-full opacity-0 transition-all duration-300 z-50';
             
             if (type === 'success') {
@@ -1138,9 +806,6 @@
             } else if (type === 'warning') {
                 message.classList.add('bg-yellow-500', 'text-white');
                 messageIcon.textContent = '⚠️';
-            } else if (type === 'info') {
-                message.classList.add('bg-blue-500', 'text-white');
-                messageIcon.textContent = 'ℹ️';
             }
             
             message.style.transform = 'translateY(0)';
@@ -1170,16 +835,282 @@
             };
         }
 
-        function getProductTypeEmoji(type) {
-            const emojis = {
-                'ผัก-ผลไม้': '🥬',
-                'เนื้อสัตว์': '🥩',
-                'อาหารแห้ง': '🌾',
-                'เครื่องปรุง': '🧂',
-                'ขนม-เครื่องดื่ม': '🍪',
-                'อื่นๆ': '📦'
+        function toggleView() {
+            const formView = document.getElementById('formView');
+            const viewToggle = document.querySelector('button[onclick="toggleView()"]');
+            
+            if (currentView === 'spreadsheet') {
+                currentView = 'form';
+                formView.style.display = 'block';
+                viewToggle.innerHTML = '<span class="mr-2">📊</span>ตาราง';
+            } else {
+                currentView = 'spreadsheet';
+                formView.style.display = 'none';
+                viewToggle.innerHTML = '<span class="mr-2">📋</span>แบบฟอร์ม';
+            }
+        }
+
+        function toggleDashboard() {
+            const dashboardView = document.getElementById('dashboardView');
+            const dashboardToggle = document.querySelector('button[onclick="toggleDashboard()"]');
+            
+            showDashboard = !showDashboard;
+            
+            if (showDashboard) {
+                dashboardView.style.display = 'block';
+                dashboardToggle.innerHTML = '<span class="mr-2">📊</span>ซ่อนแดชบอร์ด';
+                updateDashboard();
+            } else {
+                dashboardView.style.display = 'none';
+                dashboardToggle.innerHTML = '<span class="mr-2">📈</span>แดชบอร์ด';
+            }
+        }
+
+        function updateDashboard() {
+            if (!showDashboard) return;
+            
+            // Calculate statistics
+            const stats = calculateStatistics();
+            
+            // Update summary cards
+            document.getElementById('totalRevenue').textContent = formatCurrency(stats.totalRevenue) + ' บาท';
+            document.getElementById('totalStalls').textContent = stats.totalStalls + ' แผง';
+            document.getElementById('expiringSoon').textContent = stats.expiringSoon + ' สัญญา';
+            document.getElementById('expiredContracts').textContent = stats.expired + ' สัญญา';
+            
+            // Update charts
+            renderBuildingChart(stats.buildingDistribution);
+            renderStatusChart(stats.statusDistribution);
+            
+            // Update expiring contracts table
+            renderExpiringContractsTable();
+        }
+
+        function calculateStatistics() {
+            const now = new Date();
+            const stats = {
+                totalRevenue: 0,
+                totalStalls: rentals.length,
+                expiringSoon: 0,
+                expired: 0,
+                buildingDistribution: {},
+                statusDistribution: {}
             };
-            return emojis[type] || '📦';
+
+            rentals.forEach(rental => {
+                // Calculate total revenue
+                stats.totalRevenue += (parseFloat(rental.lockFee) || 0) + (parseFloat(rental.commonFee) || 0);
+                
+                // Check contract expiry
+                if (rental.contractEndDate) {
+                    const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
+                    if (daysLeft !== null) {
+                        if (daysLeft <= 0) {
+                            stats.expired++;
+                        } else if (daysLeft <= 30) {
+                            stats.expiringSoon++;
+                        }
+                    }
+                }
+                
+                // Building distribution
+                const building = rental.building || 'ไม่ระบุ';
+                stats.buildingDistribution[building] = (stats.buildingDistribution[building] || 0) + 1;
+                
+                // Status distribution
+                const status = rental.paymentStatus || 'ไม่ระบุ';
+                stats.statusDistribution[status] = (stats.statusDistribution[status] || 0) + 1;
+            });
+
+            return stats;
+        }
+
+        function renderBuildingChart(distribution) {
+            const chartContainer = document.getElementById('buildingChart');
+            const total = Object.values(distribution).reduce((sum, count) => sum + count, 0);
+            
+            if (total === 0) {
+                chartContainer.innerHTML = '<p class="text-secondary text-center py-4">ไม่มีข้อมูล</p>';
+                return;
+            }
+
+            const colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-pink-500', 'bg-indigo-500'];
+            let colorIndex = 0;
+
+            chartContainer.innerHTML = Object.entries(distribution)
+                .sort(([,a], [,b]) => b - a)
+                .map(([building, count]) => {
+                    const percentage = ((count / total) * 100).toFixed(1);
+                    const color = colors[colorIndex % colors.length];
+                    colorIndex++;
+                    
+                    return `
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center flex-1">
+                                <div class="w-4 h-4 ${color} rounded mr-3"></div>
+                                <span class="text-sm text-primary">${building}</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-3">
+                                    <div class="${color} h-2 rounded-full" style="width: ${percentage}%"></div>
+                                </div>
+                                <span class="text-sm font-semibold text-primary w-12 text-right">${count}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+        }
+
+        function renderStatusChart(distribution) {
+            const chartContainer = document.getElementById('statusChart');
+            const total = Object.values(distribution).reduce((sum, count) => sum + count, 0);
+            
+            if (total === 0) {
+                chartContainer.innerHTML = '<p class="text-secondary text-center py-4">ไม่มีข้อมูล</p>';
+                return;
+            }
+
+            const statusColors = {
+                'ทำสัญญาแล้ว': 'bg-green-500',
+                'รอทำสัญญา': 'bg-yellow-500',
+                'สัญญาหมดอายุ': 'bg-red-500',
+                'ย้ายออกแล้ว': 'bg-blue-500',
+                'ไม่ระบุ': 'bg-gray-500'
+            };
+
+            chartContainer.innerHTML = Object.entries(distribution)
+                .sort(([,a], [,b]) => b - a)
+                .map(([status, count]) => {
+                    const percentage = ((count / total) * 100).toFixed(1);
+                    const color = statusColors[status] || 'bg-gray-500';
+                    
+                    return `
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center flex-1">
+                                <div class="w-4 h-4 ${color} rounded mr-3"></div>
+                                <span class="text-sm text-primary">${status}</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-3">
+                                    <div class="${color} h-2 rounded-full" style="width: ${percentage}%"></div>
+                                </div>
+                                <span class="text-sm font-semibold text-primary w-12 text-right">${count}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+        }
+
+        function renderExpiringContractsTable(daysFilter = 30) {
+            const tableBody = document.getElementById('expiringContractsTable');
+            const now = new Date();
+            
+            const expiringContracts = rentals
+                .filter(rental => {
+                    if (!rental.contractEndDate) return false;
+                    const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
+                    if (daysFilter === 0) return daysLeft !== null; // Show all
+                    return daysLeft !== null && daysLeft <= daysFilter && daysLeft >= 0;
+                })
+                .sort((a, b) => {
+                    const daysA = getDaysUntilExpiry(a.contractEndDate);
+                    const daysB = getDaysUntilExpiry(b.contractEndDate);
+                    return daysA - daysB;
+                });
+
+            if (expiringContracts.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-secondary">
+                            ไม่มีสัญญาที่ต้องติดตาม${daysFilter > 0 ? ` (${daysFilter} วัน)` : ''}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tableBody.innerHTML = expiringContracts.map(rental => {
+                const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
+                const urgencyClass = daysLeft <= 7 ? 'text-red-600 font-bold' : 
+                                   daysLeft <= 15 ? 'text-yellow-600 font-semibold' : 
+                                   'text-orange-600';
+                
+                return `
+                    <tr class="border-b border-custom hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <td class="py-2 px-3 text-primary">${rental.tenantName}</td>
+                        <td class="py-2 px-3 text-primary">${rental.building} - ${rental.stallNumber}</td>
+                        <td class="py-2 px-3 text-primary">${formatDate(rental.contractEndDate)}</td>
+                        <td class="py-2 px-3 ${urgencyClass}">${daysLeft} วัน</td>
+                        <td class="py-2 px-3">
+                            ${rental.phone ? `<a href="tel:${rental.phone}" class="text-blue-600 hover:underline">${rental.phone}</a>` : '-'}
+                        </td>
+                        <td class="py-2 px-3">
+                            <div class="flex space-x-1">
+                                <button onclick="callTenant('${rental.phone}')" 
+                                        class="text-green-600 hover:text-green-800 p-1 rounded" 
+                                        title="โทรหา" ${!rental.phone ? 'disabled' : ''}>
+                                    📞
+                                </button>
+                                <button onclick="editRental(${rental.id})" 
+                                        class="text-blue-600 hover:text-blue-800 p-1 rounded" 
+                                        title="แก้ไข">
+                                    ✏️
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterExpiringContracts(days) {
+            renderExpiringContractsTable(days);
+        }
+
+        function callTenant(phone) {
+            if (phone) {
+                window.open(`tel:${phone}`, '_self');
+            }
+        }
+
+        function editRental(id) {
+            const rental = rentals.find(r => r.id === id);
+            if (!rental) return;
+            
+            // Fill form with rental data
+            document.getElementById('tenantName').value = rental.tenantName;
+            document.getElementById('building').value = rental.building || '';
+            document.getElementById('stallNumber').value = rental.stallNumber;
+            document.getElementById('productType').value = rental.productType;
+            document.getElementById('phoneNumber').value = rental.phone || '';
+            document.getElementById('lockFee').value = rental.lockFee || 0;
+            document.getElementById('commonFee').value = rental.commonFee || 0;
+            document.getElementById('contractStartDate').value = rental.contractStartDate;
+            document.getElementById('contractEndDate').value = rental.contractEndDate;
+            document.getElementById('paymentStatus').value = rental.paymentStatus;
+            document.getElementById('paymentDate').value = rental.paymentDate || '';
+            document.getElementById('guarantorName').value = rental.guarantorName || '';
+            document.getElementById('guarantorPhone').value = rental.guarantorPhone || '';
+            document.getElementById('guarantorRelation').value = rental.guarantorRelation || '';
+            document.getElementById('guarantorAddress').value = rental.guarantorAddress || '';
+            document.getElementById('notes').value = rental.notes || '';
+            
+            // Show form
+            const formView = document.getElementById('formView');
+            formView.style.display = 'block';
+            currentView = 'form';
+            document.querySelector('button[onclick="toggleView()"]').innerHTML = '<span class="mr-2">📊</span>ตาราง';
+            
+            // Scroll to form
+            formView.scrollIntoView({ behavior: 'smooth' });
+            
+            // Delete the old record (will be replaced when form is submitted)
+            rentals = rentals.filter(r => r.id !== id);
+            saveToStorage();
+            updateDashboard();
+            renderSpreadsheet();
+            
+            showMessage('กรอกข้อมูลใหม่และกดบันทึกเพื่อแก้ไข', 'warning');
         }
 
         function renderSpreadsheet(rentalsToRender = rentals) {
@@ -1187,33 +1118,20 @@
             const recordCount = document.getElementById('recordCount');
             const totalAmount = document.getElementById('totalAmount');
             
-            recordCount.textContent = `${rentalsToRender.length} รายการ`;
-            
-            const total = rentalsToRender.reduce((sum, rental) => sum + (parseFloat(rental.lockFee) || 0) + (parseFloat(rental.commonFee) || 0), 0);
-            totalAmount.textContent = formatCurrency(total);
-
-            // Sort rentals by building and then by stall number
+            // เรียงลำดับข้อมูลตามอาคารและหมายเลขแผง
             const sortedRentals = [...rentalsToRender].sort((a, b) => {
-                // First sort by building
+                // เรียงตามอาคารก่อน
                 const buildingA = a.building || '';
                 const buildingB = b.building || '';
-                
                 if (buildingA !== buildingB) {
-                    // Handle special case for "โซนกลางแจ้ง" - put it at the end
-                    if (buildingA === 'โซนกลางแจ้ง') return 1;
-                    if (buildingB === 'โซนกลางแจ้ง') return -1;
-                    
-                    // Extract building letters for proper sorting (A, B, C, etc.)
-                    const letterA = buildingA.replace('อาคาร ', '');
-                    const letterB = buildingB.replace('อาคาร ', '');
-                    return letterA.localeCompare(letterB);
+                    return buildingA.localeCompare(buildingB, 'th');
                 }
                 
-                // If buildings are the same, sort by stall number
+                // แล้วเรียงตามหมายเลขแผง (แปลงเป็นตัวเลขถ้าเป็นได้)
                 const stallA = a.stallNumber || '';
                 const stallB = b.stallNumber || '';
                 
-                // Try to parse as numbers for proper numeric sorting
+                // ลองแปลงเป็นตัวเลข
                 const numA = parseInt(stallA);
                 const numB = parseInt(stallB);
                 
@@ -1221,14 +1139,19 @@
                     return numA - numB;
                 }
                 
-                // If not numbers, sort alphabetically
-                return stallA.localeCompare(stallB);
+                // ถ้าแปลงไม่ได้ให้เรียงตามตัวอักษร
+                return stallA.localeCompare(stallB, 'th');
             });
+            
+            recordCount.textContent = `${sortedRentals.length} รายการ`;
+            
+            const total = sortedRentals.reduce((sum, rental) => sum + (parseFloat(rental.lockFee) || 0) + (parseFloat(rental.commonFee) || 0), 0);
+            totalAmount.textContent = formatCurrency(total);
 
             if (sortedRentals.length === 0) {
                 spreadsheetBody.innerHTML = `
                     <tr>
-                        <td colspan="16" class="text-center text-gray-500 py-8">
+                        <td colspan="19" class="text-center text-secondary py-8">
                             <div>
                                 <span class="text-4xl mb-2 block">📊</span>
                                 <p>ไม่พบข้อมูลค่าเช่าแผง</p>
@@ -1242,13 +1165,12 @@
 
             spreadsheetBody.innerHTML = sortedRentals.map((rental, index) => {
                 const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
-                const rowClass = getRowExpiryClass(daysLeft);
                 const daysLeftText = daysLeft !== null ? 
                     (daysLeft <= 0 ? 'หมดอายุแล้ว' : `${daysLeft} วัน`) : 
                     'ไม่ระบุ';
                 
                 return `
-                    <tr class="fade-in ${rowClass}">
+                    <tr class="fade-in">
                         <td class="row-number">${index + 1}</td>
                         <td class="editable-cell" onclick="editCell(${rental.id}, 'tenantName', this)">${rental.tenantName}</td>
                         <td class="editable-cell" onclick="editCell(${rental.id}, 'building', this)">${rental.building || ''}</td>
@@ -1259,12 +1181,17 @@
                         </td>
                         <td class="editable-cell text-right" onclick="editCell(${rental.id}, 'lockFee', this)">${formatCurrency(rental.lockFee || 0)}</td>
                         <td class="editable-cell text-right" onclick="editCell(${rental.id}, 'commonFee', this)">${formatCurrency(rental.commonFee || 0)}</td>
-                        <td class="text-right font-semibold text-green-600">${formatCurrency((rental.lockFee || 0) + (rental.commonFee || 0))}</td>
+                        <td class="text-right font-semibold text-green-600 dark:text-green-400">${formatCurrency((rental.lockFee || 0) + (rental.commonFee || 0))}</td>
                         <td class="editable-cell" onclick="editCell(${rental.id}, 'contractStartDate', this)">${formatDate(rental.contractStartDate)}</td>
+                        <td class="text-center">${getDurationText(rental.contractDuration)}</td>
                         <td class="editable-cell" onclick="editCell(${rental.id}, 'contractEndDate', this)">${formatDate(rental.contractEndDate)}</td>
-                        <td class="text-center ${daysLeft !== null && daysLeft <= 7 ? 'text-red-600 font-bold' : daysLeft !== null && daysLeft <= 15 ? 'text-yellow-600 font-semibold' : daysLeft !== null && daysLeft <= 30 ? 'text-blue-600' : ''}">${daysLeftText}</td>
+                        <td class="text-center ${daysLeft !== null && daysLeft <= 7 ? 'text-red-600 font-bold' : daysLeft !== null && daysLeft <= 15 ? 'text-yellow-600 font-semibold' : ''}">${daysLeftText}</td>
                         <td class="editable-cell ${getStatusClass(rental.paymentStatus)}" onclick="editCell(${rental.id}, 'paymentStatus', this)">${rental.paymentStatus}</td>
                         <td class="editable-cell" onclick="editCell(${rental.id}, 'paymentDate', this)">${rental.paymentDate || ''}</td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'guarantorName', this)">${rental.guarantorName || ''}</td>
+                        <td class="editable-cell" onclick="editCell(${rental.id}, 'guarantorPhone', this)">
+                            ${rental.guarantorPhone ? `<a href="tel:${rental.guarantorPhone}" class="text-blue-600 hover:underline">${rental.guarantorPhone}</a>` : ''}
+                        </td>
                         <td class="editable-cell" onclick="editCell(${rental.id}, 'notes', this)">${rental.notes || ''}</td>
                         <td class="text-center">
                             <button onclick="deleteRental(${rental.id})" 
@@ -1288,41 +1215,27 @@
             if (field === 'building') {
                 inputElement = document.createElement('select');
                 inputElement.className = 'cell-input';
-                const buildingOptions = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
-                let optionsHtml = '<option value="">เลือกอาคาร</option>';
-                buildingOptions.forEach(letter => {
-                    const value = `อาคาร ${letter}`;
-                    optionsHtml += `<option value="${value}" ${currentValue === value ? 'selected' : ''}>${value}</option>`;
-                });
-                optionsHtml += `<option value="โซนกลางแจ้ง" ${currentValue === 'โซนกลางแจ้ง' ? 'selected' : ''}>โซนกลางแจ้ง</option>`;
-                inputElement.innerHTML = optionsHtml;
+                inputElement.innerHTML = `
+                    <option value="">เลือกอาคาร</option>
+                    <option value="อาคาร A" ${currentValue === 'อาคาร A' ? 'selected' : ''}>อาคาร A</option>
+                    <option value="อาคาร B" ${currentValue === 'อาคาร B' ? 'selected' : ''}>อาคาร B</option>
+                    <option value="อาคาร C" ${currentValue === 'อาคาร C' ? 'selected' : ''}>อาคาร C</option>
+                    <option value="อาคาร D" ${currentValue === 'อาคาร D' ? 'selected' : ''}>อาคาร D</option>
+                    <option value="อาคาร E" ${currentValue === 'อาคาร E' ? 'selected' : ''}>อาคาร E</option>
+                    <option value="โซนกลางแจ้ง" ${currentValue === 'โซนกลางแจ้ง' ? 'selected' : ''}>โซนกลางแจ้ง</option>
+                `;
             } else if (field === 'productType') {
-                // Check if current value is a standard option or custom
-                const standardOptions = ['ผัก-ผลไม้', 'เนื้อสัตว์', 'อาหารแห้ง', 'เครื่องปรุง', 'ขนม-เครื่องดื่ม', 'อื่นๆ'];
-                const isCustomValue = !standardOptions.includes(currentValue) && currentValue !== '';
-                
-                if (isCustomValue) {
-                    // If it's a custom value, show input field directly
-                    inputElement = document.createElement('input');
-                    inputElement.type = 'text';
-                    inputElement.className = 'cell-input';
-                    inputElement.value = currentValue;
-                    inputElement.placeholder = 'ระบุประเภทสินค้า';
-                } else {
-                    // Show select dropdown for standard options
-                    inputElement = document.createElement('select');
-                    inputElement.className = 'cell-input';
-                    inputElement.innerHTML = `
-                        <option value="">เลือกประเภทสินค้า</option>
-                        <option value="ผัก-ผลไม้" ${currentValue === 'ผัก-ผลไม้' ? 'selected' : ''}>ผัก-ผลไม้</option>
-                        <option value="เนื้อสัตว์" ${currentValue === 'เนื้อสัตว์' ? 'selected' : ''}>เนื้อสัตว์</option>
-                        <option value="อาหารแห้ง" ${currentValue === 'อาหารแห้ง' ? 'selected' : ''}>อาหารแห้ง</option>
-                        <option value="เครื่องปรุง" ${currentValue === 'เครื่องปรุง' ? 'selected' : ''}>เครื่องปรุง</option>
-                        <option value="ขนม-เครื่องดื่ม" ${currentValue === 'ขนม-เครื่องดื่ม' ? 'selected' : ''}>ขนม-เครื่องดื่ม</option>
-                        <option value="อื่นๆ" ${currentValue === 'อื่นๆ' ? 'selected' : ''}>อื่นๆ</option>
-                        <option value="custom">อื่นๆ (ระบุ)</option>
-                    `;
-                }
+                inputElement = document.createElement('select');
+                inputElement.className = 'cell-input';
+                inputElement.innerHTML = `
+                    <option value="">เลือกประเภทสินค้า</option>
+                    <option value="ผัก-ผลไม้" ${currentValue === 'ผัก-ผลไม้' ? 'selected' : ''}>ผัก-ผลไม้</option>
+                    <option value="เนื้อสัตว์" ${currentValue === 'เนื้อสัตว์' ? 'selected' : ''}>เนื้อสัตว์</option>
+                    <option value="อาหารแห้ง" ${currentValue === 'อาหารแห้ง' ? 'selected' : ''}>อาหารแห้ง</option>
+                    <option value="เครื่องปรุง" ${currentValue === 'เครื่องปรุง' ? 'selected' : ''}>เครื่องปรุง</option>
+                    <option value="ขนม-เครื่องดื่ม" ${currentValue === 'ขนม-เครื่องดื่ม' ? 'selected' : ''}>ขนม-เครื่องดื่ม</option>
+                    <option value="อื่นๆ" ${currentValue === 'อื่นๆ' ? 'selected' : ''}>อื่นๆ</option>
+                `;
             } else if (field === 'paymentStatus') {
                 inputElement = document.createElement('select');
                 inputElement.className = 'cell-input';
@@ -1331,6 +1244,7 @@
                     <option value="ทำสัญญาแล้ว" ${currentValue === 'ทำสัญญาแล้ว' ? 'selected' : ''}>ทำสัญญาแล้ว</option>
                     <option value="รอทำสัญญา" ${currentValue === 'รอทำสัญญา' ? 'selected' : ''}>รอทำสัญญา</option>
                     <option value="สัญญาหมดอายุ" ${currentValue === 'สัญญาหมดอายุ' ? 'selected' : ''}>สัญญาหมดอายุ</option>
+                    <option value="ย้ายออกแล้ว" ${currentValue === 'ย้ายออกแล้ว' ? 'selected' : ''}>ย้ายออกแล้ว</option>
                 `;
             } else if (field === 'lockFee' || field === 'commonFee') {
                 inputElement = document.createElement('input');
@@ -1366,6 +1280,7 @@
                 rental[field] = newValue;
                 saveToStorage();
                 renderSpreadsheet();
+                updateDashboard();
                 showMessage('แก้ไขข้อมูลเรียบร้อยแล้ว!', 'success');
             }
             
@@ -1390,6 +1305,7 @@
                     rentals = rentals.filter(rental => rental.id !== id);
                     saveToStorage();
                     renderSpreadsheet();
+                    updateDashboard();
                     showMessage('ลบข้อมูลเรียบร้อยแล้ว!', 'success');
                 }
             );
@@ -1409,6 +1325,10 @@
                 contractEndDate: '',
                 paymentStatus: '',
                 paymentDate: '',
+                guarantorName: '',
+                guarantorPhone: '',
+                guarantorRelation: '',
+                guarantorAddress: '',
                 notes: '',
                 createdAt: new Date().toISOString()
             };
@@ -1416,17 +1336,17 @@
             rentals.unshift(newRental);
             saveToStorage();
             renderSpreadsheet();
+            updateDashboard();
             showMessage('เพิ่มแถวใหม่เรียบร้อยแล้ว!', 'success');
         }
 
-        // Export data to CSV
         function exportData() {
             if (rentals.length === 0) {
                 showMessage('ไม่มีข้อมูลให้ส่งออก', 'warning');
                 return;
             }
 
-            const headers = ['ชื่อผู้เช่า', 'อาคาร', 'หมายเลขแผง', 'ประเภทสินค้า', 'เบอร์โทรศัพท์', 'ค่าล็อค', 'ค่าส่วนกลาง', 'รวม', 'วันเริ่มสัญญา', 'วันสิ้นสุดสัญญา', 'วันที่เหลือ', 'สถานะการทำสัญญา', 'รูปแบบการชำระ', 'หมายเหตุ', 'วันที่บันทึก'];
+            const headers = ['ชื่อผู้เช่า', 'อาคาร', 'หมายเลขแผง', 'ประเภทสินค้า', 'เบอร์โทรศัพท์', 'ค่าล็อค', 'ค่าส่วนกลาง', 'รวม', 'วันเริ่มสัญญา', 'วันสิ้นสุดสัญญา', 'วันที่เหลือ', 'สถานะการทำสัญญา', 'รูปแบบการชำระ', 'ผู้ค้ำประกัน', 'เบอร์ผู้ค้ำประกัน', 'ความสัมพันธ์', 'ที่อยู่ผู้ค้ำประกัน', 'หมายเหตุ'];
             const csvContent = [
                 headers.join(','),
                 ...rentals.map(rental => {
@@ -1449,13 +1369,15 @@
                         `"${daysLeftText}"`,
                         `"${rental.paymentStatus || ''}"`,
                         `"${rental.paymentDate || ''}"`,
-                        `"${rental.notes || ''}"`,
-                        `"${new Date(rental.createdAt).toLocaleDateString('th-TH')}"`
+                        `"${rental.guarantorName || ''}"`,
+                        `"${rental.guarantorPhone || ''}"`,
+                        `"${rental.guarantorRelation || ''}"`,
+                        `"${rental.guarantorAddress || ''}"`,
+                        `"${rental.notes || ''}"`
                     ].join(',');
                 })
             ].join('\n');
 
-            // Create blob with proper UTF-8 encoding for Thai characters
             const encoder = new TextEncoder();
             const utf8Data = encoder.encode('\ufeff' + csvContent);
             const blob = new Blob([utf8Data], { type: 'text/csv;charset=utf-8;' });
@@ -1472,9 +1394,288 @@
             showMessage('ส่งออกข้อมูลเรียบร้อยแล้ว!', 'success');
         }
 
-        // Import data from CSV/JSON
-        function importData(event) {
-            const file = event.target.files[0];
+        function backupData() {
+            if (rentals.length === 0) {
+                showMessage('ไม่มีข้อมูลให้สำรอง', 'warning');
+                return;
+            }
+
+            const backupData = {
+                rentals: rentals,
+                nextId: nextId,
+                backupDate: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `สำรองข้อมูลค่าเช่าแผง_${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}.json`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showMessage('สำรองข้อมูลเรียบร้อยแล้ว!', 'success');
+        }
+
+        function copyForGoogleSheets() {
+            if (rentals.length === 0) {
+                showMessage('ไม่มีข้อมูลให้คัดลอก', 'warning');
+                return;
+            }
+
+            // สร้างข้อมูลในรูปแบบที่ Google Sheets เข้าใจ
+            const headers = ['ชื่อผู้เช่า', 'อาคาร', 'หมายเลขแผง', 'ประเภทสินค้า', 'เบอร์โทรศัพท์', 'ค่าล็อค', 'ค่าส่วนกลาง', 'รวม', 'วันเริ่มสัญญา', 'วันสิ้นสุดสัญญา', 'วันที่เหลือ', 'สถานะการทำสัญญา', 'รูปแบบการชำระ', 'ผู้ค้ำประกัน', 'เบอร์ผู้ค้ำประกัน', 'ความสัมพันธ์', 'ที่อยู่ผู้ค้ำประกัน', 'หมายเหตุ'];
+            
+            const data = rentals.map(rental => {
+                const daysLeft = getDaysUntilExpiry(rental.contractEndDate);
+                const daysLeftText = daysLeft !== null ? 
+                    (daysLeft <= 0 ? 'หมดอายุแล้ว' : `${daysLeft} วัน`) : 
+                    'ไม่ระบุ';
+                
+                return [
+                    rental.tenantName,
+                    rental.building || '',
+                    rental.stallNumber,
+                    rental.productType,
+                    rental.phone || '',
+                    rental.lockFee || 0,
+                    rental.commonFee || 0,
+                    (rental.lockFee || 0) + (rental.commonFee || 0),
+                    formatDate(rental.contractStartDate),
+                    formatDate(rental.contractEndDate),
+                    daysLeftText,
+                    rental.paymentStatus || '',
+                    rental.paymentDate || '',
+                    rental.guarantorName || '',
+                    rental.guarantorPhone || '',
+                    rental.guarantorRelation || '',
+                    rental.guarantorAddress || '',
+                    rental.notes || ''
+                ];
+            });
+
+            // รวมหัวตารางและข้อมูล
+            const allData = [headers, ...data];
+            
+            // แปลงเป็น TSV (Tab Separated Values) สำหรับ Google Sheets
+            const tsvContent = allData.map(row => row.join('\t')).join('\n');
+            
+            // คัดลอกไปยัง clipboard
+            navigator.clipboard.writeText(tsvContent).then(() => {
+                showMessage(`คัดลอกข้อมูล ${rentals.length} รายการเรียบร้อย! ไปวางใน Google Sheets ได้เลย`, 'success');
+            }).catch(() => {
+                // Fallback สำหรับเบราว์เซอร์เก่า
+                const textArea = document.createElement('textarea');
+                textArea.value = tsvContent;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showMessage(`คัดลอกข้อมูล ${rentals.length} รายการเรียบร้อย! ไปวางใน Google Sheets ได้เลย`, 'success');
+            });
+        }
+
+        function showPasteFromSheetsModal() {
+            const modal = document.getElementById('pasteFromSheetsModal');
+            const textarea = document.getElementById('sheetsDataInput');
+            modal.classList.remove('hidden');
+            textarea.value = '';
+            textarea.focus();
+        }
+
+        function closePasteFromSheetsModal() {
+            const modal = document.getElementById('pasteFromSheetsModal');
+            modal.classList.add('hidden');
+        }
+
+        function importFromSheets() {
+            const textarea = document.getElementById('sheetsDataInput');
+            const importMode = document.querySelector('input[name="importMode"]:checked').value;
+            const data = textarea.value.trim();
+            
+            if (!data) {
+                showMessage('กรุณาวางข้อมูลจาก Google Sheets', 'warning');
+                return;
+            }
+
+            try {
+                // แยกข้อมูลเป็นแถว
+                const lines = data.split('\n').filter(line => line.trim());
+                if (lines.length < 2) {
+                    showMessage('ข้อมูลไม่ครบถ้วน กรุณาตรวจสอบว่ามีหัวตารางและข้อมูลอย่างน้อย 1 แถว', 'error');
+                    return;
+                }
+
+                // ตรวจสอบหัวตาราง (แถวแรก)
+                const headerLine = lines[0];
+                const expectedHeaders = ['ชื่อผู้เช่า', 'อาคาร', 'หมายเลขแผง', 'ประเภทสินค้า'];
+                const hasValidHeaders = expectedHeaders.some(header => headerLine.includes(header));
+                
+                if (!hasValidHeaders) {
+                    showMessage('ไม่พบหัวตารางที่ถูกต้อง กรุณาตรวจสอบว่าได้คัดลอกหัวตารางมาด้วย', 'error');
+                    return;
+                }
+
+                // แปลงข้อมูล
+                const importedRentals = [];
+                const dataLines = lines.slice(1); // ข้ามหัวตาราง
+
+                for (let i = 0; i < dataLines.length; i++) {
+                    const line = dataLines[i].trim();
+                    if (!line) continue;
+
+                    // แยกคอลัมน์ด้วย tab หรือ comma
+                    let columns = line.split('\t');
+                    if (columns.length === 1) {
+                        columns = line.split(',');
+                    }
+
+                    // ตรวจสอบว่ามีข้อมูลพื้นฐาน
+                    if (columns.length >= 3 && columns[0].trim() && columns[2].trim()) {
+                        // แปลงวันที่จากรูปแบบไทยเป็น ISO
+                        const parseThaiDate = (dateStr) => {
+                            if (!dateStr) return '';
+                            // ถ้าเป็นรูปแบบ dd/mm/yyyy
+                            const parts = dateStr.split('/');
+                            if (parts.length === 3) {
+                                const day = parts[0].padStart(2, '0');
+                                const month = parts[1].padStart(2, '0');
+                                const year = parts[2];
+                                return `${year}-${month}-${day}`;
+                            }
+                            return dateStr;
+                        };
+
+                        const rental = {
+                            id: nextId++,
+                            tenantName: columns[0].trim(),
+                            building: columns[1] ? columns[1].trim() : '',
+                            stallNumber: columns[2].trim(),
+                            productType: columns[3] ? columns[3].trim() : '',
+                            phone: columns[4] ? columns[4].trim() : '',
+                            lockFee: columns[5] ? parseFloat(columns[5].replace(/[^\d.-]/g, '')) || 0 : 0,
+                            commonFee: columns[6] ? parseFloat(columns[6].replace(/[^\d.-]/g, '')) || 0 : 0,
+                            contractStartDate: columns[8] ? parseThaiDate(columns[8].trim()) : '',
+                            contractEndDate: columns[9] ? parseThaiDate(columns[9].trim()) : '',
+                            paymentStatus: columns[11] ? columns[11].trim() : '',
+                            paymentDate: columns[12] ? columns[12].trim() : '',
+                            guarantorName: columns[13] ? columns[13].trim() : '',
+                            guarantorPhone: columns[14] ? columns[14].trim() : '',
+                            guarantorRelation: columns[15] ? columns[15].trim() : '',
+                            guarantorAddress: columns[16] ? columns[16].trim() : '',
+                            notes: columns[17] ? columns[17].trim() : '',
+                            createdAt: new Date().toISOString()
+                        };
+
+                        importedRentals.push(rental);
+                    }
+                }
+
+                if (importedRentals.length === 0) {
+                    showMessage('ไม่พบข้อมูลที่ถูกต้องในข้อมูลที่วาง', 'error');
+                    return;
+                }
+
+                // นำเข้าข้อมูล
+                if (importMode === 'replace') {
+                    rentals = importedRentals;
+                } else {
+                    rentals = [...importedRentals, ...rentals];
+                }
+
+                saveToStorage();
+                renderSpreadsheet();
+                updateDashboard();
+                closePasteFromSheetsModal();
+                
+                const modeText = importMode === 'replace' ? 'แทนที่ข้อมูลเดิม' : 'เพิ่มเข้าไปในข้อมูลเดิม';
+                showMessage(`นำเข้าข้อมูล ${importedRentals.length} รายการเรียบร้อย (${modeText})`, 'success');
+
+            } catch (error) {
+                console.error('Import error:', error);
+                showMessage('เกิดข้อผิดพลาดในการนำเข้าข้อมูล กรุณาตรวจสอบรูปแบบข้อมูล', 'error');
+            }
+        }
+
+        function clearAllData() {
+            if (rentals.length === 0) {
+                showMessage('ไม่มีข้อมูลให้ล้าง', 'warning');
+                return;
+            }
+            
+            showConfirmModal(
+                `ต้องการล้างข้อมูลทั้งหมด ${rentals.length} รายการหรือไม่? การกระทำนี้ไม่สามารถยกเลิกได้`,
+                () => {
+                    rentals = [];
+                    nextId = 1;
+                    saveToStorage();
+                    renderSpreadsheet();
+                    updateDashboard();
+                    showMessage('ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว!', 'success');
+                }
+            );
+        }
+
+        // Form submission
+        document.getElementById('rentalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                id: nextId++,
+                tenantName: document.getElementById('tenantName').value,
+                building: document.getElementById('building').value,
+                stallNumber: document.getElementById('stallNumber').value,
+                productType: document.getElementById('productType').value,
+                phone: document.getElementById('phoneNumber').value,
+                lockFee: parseFloat(document.getElementById('lockFee').value) || 0,
+                commonFee: parseFloat(document.getElementById('commonFee').value) || 0,
+                contractStartDate: document.getElementById('contractStartDate').value,
+                contractDuration: document.getElementById('contractDuration').value,
+                contractEndDate: document.getElementById('contractEndDate').value,
+                paymentStatus: document.getElementById('paymentStatus').value,
+                paymentDate: document.getElementById('paymentDate').value,
+                guarantorName: document.getElementById('guarantorName').value,
+                guarantorPhone: document.getElementById('guarantorPhone').value,
+                guarantorRelation: document.getElementById('guarantorRelation').value,
+                guarantorAddress: document.getElementById('guarantorAddress').value,
+                notes: document.getElementById('notes').value,
+                createdAt: new Date().toISOString()
+            };
+            
+            rentals.unshift(formData);
+            saveToStorage();
+            renderSpreadsheet();
+            updateDashboard();
+            this.reset();
+            showMessage('บันทึกข้อมูลเรียบร้อยแล้ว!', 'success');
+        });
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            if (!searchTerm) {
+                renderSpreadsheet();
+                return;
+            }
+            
+            const filteredRentals = rentals.filter(rental => 
+                rental.tenantName.toLowerCase().includes(searchTerm) ||
+                rental.building.toLowerCase().includes(searchTerm) ||
+                rental.stallNumber.toLowerCase().includes(searchTerm) ||
+                rental.productType.toLowerCase().includes(searchTerm) ||
+                (rental.phone && rental.phone.includes(searchTerm)) ||
+                (rental.guarantorName && rental.guarantorName.toLowerCase().includes(searchTerm))
+            );
+            
+            renderSpreadsheet(filteredRentals);
+        });
+
+        // File import functionality
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
@@ -1485,7 +1686,6 @@
                         const lines = text.split('\n');
                         const importedRentals = [];
                         
-                        // Skip header row
                         for (let i = 1; i < lines.length; i++) {
                             const line = lines[i].trim();
                             if (!line) continue;
@@ -1505,7 +1705,11 @@
                                     contractEndDate: columns[9] || '',
                                     paymentStatus: columns[11] || '',
                                     paymentDate: columns[12] || '',
-                                    notes: columns[13] || '',
+                                    guarantorName: columns[13] || '',
+                                    guarantorPhone: columns[14] || '',
+                                    guarantorRelation: columns[15] || '',
+                                    guarantorAddress: columns[16] || '',
+                                    notes: columns[17] || '',
                                     createdAt: new Date().toISOString()
                                 });
                             }
@@ -1515,24 +1719,22 @@
                             rentals = [...importedRentals, ...rentals];
                             saveToStorage();
                             renderSpreadsheet();
+                            updateDashboard();
                             showMessage(`นำเข้าข้อมูล ${importedRentals.length} รายการเรียบร้อย!`, 'success');
                         } else {
                             showMessage('ไม่พบข้อมูลที่ถูกต้องในไฟล์', 'error');
                         }
                     } else if (file.name.endsWith('.json')) {
                         const data = JSON.parse(e.target.result);
-                        if (Array.isArray(data) && data.length > 0) {
-                            const importedRentals = data.map(rental => ({
-                                ...rental,
-                                id: nextId++,
-                                createdAt: rental.createdAt || new Date().toISOString()
-                            }));
-                            rentals = [...importedRentals, ...rentals];
+                        if (data.rentals && Array.isArray(data.rentals)) {
+                            rentals = data.rentals;
+                            nextId = data.nextId || (Math.max(...rentals.map(r => r.id)) + 1);
                             saveToStorage();
                             renderSpreadsheet();
-                            showMessage(`นำเข้าข้อมูล ${importedRentals.length} รายการเรียบร้อย!`, 'success');
+                            updateDashboard();
+                            showMessage(`กู้คืนข้อมูล ${rentals.length} รายการเรียบร้อย!`, 'success');
                         } else {
-                            showMessage('รูปแบบไฟล์ JSON ไม่ถูกต้อง', 'error');
+                            showMessage('รูปแบบไฟล์ไม่ถูกต้อง', 'error');
                         }
                     }
                 } catch (error) {
@@ -1540,260 +1742,20 @@
                 }
             };
             reader.readAsText(file, 'UTF-8');
-            event.target.value = '';
-        }
-
-        // Backup data
-        function backupData() {
-            if (rentals.length === 0) {
-                showMessage('ไม่มีข้อมูลให้สำรอง', 'warning');
-                return;
-            }
-
-            const backupData = {
-                rentals: rentals,
-                bookings: bookings,
-                nextId: nextId,
-                nextBookingId: nextBookingId,
-                backupDate: new Date().toISOString(),
-                version: '2.0'
-            };
-
-            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `สำรองข้อมูลค่าเช่าแผง_${new Date().toLocaleDateString('th-TH').replace(/\//g, '-')}.json`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showMessage('สำรองข้อมูลเรียบร้อยแล้ว!', 'success');
-        }
-
-        // Restore data
-        function restoreData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const backupData = JSON.parse(e.target.result);
-                    
-                    if (backupData.rentals && Array.isArray(backupData.rentals)) {
-                        showConfirmModal(
-                            `พบข้อมูลสำรอง ${backupData.rentals.length} รายการ ต้องการแทนที่ข้อมูลปัจจุบันหรือไม่?`,
-                            () => {
-                                rentals = backupData.rentals;
-                                bookings = backupData.bookings || [];
-                                nextId = backupData.nextId || (Math.max(...rentals.map(r => r.id)) + 1);
-                                nextBookingId = backupData.nextBookingId || (Math.max(...bookings.map(b => b.id)) + 1);
-                                saveToStorage();
-                                renderSpreadsheet();
-                                showMessage(`กู้คืนข้อมูล ${rentals.length} รายการเรียบร้อย!`, 'success');
-                            }
-                        );
-                    } else {
-                        showMessage('รูปแบบไฟล์สำรองไม่ถูกต้อง', 'error');
-                    }
-                } catch (error) {
-                    showMessage('เกิดข้อผิดพลาดในการอ่านไฟล์สำรอง', 'error');
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
-        }
-
-        // Clear all data function
-        function clearAllData() {
-            if (rentals.length === 0) {
-                showMessage('ไม่มีข้อมูลให้ล้าง', 'warning');
-                return;
-            }
-            
-            showConfirmModal(
-                `ต้องการล้างข้อมูลทั้งหมด ${rentals.length} รายการหรือไม่? การกระทำนี้ไม่สามารถยกเลิกได้`,
-                () => {
-                    rentals = [];
-                    bookings = [];
-                    nextId = 1;
-                    nextBookingId = 1;
-                    saveToStorage();
-                    renderSpreadsheet();
-                    showMessage('ล้างข้อมูลทั้งหมดเรียบร้อยแล้ว!', 'success');
-                }
-            );
-        }
-
-        // Google Sheets functions
-        function showGoogleSheetsModal() {
-            document.getElementById('googleSheetsModal').classList.remove('hidden');
-            document.getElementById('googleSheetsUrl').focus();
-        }
-
-        function closeGoogleSheetsModal() {
-            document.getElementById('googleSheetsModal').classList.add('hidden');
-            document.getElementById('googleSheetsUrl').value = '';
-        }
-
-        function extractSheetId(url) {
-            const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-            return match ? match[1] : null;
-        }
-
-        async function importFromGoogleSheets() {
-            const url = document.getElementById('googleSheetsUrl').value.trim();
-            if (!url) {
-                showMessage('กรุณาใส่ลิงก์ Google Sheets', 'warning');
-                return;
-            }
-
-            const sheetId = extractSheetId(url);
-            if (!sheetId) {
-                showMessage('ลิงก์ Google Sheets ไม่ถูกต้อง', 'error');
-                return;
-            }
-
-            try {
-                showMessage('กำลังนำเข้าข้อมูล...', 'warning');
-                
-                // Convert to CSV export URL
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
-                
-                const response = await fetch(csvUrl);
-                if (!response.ok) {
-                    throw new Error('ไม่สามารถเข้าถึง Google Sheets ได้');
-                }
-                
-                const csvText = await response.text();
-                const lines = csvText.split('\n');
-                const importedRentals = [];
-                
-                // Skip header row and process data
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    
-                    // Parse CSV line (handle quoted values)
-                    const columns = [];
-                    let current = '';
-                    let inQuotes = false;
-                    
-                    for (let j = 0; j < line.length; j++) {
-                        const char = line[j];
-                        if (char === '"') {
-                            inQuotes = !inQuotes;
-                        } else if (char === ',' && !inQuotes) {
-                            columns.push(current.trim());
-                            current = '';
-                        } else {
-                            current += char;
-                        }
-                    }
-                    columns.push(current.trim());
-                    
-                    // Create rental object if we have minimum required data
-                    if (columns.length >= 2 && columns[0] && columns[2]) {
-                        importedRentals.push({
-                            id: nextId++,
-                            tenantName: columns[0] || '',
-                            building: columns[1] || '',
-                            stallNumber: columns[2] || '',
-                            productType: columns[3] || '',
-                            phone: columns[4] || '',
-                            lockFee: parseFloat(columns[5]) || 0,
-                            commonFee: parseFloat(columns[6]) || 0,
-                            contractStartDate: columns[8] || '',
-                            contractEndDate: columns[9] || '',
-                            paymentStatus: columns[11] || '',
-                            paymentDate: columns[12] || '',
-                            notes: columns[13] || '',
-                            createdAt: new Date().toISOString()
-                        });
-                    }
-                }
-                
-                if (importedRentals.length > 0) {
-                    rentals = [...importedRentals, ...rentals];
-                    saveToStorage();
-                    renderSpreadsheet();
-                    closeGoogleSheetsModal();
-                    showMessage(`นำเข้าข้อมูลจาก Google Sheets ${importedRentals.length} รายการเรียบร้อย!`, 'success');
-                } else {
-                    showMessage('ไม่พบข้อมูลที่ถูกต้องใน Google Sheets', 'error');
-                }
-                
-            } catch (error) {
-                console.error('Error importing from Google Sheets:', error);
-                showMessage('เกิดข้อผิดพลาดในการนำเข้าข้อมูล กรุณาตรวจสอบว่า Google Sheets เปิดให้ทุกคนดูได้', 'error');
-            }
-        }
-
-        document.getElementById('rentalForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Get product type value
-            const productTypeSelect = document.getElementById('productType').value;
-            const customProductType = document.getElementById('customProductType').value;
-            const finalProductType = productTypeSelect === 'custom' ? customProductType : productTypeSelect;
-            
-            const rental = {
-                id: nextId++,
-                tenantName: document.getElementById('tenantName').value,
-                building: document.getElementById('building').value,
-                stallNumber: document.getElementById('stallNumber').value,
-                productType: finalProductType,
-                phone: document.getElementById('phoneNumber').value,
-                lockFee: parseFloat(document.getElementById('lockFee').value) || 0,
-                commonFee: parseFloat(document.getElementById('commonFee').value) || 0,
-                contractStartDate: document.getElementById('contractStartDate').value,
-                contractEndDate: document.getElementById('contractEndDate').value,
-                paymentStatus: document.getElementById('paymentStatus').value,
-                paymentDate: document.getElementById('paymentDate').value,
-                notes: document.getElementById('notes').value,
-                createdAt: new Date().toISOString()
-            };
-
-            rentals.unshift(rental);
-            saveToStorage();
-            renderSpreadsheet();
-            
-            // Reset form
-            this.reset();
-            
-            showMessage('บันทึกข้อมูลเรียบร้อยแล้ว!', 'success');
+            e.target.value = '';
         });
-
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const filteredRentals = rentals.filter(rental => 
-                rental.tenantName.toLowerCase().includes(searchTerm) ||
-                (rental.building || '').toLowerCase().includes(searchTerm) ||
-                rental.stallNumber.toLowerCase().includes(searchTerm) ||
-                rental.productType.toLowerCase().includes(searchTerm) ||
-                rental.paymentStatus.toLowerCase().includes(searchTerm) ||
-                rental.notes.toLowerCase().includes(searchTerm)
-            );
-            renderSpreadsheet(filteredRentals);
-        });
-
-        // Auto-update notifications every minute
-        setInterval(() => {
-            generateNotifications();
-            updateNotificationBadge();
-            if (!document.getElementById('notificationsPanel').classList.contains('hidden')) {
-                renderNotifications();
-            }
-        }, 60000);
 
         // Initialize
-        document.getElementById('formView').style.display = 'none';
-        document.getElementById('contractStartDate').value = new Date().toISOString().split('T')[0];
-        renderSpreadsheet();
-        generateNotifications();
-        updateNotificationBadge();
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            renderSpreadsheet();
+            updateDashboard();
+            
+            // Hide form initially
+            if (currentView === 'spreadsheet') {
+                document.getElementById('formView').style.display = 'none';
+            }
+        });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e3b4fb03859c7d',t:'MTc2MDQwOTU3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98e419c086da35a4',t:'MTc2MDQxMzcwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
