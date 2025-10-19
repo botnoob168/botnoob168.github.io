@@ -1,505 +1,1704 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VPN Config Manager</title>
+    <title>VPN Files Download Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             box-sizing: border-box;
         }
-        .file-card {
+        
+        /* Dark Mode Styles */
+        .dark {
+            background-color: #1a1a1a;
+            color: #e5e5e5;
+        }
+        
+        .dark .bg-gray-50 {
+            background-color: #1a1a1a;
+        }
+        
+        .dark .bg-white {
+            background-color: #2d2d2d;
+            color: #e5e5e5;
+        }
+        
+        .dark .bg-gray-100 {
+            background-color: #3d3d3d;
+        }
+        
+        .dark .bg-gray-200 {
+            background-color: #4d4d4d;
+        }
+        
+        .dark .bg-gray-800 {
+            background-color: #0d0d0d;
+        }
+        
+        .dark .text-gray-900 {
+            color: #e5e5e5;
+        }
+        
+        .dark .text-gray-700 {
+            color: #b5b5b5;
+        }
+        
+        .dark .text-gray-600 {
+            color: #9ca3af;
+        }
+        
+        .dark .text-gray-500 {
+            color: #6b7280;
+        }
+        
+        .dark .text-gray-400 {
+            color: #9ca3af;
+        }
+        
+        .dark .border-gray-300 {
+            border-color: #4d4d4d;
+        }
+        
+        .dark .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .dark .bg-gray-50 {
+            background-color: #2a2a2a;
+        }
+        
+        .dark input, .dark select {
+            background-color: #3d3d3d;
+            color: #e5e5e5;
+            border-color: #4d4d4d;
+        }
+        
+        .dark input:focus, .dark select:focus {
+            background-color: #3d3d3d;
+            border-color: #8b5cf6;
+        }
+        
+        .dark .hover\:bg-gray-200:hover {
+            background-color: #4d4d4d;
+        }
+        
+        .dark .hover\:bg-gray-100:hover {
+            background-color: #3d3d3d;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
             transition: all 0.3s ease;
         }
-        .file-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
-        .status-online {
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        .upload-zone {
-            border: 2px dashed #cbd5e1;
+        .download-btn {
+            background: linear-gradient(45deg, #10b981, #059669);
             transition: all 0.3s ease;
         }
-        .upload-zone.dragover {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
+        .download-btn:hover {
+            background: linear-gradient(45deg, #059669, #047857);
+            transform: scale(1.05);
+        }
+        .ssh-btn {
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+            transition: all 0.3s ease;
+        }
+        .ssh-btn:hover {
+            background: linear-gradient(45deg, #1d4ed8, #1e40af);
+            transform: scale(1.05);
+        }
+        .v2ray-btn {
+            background: linear-gradient(45deg, #8b5cf6, #7c3aed);
+            transition: all 0.3s ease;
+        }
+        .v2ray-btn:hover {
+            background: linear-gradient(45deg, #7c3aed, #6d28d9);
+            transform: scale(1.05);
+        }
+        .expired-overlay {
+            background: rgba(239, 68, 68, 0.9);
+            backdrop-filter: blur(4px);
+        }
+        .premium-badge {
+            background: linear-gradient(45deg, #fbbf24, #f59e0b);
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
+<body class="h-full bg-gray-50 font-sans">
+    <div id="app" class="min-h-full">
         <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">🔐 VPN Config Manager</h1>
-            <p class="text-gray-600">จัดการไฟล์ VPN Configuration ของคุณ</p>
-        </div>
-
-        <!-- Admin Login Section -->
-        <div id="loginSection" class="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">🔐 เข้าสู่ระบบแอดมิน</h2>
-            <div class="max-w-md mx-auto">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อผู้ใช้</label>
-                    <input type="text" id="adminUsername" placeholder="กรอกชื่อผู้ใช้" 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <header class="gradient-bg shadow-lg">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-6">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <h1 class="text-2xl font-bold text-white">VPN Download Center</h1>
+                    </div>
+                    <nav class="hidden md:flex space-x-8 items-center">
+                        <button onclick="showHome()" class="text-white hover:text-purple-200 transition-colors">หน้าหลัก</button>
+                        <button onclick="showAbout()" class="text-white hover:text-purple-200 transition-colors">เกี่ยวกับ</button>
+                        <button onclick="showAdminLogin()" class="text-white hover:text-purple-200 transition-colors">🔧 แอดมิน</button>
+                        <button onclick="toggleDarkMode()" id="darkModeToggle" class="text-white hover:text-purple-200 transition-colors p-2 rounded-lg hover:bg-purple-700">
+                            🌙
+                        </button>
+                    </nav>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden text-white p-2 rounded-lg hover:bg-purple-700 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
                 </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">รหัสผ่าน</label>
-                    <input type="password" id="adminPassword" placeholder="กรอกรหัสผ่าน" 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                
+                <!-- Mobile Menu -->
+                <div id="mobileMenu" class="hidden md:hidden bg-purple-700 px-4 py-4 space-y-2">
+                    <button onclick="showHome(); toggleMobileMenu()" class="block w-full text-left text-white hover:text-purple-200 transition-colors py-2">หน้าหลัก</button>
+                    <button onclick="showAbout(); toggleMobileMenu()" class="block w-full text-left text-white hover:text-purple-200 transition-colors py-2">เกี่ยวกับ</button>
+                    <button onclick="showAdminLogin(); toggleMobileMenu()" class="block w-full text-left text-white hover:text-purple-200 transition-colors py-2">🔧 แอดมิน</button>
+                    <button onclick="toggleDarkMode()" class="block w-full text-left text-white hover:text-purple-200 transition-colors py-2">🌙 โหมดมืด</button>
                 </div>
-                <button onclick="adminLogin()" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
-                    🔑 เข้าสู่ระบบ
-                </button>
-                <p class="text-xs text-gray-500 mt-2 text-center">Demo: admin / admin123</p>
             </div>
-        </div>
+        </header>
 
-        <!-- Upload Section (Admin Only) -->
-        <div id="uploadSection" class="bg-white rounded-xl shadow-lg p-6 mb-8 hidden">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-gray-800">📁 อัปโหลดไฟล์ใหม่ (แอดมินเท่านั้น)</h2>
-                <button onclick="adminLogout()" class="px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors">
-                    🚪 ออกจากระบบ
-                </button>
-            </div>
-            <div id="uploadZone" class="upload-zone rounded-lg p-8 text-center cursor-pointer">
-                <div class="text-4xl mb-4">📤</div>
-                <p class="text-gray-600 mb-2">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
-                <p class="text-sm text-gray-500">รองรับ .ovpn, .conf</p>
-                <input type="file" id="fileInput" class="hidden" accept=".ovpn,.conf" multiple>
-            </div>
-        </div>
-
-        <!-- Search and Filter -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <div class="flex flex-col md:flex-row gap-4">
-                <div class="flex-1">
-                    <input type="text" id="searchInput" placeholder="🔍 ค้นหาไฟล์..." 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Password Protection Modal -->
+            <div id="passwordModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">🔐 ป้อนรหัสผ่าน</h2>
+                        <p class="text-gray-600 mt-2">กรุณาใส่รหัสผ่านเพื่อเข้าถึงไฟล์ดาวน์โหลด</p>
+                    </div>
+                    
+                    <form id="passwordForm">
+                        <div class="mb-6">
+                            <label for="downloadPassword" class="block text-sm font-medium text-gray-700 mb-2">รหัสผ่านดาวน์โหลด</label>
+                            <input type="password" id="downloadPassword" name="downloadPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="ใส่รหัสผ่าน" required>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-all transform hover:scale-105">
+                            🔓 ยืนยันรหัสผ่าน
+                        </button>
+                    </form>
+                    
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                        <p class="text-sm text-blue-800">
+                            <strong>💡 สำหรับทดสอบ:</strong> รหัสผ่าน = <code class="bg-blue-200 px-2 py-1 rounded font-mono">download123</code>
+                        </p>
+                        <p class="text-xs text-blue-600 mt-2">
+                            ⚠️ คุณจะต้องใส่รหัสผ่านเพียงครั้งเดียวต่อเซสชัน
+                        </p>
+                    </div>
                 </div>
-                <select id="filterSelect" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                    <option value="all">ทั้งหมด</option>
-                    <option value="online">ออนไลน์</option>
-                    <option value="offline">ออฟไลน์</option>
-                    <option value="premium">Premium</option>
-                </select>
             </div>
-        </div>
 
-        <!-- VPN Files Grid -->
-        <div id="fileGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Files will be populated here -->
-        </div>
+            <!-- Home Page -->
+            <div id="homePage">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold text-gray-900 mb-4">ดาวน์โหลดไฟล์ VPN</h2>
+                    <p class="text-xl text-gray-600 max-w-2xl mx-auto">เลือกแอป VPN ที่คุณต้องการและดาวน์โหลดไฟล์คอนฟิกได้ทันที</p>
+                    
+                    <!-- Search Bar -->
+                    <div class="max-w-md mx-auto mt-8 mb-8">
+                        <div class="relative">
+                            <input type="text" id="searchInput" placeholder="ค้นหา VPN, SSH, V2Ray..." class="w-full px-4 py-3 pl-12 pr-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm">
+                            <svg class="absolute left-4 top-3.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
 
-        <!-- Empty State -->
-        <div id="emptyState" class="text-center py-12 hidden">
-            <div class="text-6xl mb-4">📂</div>
-            <h3 class="text-xl font-semibold text-gray-600 mb-2">ไม่พบไฟล์</h3>
-            <p class="text-gray-500">อัปโหลดไฟล์ VPN config เพื่อเริ่มต้น</p>
-        </div>
-    </div>
+                    <!-- Category Tabs -->
+                    <div class="flex justify-center mb-8">
+                        <div class="bg-white rounded-xl shadow-lg p-2 inline-flex">
+                            <button onclick="showCategory('vpn')" id="vpnTab" class="px-6 py-3 rounded-lg font-semibold transition-all bg-purple-600 text-white">
+                                🔒 VPN Apps
+                            </button>
+                            <button onclick="showCategory('ssh')" id="sshTab" class="px-6 py-3 rounded-lg font-semibold transition-all text-gray-600 hover:text-purple-600">
+                                🖥️ SSH Configs
+                            </button>
+                            <button onclick="showCategory('v2ray')" id="v2rayTab" class="px-6 py-3 rounded-lg font-semibold transition-all text-gray-600 hover:text-purple-600">
+                                ⚡ V2Ray Configs
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- Modal for File Details -->
-    <div id="fileModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-xl p-6 m-4 max-w-md w-full">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">รายละเอียดไฟล์</h3>
-                <button id="closeModal" class="text-gray-500 hover:text-gray-700">✕</button>
+                <!-- Dynamic Content Grid -->
+                <div id="contentGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+
+                <!-- Stats Section -->
+                <div class="mt-16 bg-white rounded-xl shadow-lg p-8">
+                    <h3 class="text-2xl font-bold text-gray-900 text-center mb-8">สถิติการดาวน์โหลด</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-blue-600" id="vpnDownloads">2,773</div>
+                            <div class="text-gray-600">VPN Apps Downloads</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-green-600" id="sshDownloads">1,456</div>
+                            <div class="text-gray-600">SSH Configs Downloads</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-purple-600" id="v2rayDownloads">987</div>
+                            <div class="text-gray-600">V2Ray Configs Downloads</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div id="modalContent">
-                <!-- Modal content will be populated here -->
+
+            <!-- Admin Login Page -->
+            <div id="adminLoginPage" class="hidden">
+                <div class="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">เข้าสู่ระบบแอดมิน</h2>
+                        <p class="text-gray-600 mt-2">กรุณาใส่รหัสผ่านเพื่อเข้าถึงหน้าจัดการ</p>
+                    </div>
+                    
+                    <form id="adminLoginForm">
+                        <div class="mb-6">
+                            <label for="adminPassword" class="block text-sm font-medium text-gray-700 mb-2">รหัสผ่านแอดมิน</label>
+                            <input type="password" id="adminPassword" name="adminPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="ใส่รหัสผ่าน" required>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors">
+                            🔓 เข้าสู่ระบบ
+                        </button>
+                    </form>
+                    
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                        <p class="text-sm text-blue-800">
+                            <strong>สำหรับทดสอบ:</strong> รหัสผ่าน = <code class="bg-blue-200 px-2 py-1 rounded">admin123</code>
+                        </p>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            <!-- Admin Page -->
+            <div id="adminPage" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-3xl font-bold text-gray-900">🔧 หน้าแอดมิน - จัดการไฟล์</h2>
+                        <button onclick="adminLogout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">
+                            🚪 ออกจากระบบ
+                        </button>
+                    </div>
+                    
+                    <!-- Category Management Tabs -->
+                    <div class="flex mb-6">
+                        <button onclick="showAdminCategory('members')" id="adminMembersTab" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-l-lg">👥 สมาชิก</button>
+                        <button onclick="showAdminCategory('vpn')" id="adminVpnTab" class="px-4 py-2 bg-purple-600 text-white">VPN Apps</button>
+                        <button onclick="showAdminCategory('ssh')" id="adminSshTab" class="px-4 py-2 bg-gray-200 text-gray-700">SSH Configs</button>
+                        <button onclick="showAdminCategory('v2ray')" id="adminV2rayTab" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-r-lg">V2Ray Configs</button>
+                    </div>
+
+                    <!-- Admin Members Management -->
+                    <div id="adminMembersSection" class="hidden">
+                        <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-4">👥 เพิ่มสมาชิกใหม่</h3>
+                            <form id="addMemberForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="memberUsername" class="block text-sm font-medium text-gray-700 mb-2">ชื่อผู้ใช้</label>
+                                    <input type="text" id="memberUsername" name="memberUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="เช่น john_doe" required>
+                                </div>
+                                <div>
+                                    <label for="memberEmail" class="block text-sm font-medium text-gray-700 mb-2">อีเมล</label>
+                                    <input type="email" id="memberEmail" name="memberEmail" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="john@example.com" required>
+                                </div>
+                                <div>
+                                    <label for="memberPassword" class="block text-sm font-medium text-gray-700 mb-2">รหัสผ่าน</label>
+                                    <input type="password" id="memberPassword" name="memberPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="รหัสผ่านสำหรับสมาชิก" required>
+                                </div>
+                                <div>
+                                    <label for="memberPlan" class="block text-sm font-medium text-gray-700 mb-2">แผนการใช้งาน</label>
+                                    <select id="memberPlan" name="memberPlan" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                        <option value="free">🆓 Free Plan</option>
+                                        <option value="premium">⭐ Premium Plan</option>
+                                        <option value="vip">💎 VIP Plan</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="memberExpiry" class="block text-sm font-medium text-gray-700 mb-2">วันหมดอายุ</label>
+                                    <input type="date" id="memberExpiry" name="memberExpiry" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                </div>
+                                <div>
+                                    <label for="memberStatus" class="block text-sm font-medium text-gray-700 mb-2">สถานะ</label>
+                                    <select id="memberStatus" name="memberStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                        <option value="active">✅ ใช้งานได้</option>
+                                        <option value="suspended">⏸️ ระงับการใช้งาน</option>
+                                        <option value="expired">❌ หมดอายุ</option>
+                                    </select>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                                        ➕ เพิ่มสมาชิก
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Edit Member Modal -->
+                        <div id="editMemberModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                            <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h3 class="text-2xl font-bold text-gray-900">✏️ แก้ไขข้อมูลสมาชิก</h3>
+                                    <button onclick="closeEditMemberModal()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+                                </div>
+                                <form id="editMemberForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input type="hidden" id="editMemberId" name="editMemberId">
+                                    <div>
+                                        <label for="editMemberUsername" class="block text-sm font-medium text-gray-700 mb-2">ชื่อผู้ใช้</label>
+                                        <input type="text" id="editMemberUsername" name="editMemberUsername" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                    </div>
+                                    <div>
+                                        <label for="editMemberEmail" class="block text-sm font-medium text-gray-700 mb-2">อีเมล</label>
+                                        <input type="email" id="editMemberEmail" name="editMemberEmail" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                    </div>
+                                    <div>
+                                        <label for="editMemberPassword" class="block text-sm font-medium text-gray-700 mb-2">รหัสผ่านใหม่ (เว้นว่างหากไม่ต้องการเปลี่ยน)</label>
+                                        <input type="password" id="editMemberPassword" name="editMemberPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="ใส่รหัสผ่านใหม่">
+                                    </div>
+                                    <div>
+                                        <label for="editMemberPlan" class="block text-sm font-medium text-gray-700 mb-2">แผนการใช้งาน</label>
+                                        <select id="editMemberPlan" name="editMemberPlan" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                            <option value="free">🆓 Free Plan</option>
+                                            <option value="premium">⭐ Premium Plan</option>
+                                            <option value="vip">💎 VIP Plan</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="editMemberExpiry" class="block text-sm font-medium text-gray-700 mb-2">วันหมดอายุ</label>
+                                        <input type="date" id="editMemberExpiry" name="editMemberExpiry" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                    </div>
+                                    <div>
+                                        <label for="editMemberStatus" class="block text-sm font-medium text-gray-700 mb-2">สถานะ</label>
+                                        <select id="editMemberStatus" name="editMemberStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                            <option value="active">✅ ใช้งานได้</option>
+                                            <option value="suspended">⏸️ ระงับการใช้งาน</option>
+                                            <option value="expired">❌ หมดอายุ</option>
+                                        </select>
+                                    </div>
+                                    <div class="md:col-span-2 flex space-x-4">
+                                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                                            💾 บันทึกการแก้ไข
+                                        </button>
+                                        <button type="button" onclick="closeEditMemberModal()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                                            ❌ ยกเลิก
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Members List -->
+                        <div class="bg-white rounded-lg p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-semibold text-gray-900">📋 รายการสมาชิกทั้งหมด</h3>
+                                <div class="flex space-x-2">
+                                    <select id="memberFilterStatus" onchange="filterMembers()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                        <option value="all">ทุกสถานะ</option>
+                                        <option value="active">ใช้งานได้</option>
+                                        <option value="suspended">ระงับการใช้งาน</option>
+                                        <option value="expired">หมดอายุ</option>
+                                    </select>
+                                    <select id="memberFilterPlan" onchange="filterMembers()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                        <option value="all">ทุกแผน</option>
+                                        <option value="free">Free Plan</option>
+                                        <option value="premium">Premium Plan</option>
+                                        <option value="vip">VIP Plan</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="adminMembersList" class="space-y-3">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin VPN Management -->
+                    <div id="adminVpnSection">
+                        <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-4">เพิ่มแอป VPN ใหม่</h3>
+                            <form id="addVpnForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="vpnName" class="block text-sm font-medium text-gray-700 mb-2">ชื่อแอป VPN</label>
+                                    <input type="text" id="vpnName" name="vpnName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="เช่น ExpressVPN" required>
+                                </div>
+                                <div>
+                                    <label for="vpnVersion" class="block text-sm font-medium text-gray-700 mb-2">เวอร์ชัน</label>
+                                    <input type="text" id="vpnVersion" name="vpnVersion" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="เช่น 1.0.0" required>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label for="vpnDescription" class="block text-sm font-medium text-gray-700 mb-2">คำอธิบาย</label>
+                                    <input type="text" id="vpnDescription" name="vpnDescription" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="คำอธิบายแอป VPN" required>
+                                </div>
+                                <div>
+                                    <label for="vpnLogo" class="block text-sm font-medium text-gray-700 mb-2">🖼️ ลิงก์โลโก้แอป</label>
+                                    <input type="url" id="vpnLogo" name="vpnLogo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="https://example.com/logo.png" required>
+                                </div>
+                                <div>
+                                    <label for="vpnUrl" class="block text-sm font-medium text-gray-700 mb-2">🔗 ลิงก์ดาวน์โหลด</label>
+                                    <input type="url" id="vpnUrl" name="vpnUrl" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="https://example.com/download" required>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                                        ➕ เพิ่มแอป VPN
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Edit VPN Modal -->
+                        <div id="editVpnModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                            <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h3 class="text-2xl font-bold text-gray-900">✏️ แก้ไข VPN App</h3>
+                                    <button onclick="closeEditVpnModal()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+                                </div>
+                                <form id="editVpnForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input type="hidden" id="editVpnId" name="editVpnId">
+                                    <div>
+                                        <label for="editVpnName" class="block text-sm font-medium text-gray-700 mb-2">ชื่อแอป VPN</label>
+                                        <input type="text" id="editVpnName" name="editVpnName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                                    </div>
+                                    <div>
+                                        <label for="editVpnVersion" class="block text-sm font-medium text-gray-700 mb-2">เวอร์ชัน</label>
+                                        <input type="text" id="editVpnVersion" name="editVpnVersion" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label for="editVpnDescription" class="block text-sm font-medium text-gray-700 mb-2">คำอธิบาย</label>
+                                        <input type="text" id="editVpnDescription" name="editVpnDescription" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                                    </div>
+                                    <div>
+                                        <label for="editVpnLogo" class="block text-sm font-medium text-gray-700 mb-2">🖼️ ลิงก์โลโก้แอป</label>
+                                        <input type="url" id="editVpnLogo" name="editVpnLogo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                                    </div>
+                                    <div>
+                                        <label for="editVpnUrl" class="block text-sm font-medium text-gray-700 mb-2">🔗 ลิงก์ดาวน์โหลด</label>
+                                        <input type="url" id="editVpnUrl" name="editVpnUrl" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" required>
+                                    </div>
+                                    <div class="md:col-span-2 flex space-x-4">
+                                        <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                                            💾 บันทึกการแก้ไข
+                                        </button>
+                                        <button type="button" onclick="closeEditVpnModal()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                                            ❌ ยกเลิก
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- VPN List -->
+                        <div class="bg-white rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-4">📋 รายการ VPN Apps ที่มีอยู่</h3>
+                            <div id="adminVpnList" class="space-y-3">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin SSH Management -->
+                    <div id="adminSshSection" class="hidden">
+                        <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-4">เพิ่ม SSH Config ใหม่</h3>
+                            <form id="addSshForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="sshCountry" class="block text-sm font-medium text-gray-700 mb-2">ประเทศ</label>
+                                    <input type="text" id="sshCountry" name="sshCountry" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="เช่น Singapore" required>
+                                </div>
+                                <div>
+                                    <label for="sshHost" class="block text-sm font-medium text-gray-700 mb-2">Host</label>
+                                    <input type="text" id="sshHost" name="sshHost" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="เช่น sg1.example.com" required>
+                                </div>
+                                <div>
+                                    <label for="sshPort" class="block text-sm font-medium text-gray-700 mb-2">Port</label>
+                                    <input type="text" id="sshPort" name="sshPort" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="เช่น 22, 443, 80" required>
+                                </div>
+                                <div>
+                                    <label for="sshLogo" class="block text-sm font-medium text-gray-700 mb-2">🖼️ ลิงก์โลโก้ประเทศ</label>
+                                    <input type="url" id="sshLogo" name="sshLogo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="https://example.com/flag.png" required>
+                                </div>
+                                <div>
+                                    <label for="sshUrl" class="block text-sm font-medium text-gray-700 mb-2">🔗 ลิงก์ดาวน์โหลด</label>
+                                    <input type="url" id="sshUrl" name="sshUrl" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="https://example.com/ssh-config" required>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                                        ➕ เพิ่ม SSH Config
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- SSH List -->
+                        <div class="bg-white rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-4">📋 รายการ SSH Configs ที่มีอยู่</h3>
+                            <div id="adminSshList" class="space-y-3">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admin V2Ray Management -->
+                    <div id="adminV2raySection" class="hidden">
+                        <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-4">เพิ่ม V2Ray Config ใหม่</h3>
+                            <form id="addV2rayForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="v2rayProtocol" class="block text-sm font-medium text-gray-700 mb-2">Protocol</label>
+                                    <select id="v2rayProtocol" name="v2rayProtocol" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required>
+                                        <option value="vmess">VMess</option>
+                                        <option value="vless">VLESS</option>
+                                        <option value="trojan">Trojan</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="v2rayPort" class="block text-sm font-medium text-gray-700 mb-2">Port</label>
+                                    <input type="text" id="v2rayPort" name="v2rayPort" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="เช่น 443, 80" required>
+                                </div>
+                                <div>
+                                    <label for="v2rayNetwork" class="block text-sm font-medium text-gray-700 mb-2">Network</label>
+                                    <select id="v2rayNetwork" name="v2rayNetwork" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required>
+                                        <option value="ws">WebSocket (ws)</option>
+                                        <option value="tcp">TCP</option>
+                                        <option value="grpc">gRPC</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="v2rayLogo" class="block text-sm font-medium text-gray-700 mb-2">🖼️ ลิงก์โลโก้ Protocol</label>
+                                    <input type="url" id="v2rayLogo" name="v2rayLogo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="https://example.com/protocol-logo.png" required>
+                                </div>
+                                <div>
+                                    <label for="v2rayUrl" class="block text-sm font-medium text-gray-700 mb-2">🔗 ลิงก์ดาวน์โหลด</label>
+                                    <input type="url" id="v2rayUrl" name="v2rayUrl" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="https://example.com/v2ray-config" required>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                                        ➕ เพิ่ม V2Ray Config
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- V2Ray List -->
+                        <div class="bg-white rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-4">📋 รายการ V2Ray Configs ที่มีอยู่</h3>
+                            <div id="adminV2rayList" class="space-y-3">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Page -->
+            <div id="aboutPage" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">เกี่ยวกับ VPN Download Center</h2>
+                    <div class="prose max-w-none">
+                        <p class="text-lg text-gray-600 mb-4">
+                            VPN Download Center เป็นแพลตฟอร์มที่ให้บริการดาวน์โหลดไฟล์คอนฟิกจากแอป VPN, SSH และ V2Ray 
+                            เพื่อให้ผู้ใช้สามารถเข้าถึงและใช้งานได้อย่างสะดวกและปลอดภัย
+                        </p>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">บริการที่เรามี</h3>
+                        <ul class="list-disc list-inside text-gray-600 space-y-2">
+                            <li>🔒 VPN Apps - แอปพลิเคชัน VPN ยอดนิยม</li>
+                            <li>🖥️ SSH Configs - การเชื่อมต่อ SSH จากหลายประเทศ</li>
+                            <li>⚡ V2Ray Configs - โปรโตคอล V2Ray ทันสมัย</li>
+                            <li>🔍 ระบบค้นหาที่ใช้งานง่าย</li>
+                            <li>📁 ระบบอัปโหลดและจัดเก็บไฟล์</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white mt-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="text-center">
+                    <p>&copy; 2024 VPN Download Center. สงวนลิขสิทธิ์.</p>
+                    <p class="text-gray-400 mt-2">เพื่อการศึกษาและทดสอบเท่านั้น</p>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <script>
-        // Sample VPN files data
-        let vpnFiles = [
+        // Sample VPN data with logo URLs
+        const vpnData = [
             {
-                id: 1,
-                name: "Thailand-Bangkok-01.ovpn",
-                server: "Bangkok, Thailand",
-                status: "online",
-                type: "premium",
-                speed: "100 Mbps",
-                ping: "15ms",
-                uploadDate: "2024-01-15",
-                size: "2.1 KB"
+                id: 'tikvpn',
+                name: 'TikVPN',
+                version: '2.1.5',
+                description: 'VPN ที่เร็วและปลอดภัย เหมาะสำหรับการใช้งานทั่วไป',
+                icon: 'T',
+                logoUrl: 'https://cdn-icons-png.flaticon.com/512/2111/2111624.png',
+                color: 'blue',
+                fileSize: '45.2 MB',
+                uploadDate: '15 ธันวาคม 2024',
+                downloadUrl: 'https://example.com/tikvpn'
             },
             {
-                id: 2,
-                name: "Singapore-Premium.ovpn",
-                server: "Singapore",
-                status: "online",
-                type: "premium",
-                speed: "150 Mbps",
-                ping: "8ms",
-                uploadDate: "2024-01-14",
-                size: "1.9 KB"
+                id: 'lomavpn',
+                name: 'LomaVPN',
+                version: '3.0.2',
+                description: 'VPN ที่มีเซิร์ฟเวอร์หลากหลาย รองรับการสตรีมมิ่ง',
+                icon: 'L',
+                logoUrl: 'https://cdn-icons-png.flaticon.com/512/1828/1828490.png',
+                color: 'green',
+                fileSize: '52.1 MB',
+                uploadDate: '15 ธันวาคม 2024',
+                downloadUrl: 'https://example.com/lomavpn'
             },
             {
-                id: 3,
-                name: "Japan-Tokyo-Free.ovpn",
-                server: "Tokyo, Japan",
-                status: "offline",
-                type: "free",
-                speed: "50 Mbps",
-                ping: "25ms",
-                uploadDate: "2024-01-13",
-                size: "2.3 KB"
+                id: 'catvpn',
+                name: 'CatVPN',
+                version: '1.8.7',
+                description: 'VPN ที่ใช้งานง่าย เน้นความเป็นส่วนตัวสูง',
+                icon: '🐱',
+                logoUrl: 'https://cdn-icons-png.flaticon.com/512/2111/2111370.png',
+                color: 'orange',
+                fileSize: '38.9 MB',
+                uploadDate: '15 ธันวาคม 2024',
+                downloadUrl: 'https://example.com/catvpn'
             },
             {
-                id: 4,
-                name: "USA-NewYork-VIP.ovpn",
-                server: "New York, USA",
-                status: "online",
-                type: "premium",
-                speed: "200 Mbps",
-                ping: "45ms",
-                uploadDate: "2024-01-12",
-                size: "2.0 KB"
+                id: 'speedvpn',
+                name: 'SpeedVPN Pro',
+                version: '4.2.1',
+                description: 'VPN ความเร็วสูง เหมาะสำหรับเกมและสตรีมมิ่ง',
+                icon: 'S',
+                logoUrl: 'https://cdn-icons-png.flaticon.com/512/2111/2111728.png',
+                color: 'purple',
+                fileSize: '67.3 MB',
+                uploadDate: '14 ธันวาคม 2024',
+                downloadUrl: 'https://example.com/speedvpn'
             },
             {
-                id: 5,
-                name: "Germany-Berlin.conf",
-                server: "Berlin, Germany",
-                status: "online",
-                type: "premium",
-                speed: "120 Mbps",
-                ping: "30ms",
-                uploadDate: "2024-01-11",
-                size: "1.8 KB"
+                id: 'securevpn',
+                name: 'SecureVPN',
+                version: '2.9.8',
+                description: 'VPN ที่เน้นความปลอดภัยสูงสุด มีการเข้ารหัสแบบ AES-256',
+                icon: '🔐',
+                logoUrl: 'https://cdn-icons-png.flaticon.com/512/2111/2111432.png',
+                color: 'indigo',
+                fileSize: '41.7 MB',
+                uploadDate: '13 ธันวาคม 2024',
+                downloadUrl: 'https://example.com/securevpn'
             },
             {
-                id: 6,
-                name: "Australia-Sydney.ovpn",
-                server: "Sydney, Australia",
-                status: "offline",
-                type: "free",
-                speed: "80 Mbps",
-                ping: "60ms",
-                uploadDate: "2024-01-10",
-                size: "2.2 KB"
+                id: 'freevpn',
+                name: 'FreeVPN Unlimited',
+                version: '1.5.3',
+                description: 'VPN ฟรีไม่จำกัดแบนด์วิธ เซิร์ฟเวอร์ทั่วโลก',
+                icon: 'F',
+                logoUrl: 'https://cdn-icons-png.flaticon.com/512/2111/2111463.png',
+                color: 'red',
+                fileSize: '29.4 MB',
+                uploadDate: '12 ธันวาคม 2024',
+                downloadUrl: 'https://example.com/freevpn'
             }
         ];
 
-        // Admin state
-        let isAdminLoggedIn = false;
-
-        // DOM elements
-        const fileGrid = document.getElementById('fileGrid');
-        const emptyState = document.getElementById('emptyState');
-        const searchInput = document.getElementById('searchInput');
-        const filterSelect = document.getElementById('filterSelect');
-        const uploadZone = document.getElementById('uploadZone');
-        const fileInput = document.getElementById('fileInput');
-        const fileModal = document.getElementById('fileModal');
-        const modalContent = document.getElementById('modalContent');
-        const closeModal = document.getElementById('closeModal');
-        const loginSection = document.getElementById('loginSection');
-        const uploadSection = document.getElementById('uploadSection');
-        const adminUsername = document.getElementById('adminUsername');
-        const adminPassword = document.getElementById('adminPassword');
-
-        // Render files
-        function renderFiles(files = vpnFiles) {
-            if (files.length === 0) {
-                fileGrid.classList.add('hidden');
-                emptyState.classList.remove('hidden');
-                return;
+        // SSH data with flag logos
+        const sshData = [
+            {
+                id: 'singapore-ssh',
+                name: 'Singapore SSH',
+                version: 'Premium Server',
+                description: 'เซิร์ฟเวอร์ SSH ความเร็วสูงในสิงคโปร์',
+                icon: '🇸🇬',
+                logoUrl: 'https://cdn-icons-png.flaticon.com/512/197/197496.png',
+                color: 'blue',
+                host: 'sg1.example.com',
+                port: '22, 443',
+                fileSize: '2.1 KB',
+                uploadDate: '15 ธันวาคม 2024',
+                downloadUrl: 'https://example.com/singapore-ssh'
+            },
+            {
+                id: 'thailand-ssh',
+                name: 'Thailand SSH',
+                version: 'Local Server',
+                description: 'เซิร์ฟเวอร์ SSH ในประเทศไทย Ping ต่ำ',
+                icon: '🇹🇭',
+                logoUrl: 'https://cdn-icons-png.flaticon.com/512/197/197452.png',
+                color: 'red',
+                host: 'th1.example.com',
+                port: '22, 80, 443',
+                fileSize: '1.8 KB',
+                uploadDate: '15 ธันวาคม 2024',
+                downloadUrl: 'https://example.com/thailand-ssh'
+            },
+            {
+                id: 'japan-ssh',
+                name: 'Japan SSH',
+                version: 'Gaming Server',
+                description: 'เซิร์ฟเวอร์ SSH ญี่ปุ่น เหมาะสำหรับเกม',
+                icon: '🇯🇵',
+                logoUrl: 'https://cdn-icons-png.flaticon.com/512/197/197604.png',
+                color: 'red',
+                host: 'jp1.example.com',
+                port: '22, 443, 80',
+                fileSize: '2.3 KB',
+                uploadDate: '15 ธันวาคม 2024',
+                downloadUrl: 'https://example.com/japan-ssh'
             }
+        ];
 
-            fileGrid.classList.remove('hidden');
-            emptyState.classList.add('hidden');
+        // Members data
+        const membersData = [
+            {
+                id: 'member_001',
+                username: 'john_doe',
+                email: 'john@example.com',
+                password: 'hashed_password_123',
+                plan: 'premium',
+                status: 'active',
+                joinDate: '2024-01-15',
+                expiryDate: '2025-01-15',
+                lastLogin: '2024-12-15',
+                downloadCount: 45
+            },
+            {
+                id: 'member_002',
+                username: 'jane_smith',
+                email: 'jane@example.com',
+                password: 'hashed_password_456',
+                plan: 'vip',
+                status: 'active',
+                joinDate: '2024-02-20',
+                expiryDate: '2025-02-20',
+                lastLogin: '2024-12-14',
+                downloadCount: 78
+            },
+            {
+                id: 'member_003',
+                username: 'mike_wilson',
+                email: 'mike@example.com',
+                password: 'hashed_password_789',
+                plan: 'free',
+                status: 'active',
+                joinDate: '2024-11-01',
+                expiryDate: '2024-12-31',
+                lastLogin: '2024-12-13',
+                downloadCount: 12
+            },
+            {
+                id: 'member_004',
+                username: 'sarah_jones',
+                email: 'sarah@example.com',
+                password: 'hashed_password_abc',
+                plan: 'premium',
+                status: 'expired',
+                joinDate: '2023-12-01',
+                expiryDate: '2024-12-01',
+                lastLogin: '2024-11-30',
+                downloadCount: 156
+            },
+            {
+                id: 'member_005',
+                username: 'alex_brown',
+                email: 'alex@example.com',
+                password: 'hashed_password_def',
+                plan: 'premium',
+                status: 'suspended',
+                joinDate: '2024-06-15',
+                expiryDate: '2025-06-15',
+                lastLogin: '2024-12-10',
+                downloadCount: 89
+            }
+        ];
 
-            fileGrid.innerHTML = files.map(file => `
-                <div class="file-card bg-white rounded-xl shadow-lg p-6 cursor-pointer" onclick="showFileDetails(${file.id})">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center">
-                            <div class="text-2xl mr-3">${file.name.endsWith('.ovpn') ? '🔐' : '⚙️'}</div>
-                            <div>
-                                <h3 class="font-semibold text-gray-800 truncate">${file.name}</h3>
-                                <p class="text-sm text-gray-600">${file.server}</p>
+        // V2Ray data with protocol logos
+        const v2rayData = [
+            {
+                id: 'vmess-config',
+                name: 'VMess Config',
+                version: 'High Speed',
+                description: 'VMess protocol ความเร็วสูง เสถียร',
+                icon: 'V',
+                logoUrl: 'https://cdn-icons-png.flaticon.com/512/2111/2111370.png',
+                color: 'purple',
+                protocol: 'VMess',
+                port: '443, 80',
+                network: 'ws, tcp',
+                fileSize: '1.5 KB',
+                uploadDate: '15 ธันวาคม 2024',
+                downloadUrl: 'https://example.com/vmess-config'
+            },
+            {
+                id: 'vless-config',
+                name: 'VLESS Config',
+                version: 'Ultra Fast',
+                description: 'VLESS protocol รุ่นใหม่ ประสิทธิภาพสูง',
+                icon: 'VL',
+                logoUrl: 'https://cdn-icons-png.flaticon.com/512/2111/2111432.png',
+                color: 'indigo',
+                protocol: 'VLESS',
+                port: '443, 80',
+                network: 'ws, grpc',
+                fileSize: '1.3 KB',
+                uploadDate: '15 ธันวาคม 2024',
+                downloadUrl: 'https://example.com/vless-config'
+            },
+            {
+                id: 'trojan-config',
+                name: 'Trojan Config',
+                version: 'Stealth Mode',
+                description: 'Trojan protocol ซ่อนตัวได้ดี ผ่านไฟร์วอลล์',
+                icon: 'T',
+                logoUrl: 'https://cdn-icons-png.flaticon.com/512/2111/2111728.png',
+                color: 'gray',
+                protocol: 'Trojan',
+                port: '443',
+                network: 'tcp, ws',
+                fileSize: '1.7 KB',
+                uploadDate: '15 ธันวาคม 2024',
+                downloadUrl: 'https://example.com/trojan-config'
+            }
+        ];
+
+        // Current active category
+        let currentCategory = 'vpn';
+
+        // Download counters
+        let downloadCounts = {
+            vpn: 2773,
+            ssh: 1456,
+            v2ray: 987
+        };
+
+        // Dark mode state
+        let isDarkMode = false;
+
+        // Password protection state
+        let isPasswordVerified = false;
+
+        // Get data based on category
+        function getData(category) {
+            switch(category) {
+                case 'vpn': return vpnData;
+                case 'ssh': return sshData;
+                case 'v2ray': return v2rayData;
+                default: return vpnData;
+            }
+        }
+
+        // Render content grid
+        function renderContentGrid() {
+            const contentGrid = document.getElementById('contentGrid');
+            const data = getData(currentCategory);
+            
+            const colorClasses = {
+                blue: 'bg-blue-500',
+                green: 'bg-green-500',
+                orange: 'bg-orange-500',
+                purple: 'bg-purple-500',
+                indigo: 'bg-indigo-500',
+                red: 'bg-red-500',
+                gray: 'bg-gray-800'
+            };
+
+            const buttonClasses = {
+                vpn: 'download-btn',
+                ssh: 'ssh-btn',
+                v2ray: 'v2ray-btn'
+            };
+
+            contentGrid.innerHTML = data.map(item => `
+                <div class="bg-white rounded-xl shadow-lg card-hover p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center mr-4 shadow-sm border">
+                            <img src="${item.logoUrl || 'https://via.placeholder.com/48x48/6366f1/ffffff?text=' + item.icon}" alt="${item.name} logo" class="w-10 h-10 rounded object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="w-10 h-10 ${colorClasses[item.color]} rounded flex items-center justify-center" style="display: none;">
+                                <span class="text-white font-bold text-lg">${item.icon}</span>
                             </div>
                         </div>
-                        <div class="flex items-center">
-                            <span class="status-${file.status} w-3 h-3 rounded-full ${file.status === 'online' ? 'bg-green-500' : 'bg-red-500'} mr-2"></span>
-                            <span class="text-xs px-2 py-1 rounded-full ${file.type === 'premium' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}">${file.type === 'premium' ? 'Premium' : 'Free'}</span>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900">${item.name}</h3>
+                            <p class="text-gray-500">${item.version}</p>
                         </div>
                     </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
-                        <div>
-                            <span class="font-medium">ความเร็ว:</span>
-                            <div>${file.speed}</div>
+                    <p class="text-gray-600 mb-6">${item.description}</p>
+                    ${currentCategory === 'ssh' ? `
+                        <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                            <div class="text-sm text-gray-600">
+                                <div>Host: ${item.host}</div>
+                                <div>Port: ${item.port}</div>
+                                <div>Protocol: SSH-2.0</div>
+                            </div>
                         </div>
-                        <div>
-                            <span class="font-medium">Ping:</span>
-                            <div>${file.ping}</div>
+                    ` : ''}
+                    ${currentCategory === 'v2ray' ? `
+                        <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                            <div class="text-sm text-gray-600">
+                                <div>Protocol: ${item.protocol}</div>
+                                <div>Port: ${item.port}</div>
+                                <div>Network: ${item.network}</div>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">${file.size} • ${file.uploadDate}</span>
-                        <div class="flex gap-2">
-                            <button onclick="event.stopPropagation(); downloadFile(${file.id})" 
-                                    class="px-3 py-1 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition-colors">
-                                📥 ดาวน์โหลด
-                            </button>
-                            ${isAdminLoggedIn ? `<button onclick="event.stopPropagation(); deleteFile(${file.id})" 
-                                    class="px-3 py-1 bg-red-500 text-white text-xs rounded-lg hover:bg-red-600 transition-colors">
-                                🗑️ ลบ
-                            </button>` : ''}
-                        </div>
+                    ` : ''}
+                    <div class="flex flex-col space-y-3">
+                        <button onclick="openLink('${item.downloadUrl}', '${item.name}', '${item.id}')" class="${buttonClasses[currentCategory]} text-white px-6 py-3 rounded-lg font-semibold">
+                            🔗 เปิดลิงก์
+                        </button>
+                        <button onclick="showDetails('${item.id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold transition-colors">
+                            📋 ดูรายละเอียด
+                        </button>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Show file details modal
-        function showFileDetails(fileId) {
-            const file = vpnFiles.find(f => f.id === fileId);
-            if (!file) return;
+        // Search functionality
+        function initializeSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                filterCards(searchTerm);
+            });
+        }
 
-            modalContent.innerHTML = `
-                <div class="space-y-4">
-                    <div class="flex items-center">
-                        <div class="text-3xl mr-4">${file.name.endsWith('.ovpn') ? '🔐' : '⚙️'}</div>
-                        <div>
-                            <h4 class="font-semibold text-lg">${file.name}</h4>
-                            <p class="text-gray-600">${file.server}</p>
+        function filterCards(searchTerm) {
+            const cards = document.querySelectorAll('#contentGrid .card-hover');
+            
+            cards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Category switching
+        function showCategory(category) {
+            // Update tab styles
+            document.getElementById('vpnTab').className = 'px-6 py-3 rounded-lg font-semibold transition-all text-gray-600 hover:text-purple-600';
+            document.getElementById('sshTab').className = 'px-6 py-3 rounded-lg font-semibold transition-all text-gray-600 hover:text-purple-600';
+            document.getElementById('v2rayTab').className = 'px-6 py-3 rounded-lg font-semibold transition-all text-gray-600 hover:text-purple-600';
+            
+            document.getElementById(category + 'Tab').className = 'px-6 py-3 rounded-lg font-semibold transition-all bg-purple-600 text-white';
+            
+            currentCategory = category;
+            renderContentGrid();
+            
+            // Clear search when switching categories
+            document.getElementById('searchInput').value = '';
+            filterCards('');
+        }
+
+        // Open link function
+        function openLink(url, name, id) {
+            // Check if password is verified
+            if (!isPasswordVerified) {
+                showPasswordModal();
+                // Store the pending download info
+                window.pendingDownload = { url, name, id };
+                return;
+            }
+            
+            // Proceed with download
+            proceedWithDownload(url, name, id);
+        }
+
+        function proceedWithDownload(url, name, id) {
+            // Increment download counter
+            downloadCounts[currentCategory]++;
+            document.getElementById(currentCategory + 'Downloads').textContent = downloadCounts[currentCategory].toLocaleString();
+            
+            // Show notification
+            showNotification(`กำลังเปิดลิงก์ดาวน์โหลด ${name}...`, 'success');
+            
+            // Open in new tab
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
+
+        // Show details function
+        function showDetails(id) {
+            const data = getData(currentCategory);
+            const item = data.find(d => d.id === id);
+            
+            if (!item) return;
+            
+            showNotification(`แสดงรายละเอียดของ ${item.name}`, 'info');
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+            
+            notification.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Slide in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Slide out and remove
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Admin state
+        let isAdminLoggedIn = false;
+
+        // Navigation functions
+        function showHome() {
+            document.getElementById('homePage').classList.remove('hidden');
+            document.getElementById('aboutPage').classList.add('hidden');
+            document.getElementById('adminLoginPage').classList.add('hidden');
+            document.getElementById('adminPage').classList.add('hidden');
+        }
+
+        function showAbout() {
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('aboutPage').classList.remove('hidden');
+            document.getElementById('adminLoginPage').classList.add('hidden');
+            document.getElementById('adminPage').classList.add('hidden');
+        }
+
+        function showAdminLogin() {
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('aboutPage').classList.add('hidden');
+            document.getElementById('adminLoginPage').classList.remove('hidden');
+            document.getElementById('adminPage').classList.add('hidden');
+        }
+
+        function showAdminPage() {
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('aboutPage').classList.add('hidden');
+            document.getElementById('adminLoginPage').classList.add('hidden');
+            document.getElementById('adminPage').classList.remove('hidden');
+            
+            // Initialize admin page
+            showAdminCategory('vpn');
+            renderAdminLists();
+        }
+
+        // Admin login
+        function handleAdminLogin(event) {
+            event.preventDefault();
+            const password = document.getElementById('adminPassword').value;
+            
+            if (password === 'admin123') {
+                isAdminLoggedIn = true;
+                showNotification('เข้าสู่ระบบแอดมินสำเร็จ!', 'success');
+                showAdminPage();
+            } else {
+                showNotification('รหัสผ่านไม่ถูกต้อง!', 'error');
+            }
+        }
+
+        // Admin logout
+        function adminLogout() {
+            isAdminLoggedIn = false;
+            showNotification('ออกจากระบบแอดมินแล้ว', 'success');
+            showHome();
+        }
+
+        // Admin category switching
+        function showAdminCategory(category) {
+            // Hide all admin sections
+            document.getElementById('adminMembersSection').classList.add('hidden');
+            document.getElementById('adminVpnSection').classList.add('hidden');
+            document.getElementById('adminSshSection').classList.add('hidden');
+            document.getElementById('adminV2raySection').classList.add('hidden');
+            
+            // Show selected section
+            document.getElementById('admin' + category.charAt(0).toUpperCase() + category.slice(1) + 'Section').classList.remove('hidden');
+            
+            // Update tab styles
+            document.getElementById('adminMembersTab').className = 'px-4 py-2 bg-gray-200 text-gray-700 rounded-l-lg';
+            document.getElementById('adminVpnTab').className = 'px-4 py-2 bg-gray-200 text-gray-700';
+            document.getElementById('adminSshTab').className = 'px-4 py-2 bg-gray-200 text-gray-700';
+            document.getElementById('adminV2rayTab').className = 'px-4 py-2 bg-gray-200 text-gray-700 rounded-r-lg';
+            
+            if (category === 'members') {
+                document.getElementById('adminMembersTab').className = 'px-4 py-2 bg-blue-600 text-white rounded-l-lg';
+            } else if (category === 'vpn') {
+                document.getElementById('adminVpnTab').className = 'px-4 py-2 bg-purple-600 text-white';
+            } else if (category === 'ssh') {
+                document.getElementById('adminSshTab').className = 'px-4 py-2 bg-blue-600 text-white';
+            } else if (category === 'v2ray') {
+                document.getElementById('adminV2rayTab').className = 'px-4 py-2 bg-purple-600 text-white rounded-r-lg';
+            }
+        }
+
+        // Render admin lists
+        function renderAdminLists() {
+            renderAdminMembersList();
+            renderAdminVpnList();
+            renderAdminSshList();
+            renderAdminV2rayList();
+        }
+
+        function renderAdminMembersList() {
+            const list = document.getElementById('adminMembersList');
+            
+            const planIcons = {
+                free: '🆓',
+                premium: '⭐',
+                vip: '💎'
+            };
+            
+            const statusIcons = {
+                active: '✅',
+                suspended: '⏸️',
+                expired: '❌'
+            };
+            
+            const statusColors = {
+                active: 'text-green-600 bg-green-50',
+                suspended: 'text-yellow-600 bg-yellow-50',
+                expired: 'text-red-600 bg-red-50'
+            };
+
+            list.innerHTML = membersData.map(member => {
+                const isExpiringSoon = new Date(member.expiryDate) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+                
+                return `
+                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg ${member.status === 'expired' ? 'opacity-75' : ''}">
+                        <div class="flex items-center flex-1">
+                            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mr-4">
+                                <span class="text-white font-bold text-lg">${member.username.charAt(0).toUpperCase()}</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2">
+                                    <h4 class="font-semibold text-gray-900">${member.username}</h4>
+                                    <span class="text-sm ${statusColors[member.status]} px-2 py-1 rounded-full">
+                                        ${statusIcons[member.status]} ${member.status === 'active' ? 'ใช้งานได้' : member.status === 'suspended' ? 'ระงับ' : 'หมดอายุ'}
+                                    </span>
+                                    <span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                        ${planIcons[member.plan]} ${member.plan.toUpperCase()}
+                                    </span>
+                                    ${isExpiringSoon && member.status === 'active' ? '<span class="text-sm bg-orange-100 text-orange-800 px-2 py-1 rounded-full">⚠️ ใกล้หมดอายุ</span>' : ''}
+                                </div>
+                                <p class="text-sm text-gray-600">${member.email}</p>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <span>เข้าร่วม: ${new Date(member.joinDate).toLocaleDateString('th-TH')}</span> • 
+                                    <span>หมดอายุ: ${new Date(member.expiryDate).toLocaleDateString('th-TH')}</span> • 
+                                    <span>ดาวน์โหลด: ${member.downloadCount} ครั้ง</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="editMember('${member.id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                                ✏️ แก้ไข
+                            </button>
+                            <button onclick="deleteMember('${member.id}', '${member.username}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                                🗑️ ลบ
+                            </button>
                         </div>
                     </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <span class="font-medium text-gray-700">สถานะ:</span>
-                            <div class="flex items-center mt-1">
-                                <span class="w-2 h-2 rounded-full ${file.status === 'online' ? 'bg-green-500' : 'bg-red-500'} mr-2"></span>
-                                ${file.status === 'online' ? 'ออนไลน์' : 'ออฟไลน์'}
+                `;
+            }).join('');
+        }
+
+        function renderAdminVpnList() {
+            const list = document.getElementById('adminVpnList');
+            const colorClasses = {
+                blue: 'bg-blue-500',
+                green: 'bg-green-500',
+                orange: 'bg-orange-500',
+                purple: 'bg-purple-500',
+                indigo: 'bg-indigo-500',
+                red: 'bg-red-500',
+                gray: 'bg-gray-800'
+            };
+
+            list.innerHTML = vpnData.map(item => `
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mr-4 shadow-sm border">
+                            <img src="${item.logoUrl || 'https://via.placeholder.com/40x40/6366f1/ffffff?text=' + item.icon}" alt="${item.name} logo" class="w-8 h-8 rounded object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="w-8 h-8 ${colorClasses[item.color]} rounded flex items-center justify-center" style="display: none;">
+                                <span class="text-white font-bold text-sm">${item.icon}</span>
                             </div>
                         </div>
                         <div>
-                            <span class="font-medium text-gray-700">ประเภท:</span>
-                            <div class="mt-1">${file.type === 'premium' ? 'Premium' : 'Free'}</div>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">ความเร็ว:</span>
-                            <div class="mt-1">${file.speed}</div>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">Ping:</span>
-                            <div class="mt-1">${file.ping}</div>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">ขนาดไฟล์:</span>
-                            <div class="mt-1">${file.size}</div>
-                        </div>
-                        <div>
-                            <span class="font-medium text-gray-700">วันที่อัปโหลด:</span>
-                            <div class="mt-1">${file.uploadDate}</div>
+                            <h4 class="font-semibold text-gray-900">${item.name}</h4>
+                            <p class="text-sm text-gray-600">${item.version} • ${item.fileSize}</p>
+                            <p class="text-xs text-blue-600">🔗 ${item.downloadUrl}</p>
                         </div>
                     </div>
-                    
-                    <div class="flex gap-3 pt-4">
-                        <button onclick="downloadFile(${file.id})" 
-                                class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                            📥 ดาวน์โหลด
+                    <div class="flex space-x-2">
+                        <button onclick="editVpnItem('${item.id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                            ✏️ แก้ไข
                         </button>
-                        ${isAdminLoggedIn ? `<button onclick="deleteFile(${file.id}); closeFileModal()" 
-                                class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                        <button onclick="deleteVpnItem('${item.id}', '${item.name}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors">
                             🗑️ ลบ
-                        </button>` : ''}
+                        </button>
                     </div>
                 </div>
-            `;
+            `).join('');
+        }
+
+        function renderAdminSshList() {
+            const list = document.getElementById('adminSshList');
             
-            fileModal.classList.remove('hidden');
-            fileModal.classList.add('flex');
+            list.innerHTML = sshData.map(item => `
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mr-4 shadow-sm border">
+                            <img src="${item.logoUrl || 'https://via.placeholder.com/40x40/3b82f6/ffffff?text=' + item.icon}" alt="${item.name} logo" class="w-8 h-8 rounded object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="w-8 h-8 bg-blue-500 rounded flex items-center justify-center" style="display: none;">
+                                <span class="text-white font-bold text-sm">${item.icon}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900">${item.name}</h4>
+                            <p class="text-sm text-gray-600">${item.host} • Port: ${item.port}</p>
+                            <p class="text-xs text-blue-600">🔗 ${item.downloadUrl}</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="editSshItem('${item.id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                            ✏️ แก้ไข
+                        </button>
+                        <button onclick="deleteSshItem('${item.id}', '${item.name}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                            🗑️ ลบ
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // Close modal
-        function closeFileModal() {
-            fileModal.classList.add('hidden');
-            fileModal.classList.remove('flex');
-        }
-
-        // Download file
-        function downloadFile(fileId) {
-            const file = vpnFiles.find(f => f.id === fileId);
-            if (!file) return;
-
-            // Create sample VPN config content
-            const configContent = `# VPN Configuration: ${file.name}
-# Server: ${file.server}
-# Generated: ${new Date().toISOString()}
-
-client
-dev tun
-proto udp
-remote ${file.server.toLowerCase().replace(/[^a-z]/g, '')}.vpnserver.com 1194
-resolv-retry infinite
-nobind
-persist-key
-persist-tun
-ca ca.crt
-cert client.crt
-key client.key
-verb 3
-cipher AES-256-CBC
-auth SHA256
-comp-lzo
-`;
-
-            // Create and download file
-            const blob = new Blob([configContent], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = file.name;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-
-            alert(`✅ ดาวน์โหลด ${file.name} เรียบร้อยแล้ว!`);
-        }
-
-        // Delete file
-        function deleteFile(fileId) {
-            if (!isAdminLoggedIn) {
-                alert('❌ เฉพาะแอดมินเท่านั้นที่สามารถลบไฟล์ได้');
-                return;
-            }
+        function renderAdminV2rayList() {
+            const list = document.getElementById('adminV2rayList');
             
-            if (confirm('คุณต้องการลบไฟล์นี้หรือไม่?')) {
-                vpnFiles = vpnFiles.filter(f => f.id !== fileId);
-                renderFiles(getFilteredFiles());
-                alert('✅ ลบไฟล์เรียบร้อยแล้ว!');
+            list.innerHTML = v2rayData.map(item => `
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mr-4 shadow-sm border">
+                            <img src="${item.logoUrl || 'https://via.placeholder.com/40x40/8b5cf6/ffffff?text=' + item.icon}" alt="${item.name} logo" class="w-8 h-8 rounded object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="w-8 h-8 bg-purple-500 rounded flex items-center justify-center" style="display: none;">
+                                <span class="text-white font-bold text-sm">${item.icon}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900">${item.name}</h4>
+                            <p class="text-sm text-gray-600">${item.protocol} • Port: ${item.port}</p>
+                            <p class="text-xs text-blue-600">🔗 ${item.downloadUrl}</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="editV2rayItem('${item.id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                            ✏️ แก้ไข
+                        </button>
+                        <button onclick="deleteV2rayItem('${item.id}', '${item.name}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors">
+                            🗑️ ลบ
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Add VPN item
+        function handleAddVpn(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            
+            const newVpn = {
+                id: 'vpn_' + Date.now(),
+                name: formData.get('vpnName'),
+                version: formData.get('vpnVersion'),
+                description: formData.get('vpnDescription'),
+                icon: formData.get('vpnName').charAt(0).toUpperCase(),
+                logoUrl: formData.get('vpnLogo'),
+                color: 'blue',
+                fileSize: '50.0 MB',
+                uploadDate: new Date().toLocaleDateString('th-TH'),
+                downloadUrl: formData.get('vpnUrl')
+            };
+            
+            vpnData.push(newVpn);
+            renderAdminVpnList();
+            renderContentGrid();
+            event.target.reset();
+            showNotification(`เพิ่ม ${newVpn.name} สำเร็จ!`, 'success');
+        }
+
+        // Add SSH item
+        function handleAddSsh(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            
+            const newSsh = {
+                id: 'ssh_' + Date.now(),
+                name: formData.get('sshCountry') + ' SSH',
+                version: 'Server',
+                description: `เซิร์ฟเวอร์ SSH ใน${formData.get('sshCountry')}`,
+                icon: '🌐',
+                logoUrl: formData.get('sshLogo'),
+                color: 'blue',
+                host: formData.get('sshHost'),
+                port: formData.get('sshPort'),
+                fileSize: '2.0 KB',
+                uploadDate: new Date().toLocaleDateString('th-TH'),
+                downloadUrl: formData.get('sshUrl')
+            };
+            
+            sshData.push(newSsh);
+            renderAdminSshList();
+            if (currentCategory === 'ssh') renderContentGrid();
+            event.target.reset();
+            showNotification(`เพิ่ม ${newSsh.name} สำเร็จ!`, 'success');
+        }
+
+        // Add V2Ray item
+        function handleAddV2ray(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            
+            const newV2ray = {
+                id: 'v2ray_' + Date.now(),
+                name: formData.get('v2rayProtocol') + ' Config',
+                version: 'High Speed',
+                description: `${formData.get('v2rayProtocol')} protocol configuration`,
+                icon: formData.get('v2rayProtocol').charAt(0).toUpperCase(),
+                logoUrl: formData.get('v2rayLogo'),
+                color: 'purple',
+                protocol: formData.get('v2rayProtocol'),
+                port: formData.get('v2rayPort'),
+                network: formData.get('v2rayNetwork'),
+                fileSize: '1.5 KB',
+                uploadDate: new Date().toLocaleDateString('th-TH'),
+                downloadUrl: formData.get('v2rayUrl')
+            };
+            
+            v2rayData.push(newV2ray);
+            renderAdminV2rayList();
+            if (currentCategory === 'v2ray') renderContentGrid();
+            event.target.reset();
+            showNotification(`เพิ่ม ${newV2ray.name} สำเร็จ!`, 'success');
+        }
+
+        // Edit VPN functions
+        function editVpnItem(id) {
+            const item = vpnData.find(vpn => vpn.id === id);
+            if (!item) return;
+            
+            // Fill the edit form with current data
+            document.getElementById('editVpnId').value = item.id;
+            document.getElementById('editVpnName').value = item.name;
+            document.getElementById('editVpnVersion').value = item.version;
+            document.getElementById('editVpnDescription').value = item.description;
+            document.getElementById('editVpnLogo').value = item.logoUrl || '';
+            document.getElementById('editVpnUrl').value = item.downloadUrl;
+            
+            // Show the modal
+            document.getElementById('editVpnModal').classList.remove('hidden');
+        }
+
+        function closeEditVpnModal() {
+            document.getElementById('editVpnModal').classList.add('hidden');
+        }
+
+        function handleEditVpn(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const id = formData.get('editVpnId');
+            
+            const itemIndex = vpnData.findIndex(vpn => vpn.id === id);
+            if (itemIndex === -1) return;
+            
+            // Update the item
+            vpnData[itemIndex] = {
+                ...vpnData[itemIndex],
+                name: formData.get('editVpnName'),
+                version: formData.get('editVpnVersion'),
+                description: formData.get('editVpnDescription'),
+                logoUrl: formData.get('editVpnLogo'),
+                downloadUrl: formData.get('editVpnUrl'),
+                icon: formData.get('editVpnName').charAt(0).toUpperCase()
+            };
+            
+            // Refresh the displays
+            renderAdminVpnList();
+            if (currentCategory === 'vpn') renderContentGrid();
+            
+            // Close modal and show success message
+            closeEditVpnModal();
+            showNotification(`แก้ไข ${vpnData[itemIndex].name} สำเร็จ!`, 'success');
+        }
+
+        function deleteVpnItem(id, name) {
+            const index = vpnData.findIndex(item => item.id === id);
+            if (index !== -1) {
+                vpnData.splice(index, 1);
+                renderAdminVpnList();
+                if (currentCategory === 'vpn') renderContentGrid();
+                showNotification(`ลบ ${name} สำเร็จ!`, 'success');
             }
         }
 
-        // Filter files
-        function getFilteredFiles() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const filterType = filterSelect.value;
+        function editSshItem(id) {
+            showNotification('ฟีเจอร์แก้ไขจะเปิดให้บริการเร็วๆ นี้!', 'info');
+        }
 
-            return vpnFiles.filter(file => {
-                const matchesSearch = file.name.toLowerCase().includes(searchTerm) || 
-                                    file.server.toLowerCase().includes(searchTerm);
+        function deleteSshItem(id, name) {
+            const index = sshData.findIndex(item => item.id === id);
+            if (index !== -1) {
+                sshData.splice(index, 1);
+                renderAdminSshList();
+                if (currentCategory === 'ssh') renderContentGrid();
+                showNotification(`ลบ ${name} สำเร็จ!`, 'success');
+            }
+        }
+
+        function editV2rayItem(id) {
+            showNotification('ฟีเจอร์แก้ไขจะเปิดให้บริการเร็วๆ นี้!', 'info');
+        }
+
+        function deleteV2rayItem(id, name) {
+            const index = v2rayData.findIndex(item => item.id === id);
+            if (index !== -1) {
+                v2rayData.splice(index, 1);
+                renderAdminV2rayList();
+                if (currentCategory === 'v2ray') renderContentGrid();
+                showNotification(`ลบ ${name} สำเร็จ!`, 'success');
+            }
+        }
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        // Dark mode toggle
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.documentElement.classList.toggle('dark', isDarkMode);
+            
+            const toggle = document.getElementById('darkModeToggle');
+            toggle.textContent = isDarkMode ? '☀️' : '🌙';
+            
+            localStorage.setItem('darkMode', isDarkMode);
+        }
+
+        // Password protection functions
+        function showPasswordModal() {
+            document.getElementById('passwordModal').classList.remove('hidden');
+        }
+
+        function hidePasswordModal() {
+            document.getElementById('passwordModal').classList.add('hidden');
+        }
+
+        function handlePasswordSubmit(event) {
+            event.preventDefault();
+            const password = document.getElementById('downloadPassword').value;
+            
+            if (password === 'download123') {
+                isPasswordVerified = true;
+                hidePasswordModal();
+                showNotification('✅ รหัสผ่านถูกต้อง! ตอนนี้คุณสามารถดาวน์โหลดไฟล์ได้แล้ว', 'success');
                 
-                const matchesFilter = filterType === 'all' || 
-                                    (filterType === 'online' && file.status === 'online') ||
-                                    (filterType === 'offline' && file.status === 'offline') ||
-                                    (filterType === 'premium' && file.type === 'premium');
-
-                return matchesSearch && matchesFilter;
-            });
-        }
-
-        // Admin login functions
-        function adminLogin() {
-            const username = adminUsername.value.trim();
-            const password = adminPassword.value.trim();
-            
-            // Demo credentials - in real app, this would be server-side authentication
-            if (username === 'admin' && password === 'admin123') {
-                isAdminLoggedIn = true;
-                loginSection.classList.add('hidden');
-                uploadSection.classList.remove('hidden');
-                renderFiles(getFilteredFiles()); // Re-render to show/hide delete buttons
-                alert('✅ เข้าสู่ระบบแอดมินสำเร็จ!');
+                // If there's a pending download, proceed with it
+                if (window.pendingDownload) {
+                    const { url, name, id } = window.pendingDownload;
+                    setTimeout(() => {
+                        proceedWithDownload(url, name, id);
+                    }, 1000);
+                    window.pendingDownload = null;
+                }
+                
+                // Store password verification in session
+                sessionStorage.setItem('passwordVerified', 'true');
             } else {
-                alert('❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+                showNotification('❌ รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่อีกครั้ง', 'error');
+                document.getElementById('downloadPassword').value = '';
+                document.getElementById('downloadPassword').focus();
             }
         }
 
-        function adminLogout() {
-            if (confirm('คุณต้องการออกจากระบบแอดมินหรือไม่?')) {
-                isAdminLoggedIn = false;
-                loginSection.classList.remove('hidden');
-                uploadSection.classList.add('hidden');
-                adminUsername.value = '';
-                adminPassword.value = '';
-                renderFiles(getFilteredFiles()); // Re-render to hide delete buttons
-                alert('✅ ออกจากระบบเรียบร้อยแล้ว');
-            }
+        // Member management functions
+        function handleAddMember(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            
+            const newMember = {
+                id: 'member_' + Date.now(),
+                username: formData.get('memberUsername'),
+                email: formData.get('memberEmail'),
+                password: 'hashed_' + formData.get('memberPassword'),
+                plan: formData.get('memberPlan'),
+                status: formData.get('memberStatus'),
+                joinDate: new Date().toISOString().split('T')[0],
+                expiryDate: formData.get('memberExpiry'),
+                lastLogin: new Date().toISOString().split('T')[0],
+                downloadCount: 0
+            };
+            
+            membersData.push(newMember);
+            renderAdminMembersList();
+            event.target.reset();
+            showNotification(`เพิ่มสมาชิก ${newMember.username} สำเร็จ!`, 'success');
         }
 
-        // Upload functionality
-        function handleFileUpload(files) {
-            if (!isAdminLoggedIn) {
-                alert('❌ เฉพาะแอดมินเท่านั้นที่สามารถอัปโหลดไฟล์ได้');
-                return;
+        function editMember(id) {
+            const member = membersData.find(m => m.id === id);
+            if (!member) return;
+            
+            // Fill the edit form with current data
+            document.getElementById('editMemberId').value = member.id;
+            document.getElementById('editMemberUsername').value = member.username;
+            document.getElementById('editMemberEmail').value = member.email;
+            document.getElementById('editMemberPassword').value = '';
+            document.getElementById('editMemberPlan').value = member.plan;
+            document.getElementById('editMemberStatus').value = member.status;
+            document.getElementById('editMemberExpiry').value = member.expiryDate;
+            
+            // Show the modal
+            document.getElementById('editMemberModal').classList.remove('hidden');
+        }
+
+        function closeEditMemberModal() {
+            document.getElementById('editMemberModal').classList.add('hidden');
+        }
+
+        function handleEditMember(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const id = formData.get('editMemberId');
+            
+            const memberIndex = membersData.findIndex(m => m.id === id);
+            if (memberIndex === -1) return;
+            
+            // Update the member
+            const updatedMember = {
+                ...membersData[memberIndex],
+                username: formData.get('editMemberUsername'),
+                email: formData.get('editMemberEmail'),
+                plan: formData.get('editMemberPlan'),
+                status: formData.get('editMemberStatus'),
+                expiryDate: formData.get('editMemberExpiry')
+            };
+            
+            // Update password only if provided
+            const newPassword = formData.get('editMemberPassword');
+            if (newPassword.trim()) {
+                updatedMember.password = 'hashed_' + newPassword;
             }
             
-            Array.from(files).forEach(file => {
-                if (file.name.endsWith('.ovpn') || file.name.endsWith('.conf')) {
-                    const newFile = {
-                        id: Date.now() + Math.random(),
-                        name: file.name,
-                        server: "Custom Server",
-                        status: "online",
-                        type: "premium",
-                        speed: "100 Mbps",
-                        ping: "20ms",
-                        uploadDate: new Date().toISOString().split('T')[0],
-                        size: (file.size / 1024).toFixed(1) + " KB"
-                    };
-                    vpnFiles.unshift(newFile);
+            membersData[memberIndex] = updatedMember;
+            
+            // Refresh the display
+            renderAdminMembersList();
+            
+            // Close modal and show success message
+            closeEditMemberModal();
+            showNotification(`แก้ไขข้อมูล ${updatedMember.username} สำเร็จ!`, 'success');
+        }
+
+        function deleteMember(id, username) {
+            const index = membersData.findIndex(m => m.id === id);
+            if (index !== -1) {
+                membersData.splice(index, 1);
+                renderAdminMembersList();
+                showNotification(`ลบสมาชิก ${username} สำเร็จ!`, 'success');
+            }
+        }
+
+        function filterMembers() {
+            const statusFilter = document.getElementById('memberFilterStatus').value;
+            const planFilter = document.getElementById('memberFilterPlan').value;
+            
+            const memberCards = document.querySelectorAll('#adminMembersList > div');
+            
+            memberCards.forEach((card, index) => {
+                const member = membersData[index];
+                if (!member) return;
+                
+                const statusMatch = statusFilter === 'all' || member.status === statusFilter;
+                const planMatch = planFilter === 'all' || member.plan === planFilter;
+                
+                if (statusMatch && planMatch) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
                 }
             });
-            renderFiles(getFilteredFiles());
-            alert(`✅ อัปโหลด ${files.length} ไฟล์เรียบร้อยแล้ว!`);
         }
 
-        // Event listeners
-        searchInput.addEventListener('input', () => renderFiles(getFilteredFiles()));
-        filterSelect.addEventListener('change', () => renderFiles(getFilteredFiles()));
-
-        uploadZone.addEventListener('click', () => fileInput.click());
-        uploadZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadZone.classList.add('dragover');
-        });
-        uploadZone.addEventListener('dragleave', () => {
-            uploadZone.classList.remove('dragover');
-        });
-        uploadZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadZone.classList.remove('dragover');
-            handleFileUpload(e.dataTransfer.files);
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleFileUpload(e.target.files);
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if password was already verified in this session
+            const passwordVerified = sessionStorage.getItem('passwordVerified');
+            if (passwordVerified === 'true') {
+                isPasswordVerified = true;
+                hidePasswordModal();
+            } else {
+                // Show password modal on first load
+                showPasswordModal();
             }
+            
+            // Load dark mode preference
+            const savedDarkMode = localStorage.getItem('darkMode');
+            if (savedDarkMode === 'true') {
+                isDarkMode = true;
+                document.documentElement.classList.add('dark');
+                document.getElementById('darkModeToggle').textContent = '☀️';
+            }
+            
+            initializeSearch();
+            showCategory('vpn'); // Make sure VPN category is shown by default
+            renderContentGrid();
+            
+            // Set default expiry date to 1 year from now
+            const nextYear = new Date();
+            nextYear.setFullYear(nextYear.getFullYear() + 1);
+            document.getElementById('memberExpiry').value = nextYear.toISOString().split('T')[0];
+            
+            // Add form event listeners
+            document.getElementById('passwordForm').addEventListener('submit', handlePasswordSubmit);
+            document.getElementById('adminLoginForm').addEventListener('submit', handleAdminLogin);
+            document.getElementById('addMemberForm').addEventListener('submit', handleAddMember);
+            document.getElementById('editMemberForm').addEventListener('submit', handleEditMember);
+            document.getElementById('addVpnForm').addEventListener('submit', handleAddVpn);
+            document.getElementById('editVpnForm').addEventListener('submit', handleEditVpn);
+            document.getElementById('addSshForm').addEventListener('submit', handleAddSsh);
+            document.getElementById('addV2rayForm').addEventListener('submit', handleAddV2ray);
         });
-
-        // Admin login with Enter key
-        adminUsername.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') adminLogin();
-        });
-        adminPassword.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') adminLogin();
-        });
-
-        closeModal.addEventListener('click', closeFileModal);
-        fileModal.addEventListener('click', (e) => {
-            if (e.target === fileModal) closeFileModal();
-        });
-
-        // Initial render
-        renderFiles();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9860709dd3ee527e',t:'MTc1OTAzMzEzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'990dceddc037d7ad',t:'MTc2MDg1MTAzNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
