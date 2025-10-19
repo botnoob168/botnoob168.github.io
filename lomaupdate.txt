@@ -1,0 +1,66 @@
+{
+    "version": 8.3,
+    "message": "อัพเดตเวอร์ชั่น 8.3\n\nเครือข่าย AIS\nรองรับโปร เน็ตกันรั่ว\n\nเครือข่าย TRUE\nรองรับโปร VDO Conference\n\nแตะ ยืนยัน เพื่ออัพเดตเวอร์ชั่นล่าสุด",
+    "data": [
+        {
+            "name": "AIS โปรเน็ตกันรั่ว-01",
+            "detail": "",
+            "content": "vless://74aafa3a-965d-4175-a3c5-1e3deeec1dd8@loma01.sry-vpn.com:8080?type=ws&path=%2F&host=www.speedtest.net&security=none#AIS-3726"
+        },
+        {
+            "name": "AIS โปรเน็ตกันรั่ว-02",
+            "detail": "",
+            "content": "vless://118ef6ce-768e-42b7-a119-6f4cbace953e@loma02.sry-vpn.com:8080?type=ws&path=%2F&host=www.speedtest.net&security=none#AIS-976"
+        },
+        {
+            "name": "AIS โปรเน็ตกันรั่ว-03",
+            "detail": "",
+            "content": "vless://1a366ede-ca5b-482d-aff6-a6bc5b9b79f2@loma03.sry-vpn.com:8080?type=ws&encryption=none&path=%2F&host=www.speedtest.net&security=none#AIS-f37kav5e"
+        },
+        {
+            "name": "AIS โปรเน็ตกันรั่ว-04",
+            "detail": "",
+            "content": "vmess://ewogICJ2IjogIjIiLAogICJwcyI6ICJBSVMtMzYzNiIsCiAgImFkZCI6ICJsb21hMDQuc3J5LXZwbi5jb20iLAogICJwb3J0IjogODA4MCwKICAiaWQiOiAiMjQyMTdmYzktNGI1Zi00M2I0LWE1YmItMzQ1NzM3YzExMDI0IiwKICAic2N5IjogImF1dG8iLAogICJuZXQiOiAidGNwIiwKICAidHlwZSI6ICJub25lIiwKICAidGxzIjogInRscyIsCiAgInNuaSI6ICJ3d3cuc3BlZWR0ZXN0Lm5ldCIsCiAgImZwIjogImNocm9tZSIsCiAgImFscG4iOiAiaDMsaDIsaHR0cC8xLjEiCn0="
+        },
+        {
+            "name": "AIS โปรเน็ตกันรั่ว-05",
+            "detail": "",
+            "content": "vless://c077f61a-1529-482f-b665-40039bf29434@loma05.sry-vpn.com:8080?type=ws&path=%2F&host=www.speedtest.net&security=none#AIS-747"
+        },
+        {
+            "name": "AIS โปรเน็ตกันรั่ว-06",
+            "detail": "",
+            "content": "vless://b91fcbb1-8f95-4f70-918b-fcea56c072ff@loma06.sry-vpn.com:8080?type=ws&path=%2F&host=www.speedtest.net&security=none#AIS-7258"
+        },
+        {
+            "name": "TRUE-VDO Conference-01",
+            "detail": "",
+            "content": "vless://12673c6c-a2d8-44cb-adf1-258b3a6482b4@cdn-cf.zoom.us:80?type=ws&path=%2F&host=loma01.sry-vpn.com&security=none#TRUE-2928"
+        },
+        {
+            "name": "TRUE-VDO Conference-02",
+            "detail": "",
+            "content": "vless://753b83f4-d0b8-451b-814a-412f40b3ef85@cdn-cf.zoom.us:80?type=ws&path=%2F&host=loma02.sry-vpn.com&security=none#TRUE-827"
+        },
+        {
+            "name": "TRUE-VDO Conference-03",
+            "detail": "",
+            "content": "vless://0401c3e4-39ff-4ed8-ab8b-3fffe472d866@cdn-cf.zoom.us:80?type=ws&encryption=none&path=%2F&host=loma03.sry-vpn.com&security=none#TRUE-o70qn4xp"
+        },
+        {
+            "name": "TRUE-VDO Conference-04",
+            "detail": "",
+            "content": "vless://653bc5ea-bb48-4d7f-988b-5d2d72049725@cdn-cf.zoom.us:80?type=ws&path=%2F&host=loma04.sry-vpn.com&security=none#TRUE-524"
+        },
+        {
+            "name": "TRUE-VDO Conference-05",
+            "detail": "",
+            "content": "vless://94d1b1a4-b17f-4631-b6d4-1c9f9fd7c250@cdn-cf.zoom.us:80?type=ws&path=%2F&host=loma05.sry-vpn.com&security=none#TRUE-244"
+        },
+        {
+            "name": "TRUE-VDO Conference-06",
+            "detail": "",
+            "content": "vless://2fbdbbcc-80e1-4dcb-9387-3d777b918145@cdn-cf.zoom.us:80?type=ws&path=%2F&host=loma06.sry-vpn.com&security=none#TRUE-2872"
+        }
+    ]
+}
