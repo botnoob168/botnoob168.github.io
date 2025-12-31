@@ -47,7 +47,7 @@
  <body class="h-full overflow-auto">
   <div id="app-wrapper" class="min-h-full w-full bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 p-4 md:p-8"><!-- Header -->
    <div class="text-center mb-6">
-    <h1 id="wheel-title" class="text-3xl md:text-4xl font-bold text-white mb-2">🎯 วงล้อสุ่มชื่อ</h1>
+    <h1 id="wheel-title" class="text-3xl md:text-4xl font-bold text-white mb-2">���� วง��้อสุ่มชื่อ</h1>
     <p class="text-purple-200 text-sm">เพิ่มชื่อ แล้วหมุนวงล้อได้เลย!</p>
    </div>
    <div class="max-w-6xl mx-auto flex flex-col lg:flex-row gap-6"><!-- Left Panel - Names List -->
@@ -79,7 +79,7 @@
      <div id="result-container" class="mt-6 hidden">
       <div class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-2xl p-6 text-center shadow-2xl relative overflow-hidden">
        <div id="confetti-container" class="absolute inset-0 pointer-events-none"></div>
-       <p class="text-white/80 text-sm mb-1">🎉 ผู้โชคดีคือ 🎉</p>
+       <p class="text-white/80 text-sm mb-1">��� ผู้โชคดีคือ 🎉</p>
        <p id="result-name" class="text-3xl font-bold text-white"></p>
       </div>
      </div>
@@ -237,7 +237,7 @@
     // Update Lock Select Options
     function updateLockSelect() {
       const currentValue = lockSelect.value;
-      lockSelect.innerHTML = '<option value="">-- ไม่ล็อค (สุ่มปกติ) --</option>';
+      lockSelect.innerHTML = '<option value="">-- ��ม่ล็อค (สุ่มปกติ) --</option>';
       names.forEach((name, i) => {
         const option = document.createElement('option');
         option.value = name;
@@ -326,11 +326,11 @@
       const sliceMidAngle = targetIndex * sliceAngle + (sliceAngle / 2);
       const targetAngle = 270 - sliceMidAngle;
       
-      // หมุนหลายรอบ + มุมเป้าหมาย
+      // หมุนหลายรอบ + มุมเป้า��มาย
       const spins = 5 + Math.random() * 3;
       const finalRotation = spins * 360 + targetAngle;
       
-      // ปรับให้หมุนจากตำแหน่งปัจจุบัน
+      // ปรับให้หมุนจา���ตำแหน่งปัจจุบัน
       const normalizedCurrent = currentRotation % 360;
       const totalRotation = finalRotation - normalizedCurrent + currentRotation;
 
@@ -364,33 +364,59 @@
       animate();
     }
 
-    // Event Listeners
-    addBtn.addEventListener('click', addName);
-    nameInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') addName();
-    });
+    // Initialize app
+    function initApp() {
+      // Event Listeners
+      addBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        addName();
+      });
+      
+      nameInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addName();
+        }
+      });
 
-    namesList.addEventListener('click', (e) => {
-      if (e.target.classList.contains('delete-btn')) {
-        deleteName(parseInt(e.target.dataset.index));
-      }
-    });
+      namesList.addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-btn')) {
+          e.preventDefault();
+          deleteName(parseInt(e.target.dataset.index));
+        }
+      });
 
-    clearAllBtn.addEventListener('click', () => {
-      names = [];
-      lockedName = null;
-      lockStatus.classList.add('hidden');
+      clearAllBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        names = [];
+        lockedName = null;
+        lockStatus.classList.add('hidden');
+        updateNamesList();
+        resultContainer.classList.add('hidden');
+      });
+
+      lockBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        lockName();
+      });
+      
+      unlockBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        unlock();
+      });
+      
+      spinBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        spin();
+      });
+
+      // Add sample names
+      names = ['คนที่ 1', 'คนที่ 2', 'คนที่ 3', 'คนที่ 4', 'คนที่ 5'];
       updateNamesList();
-      resultContainer.classList.add('hidden');
-    });
+    }
 
-    lockBtn.addEventListener('click', lockName);
-    unlockBtn.addEventListener('click', unlock);
-    spinBtn.addEventListener('click', spin);
-
-    // Add sample names
-    names = ['คนที่ 1', 'คนที่ 2', 'คนที่ 3', 'คนที่ 4', 'คนที่ 5'];
-    updateNamesList();
+    // Start app when ready
+    initApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b66bca1a66c8938',t:'MTc2NzE1MjIzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b66c5f141eca090',t:'MTc2NzE1MjYxMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
