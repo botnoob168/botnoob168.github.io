@@ -455,7 +455,7 @@
       setTimeout(() => toast.remove(), 2500);
     }
 
-    // Export Functions - แก้ไขให้ใช้งานได้ในทุกกรณี
+    // Export Functions
     function generateCopyText() {
       const titleText = config.wheel_title || defaultConfig.wheel_title;
       let text = `🎰 ${titleText} - รายชื่อผู้ได้รับรางวัล 🎰\n`;
@@ -481,7 +481,6 @@
 
       const text = generateCopyText();
 
-      // Fallback: ใช้ execCommand
       function fallbackCopy(textToCopy) {
         const textArea = document.createElement('textarea');
         textArea.value = textToCopy;
@@ -517,16 +516,13 @@
       }
 
       function onCopyFail() {
-        // แสดง modal ให้ copy เอง
         showCopyModal(text);
       }
 
-      // ลอง Clipboard API ก่อน
       if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
         navigator.clipboard.writeText(text)
           .then(onCopySuccess)
           .catch(() => {
-            // ถ้า Clipboard API ไม่ทำงาน ใช้ fallback
             if (fallbackCopy(text)) {
               onCopySuccess();
             } else {
@@ -534,7 +530,6 @@
             }
           });
       } else {
-        // ถ้าไม่มี Clipboard API ใช้ fallback
         if (fallbackCopy(text)) {
           onCopySuccess();
         } else {
@@ -549,7 +544,6 @@
       textarea.value = text;
       modal.classList.remove('hidden');
       
-      // เลือกข้อความอัตโนมัติ
       setTimeout(() => {
         textarea.focus();
         textarea.select();
@@ -577,23 +571,35 @@
       const titleText = config.wheel_title || defaultConfig.wheel_title;
       const today = new Date().toLocaleDateString('th-TH').replace(/\//g, '-');
       
-      // BOM for UTF-8
-      let csv = '\uFEFF';
-      csv += 'ลำดับ,ชื่อผู้ได้รับรางวัล,เวลา,สถานะ\n';
+      // สร้าง CSV content พร้อม BOM สำหรับ UTF-8 ที่ Excel รองรับ
+      let csvRows = [];
+      csvRows.push(['ลำดับ', 'ชื่อผู้ได้รับรางวัล', 'เวลา', 'สถานะ']);
 
       history.forEach((h, i) => {
         const status = items.includes(h.result) ? 'อยู่ในวงล้อ' : 'ถูกลบแล้ว';
-        // Escape quotes in result
-        const escapedResult = h.result.replace(/"/g, '""');
-        csv += `${i + 1},"${escapedResult}",${h.time},${status}\n`;
+        csvRows.push([i + 1, h.result, h.time, status]);
       });
 
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      // แปลงเป็น CSV string โดย escape quote อย่างถูกต้อง
+      const csvContent = csvRows.map(row => 
+        row.map(cell => {
+          const cellStr = String(cell);
+          if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+            return '"' + cellStr.replace(/"/g, '""') + '"';
+          }
+          return cellStr;
+        }).join(',')
+      ).join('\r\n');
+
+      // เพิ่ม BOM (Byte Order Mark) สำหรับ UTF-8 ที่ Excel รองรับภาษาไทย
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8' });
+      
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       
       link.setAttribute('href', url);
-      link.setAttribute('download', `${titleText}_ผู้ได้รับรางวัล_${today}.csv`);
+      link.setAttribute('download', `winners_${today}.csv`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -1164,7 +1170,7 @@
     style.textContent = `
       @keyframes fall {
         to {
-          transform: translateY(100vh) rotate(1080deg);
+          transform: translateY(100%) rotate(1080deg);
           opacity: 0;
         }
       }
@@ -1232,5 +1238,5 @@
     drawWheel();
     onConfigChange(config);
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b67ca9ce0e1cdf5',t:'MTc2NzE2MzI4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b67d43ba66bf44c',t:'MTc2NzE2MzY4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
