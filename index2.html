@@ -46,17 +46,13 @@
       50% { transform: translateX(-50%) rotate(8deg); }
     }
     .result-popup {
-      animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), celebrate 0.5s ease-in-out 0.6s infinite alternate;
+      animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     }
     @keyframes popIn {
       0% { transform: scale(0) rotate(-10deg); opacity: 0; }
-      50% { transform: scale(1.3) rotate(5deg); }
-      70% { transform: scale(0.9) rotate(-3deg); }
+      50% { transform: scale(1.1) rotate(3deg); }
+      70% { transform: scale(0.95) rotate(-2deg); }
       100% { transform: scale(1) rotate(0deg); opacity: 1; }
-    }
-    @keyframes celebrate {
-      0% { transform: scale(1) rotate(-1deg); }
-      100% { transform: scale(1.02) rotate(1deg); }
     }
     .winner-text {
       animation: textGlow 0.8s ease-in-out infinite alternate, textBounce 0.5s ease-in-out infinite;
@@ -130,7 +126,6 @@
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.5; transform: scale(1.2); }
     }
-    /* Fullscreen Mode Styles */
     .fullscreen-mode {
       position: fixed !important;
       top: 0 !important;
@@ -147,14 +142,6 @@
     }
     .fullscreen-mode .wheel-container {
       transform: scale(1.3);
-    }
-    .fullscreen-mode #result-container {
-      position: absolute;
-      bottom: 5%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90%;
-      max-width: 500px;
     }
     .fullscreen-exit-btn {
       position: fixed;
@@ -196,15 +183,53 @@
         font-size: 1.5rem;
       }
     }
+    .removed-toast {
+      animation: slideIn 0.3s ease, fadeOut 0.3s ease 2s forwards;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes fadeOut {
+      to { opacity: 0; transform: translateY(-10px); }
+    }
+    .popup-overlay {
+      animation: fadeInOverlay 0.3s ease;
+    }
+    @keyframes fadeInOverlay {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .popup-closing {
+      animation: fadeOutOverlay 0.3s ease forwards;
+    }
+    @keyframes fadeOutOverlay {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    .timer-ring {
+      transform: rotate(-90deg);
+    }
+    .timer-ring-circle {
+      transition: stroke-dashoffset 1s linear;
+    }
+    .copy-success {
+      animation: copyPulse 0.5s ease;
+    }
+    @keyframes copyPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); background-color: #10b981; }
+    }
   </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900 overflow-auto">
-  <div id="app-wrapper" class="app-wrapper w-full min-h-full p-4 md:p-6"><!-- Secret Lock Indicator (tiny dot only visible when locked) -->
+  <div id="app-wrapper" class="app-wrapper w-full min-h-full p-4 md:p-6"><!-- Secret Lock Indicator -->
    <div id="lock-dot" class="hidden fixed top-3 left-3 z-50">
     <div class="lock-dot w-2 h-2 bg-red-500 rounded-full" title="ล็อคอยู่"></div>
-   </div><!-- Header -->
+   </div><!-- Toast Notification -->
+   <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-[10001] pointer-events-none"></div><!-- Header -->
    <header id="main-header" class="text-center mb-4 md:mb-6">
     <h1 id="wheel-title" class="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 drop-shadow-lg">🎰 วงล้อนำโชค 🎰</h1>
     <p class="text-yellow-200/70 mt-2 text-sm md:text-base">เหมาะสำหรับไลฟ์สด • รองรับทุกอุปกรณ์</p>
@@ -212,7 +237,7 @@
    <main class="flex flex-col xl:flex-row gap-4 md:gap-6 max-w-7xl mx-auto"><!-- Left Panel - Controls -->
     <aside id="left-panel" class="xl:w-80 space-y-4"><!-- Items Input -->
      <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-4 glow-border">
-      <h2 id="secret-trigger" class="text-yellow-300 font-bold text-lg mb-3 flex items-center gap-2 cursor-pointer select-none hover:text-yellow-200 transition-colors"><span>📝</span> รายชื่อในวงล้อ</h2><label for="items-input" class="sr-only">รายชื่อในวงล้อ</label> <textarea id="items-input" class="item-input w-full h-32 md:h-40 bg-slate-800/50 text-white rounded-xl p-3 text-sm border border-white/20 resize-none" placeholder="ใส่ชื่อทีละบรรทัด เช่น:
+      <h2 id="secret-trigger" class="text-yellow-300 font-bold text-lg mb-3 flex items-center gap-2 cursor-pointer select-none hover:text-yellow-200 transition-colors"><span>📝</span> รายชื่อในวงล้อ <span id="item-count" class="text-sm text-white/50 font-normal">(6 รายการ)</span></h2><label for="items-input" class="sr-only">รายชื่อในวงล้อ</label> <textarea id="items-input" class="item-input w-full h-32 md:h-40 bg-slate-800/50 text-white rounded-xl p-3 text-sm border border-white/20 resize-none" placeholder="ใส่ชื่อทีละบรรทัด เช่น:
 รางวัลที่ 1
 รางวัลที่ 2
 รางวัลที่ 3">รางวัลที่ 1
@@ -221,9 +246,9 @@
 รางวัลที่ 4
 รางวัลที่ 5
 รางวัลที่ 6</textarea> <button onclick="updateWheel()" class="w-full mt-3 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-2"> <span>🔄</span> อัพเดทวงล้อ </button>
-     </div><!-- Secret Control Panel Button (Hidden by default) -->
+     </div><!-- Secret Control Panel Button -->
      <div id="control-btn-container" class="hidden"><button onclick="openControlPanel()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 glow-border"> <span>🎛️</span> เปิดหน้าควบคุม (หน้าต่างแยก) </button>
-      <p class="text-white/40 text-xs text-center mt-2">💡 เปิดหน้าต่างนี้ในจอแยก ไม่ให้คนดูเห็น</p>
+      <p class="text-white/40 text-xs text-center mt-2">🔒 เปิดหน้าต่างนี้ในจอแยก ไม่ให้คนดูเห็น</p>
      </div><!-- Fullscreen Button --> <button onclick="toggleFullscreen()" id="fullscreen-btn" class="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 border border-white/20"> <span>🖥️</span> โหมดเต็มจอ (OBS/StreamLabs) </button>
     </aside><!-- Center - Wheel -->
     <section id="wheel-section" class="flex-1 flex flex-col items-center justify-center">
@@ -233,26 +258,17 @@
        </svg>
       </div><!-- Wheel Canvas -->
       <canvas id="wheel" width="500" height="500" class="w-72 h-72 md:w-96 md:h-96 lg:w-[450px] lg:h-[450px]" aria-label="วงล้อสุ่มรางวัล"></canvas><!-- Center Button --> <button id="spin-btn" onclick="spin()" class="spin-btn absolute w-20 h-20 md:w-24 md:h-24 rounded-full text-slate-900 font-extrabold text-lg md:text-xl z-10 border-4 border-yellow-200" style="top: 50%; left: 50%; transform: translate(-50%, -50%);"> หมุน! </button>
-     </div><!-- Result Display -->
-     <div id="result-container" class="hidden mt-6 w-full max-w-md relative">
-      <div class="stars-container" id="stars-container"></div>
-      <div class="result-popup rainbow-border rounded-2xl p-1">
-       <div class="bg-slate-900 rounded-xl p-6 text-center relative overflow-hidden">
-        <div class="emoji-bounce text-5xl mb-3">
-         🎉
-        </div>
-        <p class="text-yellow-300 text-lg mb-2">🌟 ผลลัพธ์คือ 🌟</p>
-        <p id="result-text" class="winner-text text-white text-2xl md:text-4xl font-extrabold"></p>
-        <div class="flex justify-center gap-2 mt-3"><span class="emoji-bounce" style="animation-delay: 0s;">🏆</span> <span class="emoji-bounce" style="animation-delay: 0.1s;">⭐</span> <span class="emoji-bounce" style="animation-delay: 0.2s;">🎊</span> <span class="emoji-bounce" style="animation-delay: 0.3s;">✨</span> <span class="emoji-bounce" style="animation-delay: 0.4s;">🏆</span>
-        </div>
-       </div>
-      </div>
      </div>
     </section><!-- Right Panel - History -->
     <aside id="right-panel" class="xl:w-72">
      <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-4 glow-border h-full">
       <div class="flex items-center justify-between mb-3">
        <h2 class="text-yellow-300 font-bold text-lg flex items-center gap-2"><span>📜</span> ประวัติการหมุน</h2><button onclick="clearHistory()" class="text-xs text-white/50 hover:text-white/80 transition-colors">ล้าง</button>
+      </div><!-- Export Buttons -->
+      <div id="export-buttons" class="hidden mb-3">
+       <div class="flex gap-2"><button id="copy-btn" onclick="copyWinners()" class="flex-1 bg-emerald-500/80 hover:bg-emerald-500 text-white text-xs font-semibold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1"> <span>📋</span> <span id="copy-btn-text">Copy</span> </button> <button onclick="downloadCSV()" class="flex-1 bg-blue-500/80 hover:bg-blue-500 text-white text-xs font-semibold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1"> <span>📥</span> CSV </button>
+       </div>
+       <p class="text-white/40 text-xs text-center mt-2">💡 Export รายชื่อผู้ได้รับรางวัล</p>
       </div>
       <div id="history-list" class="space-y-2 max-h-64 xl:max-h-96 overflow-y-auto">
        <p class="text-white/40 text-sm text-center py-4">ยังไม่มีประวัติ</p>
@@ -263,6 +279,41 @@
    <footer class="text-center mt-6 text-white/30 text-xs">
     สร้างสำหรับไลฟ์สด • กด "หมุน!" เพื่อเริ่มต้น
    </footer>
+  </div><!-- Copy Modal -->
+  <div id="copy-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[10003] flex items-center justify-center p-4">
+   <div class="bg-slate-800 rounded-2xl p-5 max-w-md w-full border border-yellow-500/30">
+    <h3 class="text-yellow-300 font-bold text-lg mb-3 flex items-center gap-2"><span>📋</span> คัดลอกข้อความ</h3>
+    <p class="text-white/70 text-sm mb-3">กดค้างที่ข้อความแล้วเลือก "คัดลอก" หรือกด Ctrl+C / Cmd+C</p><textarea id="copy-modal-text" readonly class="w-full h-48 bg-slate-900 text-white rounded-xl p-3 text-xs border border-white/20 resize-none"></textarea>
+    <div class="flex gap-2 mt-3"><button onclick="selectCopyModalText()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2 rounded-xl transition-all text-sm"> เลือกทั้งหมด </button> <button onclick="closeCopyModal()" class="flex-1 bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 rounded-xl transition-all text-sm"> ปิด </button>
+    </div>
+   </div>
+  </div><!-- Result Popup Overlay -->
+  <div id="result-overlay" class="hidden popup-overlay fixed inset-0 bg-black/70 backdrop-blur-sm z-[10002] flex items-center justify-center p-4">
+   <div id="result-container" class="w-full max-w-md relative">
+    <div class="stars-container" id="stars-container"></div>
+    <div class="result-popup rainbow-border rounded-2xl p-1">
+     <div class="bg-slate-900 rounded-xl p-6 text-center relative overflow-hidden"><!-- Countdown Timer Ring -->
+      <div class="absolute top-3 right-3 w-12 h-12">
+       <svg class="timer-ring w-full h-full" viewbox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3" /> <circle id="timer-ring-progress" class="timer-ring-circle" cx="18" cy="18" r="16" fill="none" stroke="#fbbf24" stroke-width="3" stroke-linecap="round" stroke-dasharray="100.53" stroke-dashoffset="0" />
+       </svg><span id="timer-text" class="absolute inset-0 flex items-center justify-center text-white/80 text-sm font-bold">30</span>
+      </div>
+      <div class="emoji-bounce text-5xl mb-3">
+       🎉
+      </div>
+      <p class="text-yellow-300 text-lg mb-2">🌟 ผลลัพธ์คือ 🌟</p>
+      <p id="result-text" class="winner-text text-white text-2xl md:text-4xl font-extrabold"></p>
+      <div class="flex justify-center gap-2 mt-3"><span class="emoji-bounce" style="animation-delay: 0s;">🏆</span> <span class="emoji-bounce" style="animation-delay: 0.1s;">⭐</span> <span class="emoji-bounce" style="animation-delay: 0.2s;">🎊</span> <span class="emoji-bounce" style="animation-delay: 0.3s;">✨</span> <span class="emoji-bounce" style="animation-delay: 0.4s;">🏆</span>
+      </div><!-- Remove Winner Section -->
+      <div id="remove-winner-section" class="mt-4 pt-4 border-t border-white/20"><button id="remove-winner-btn" onclick="showRemoveConfirm()" class="bg-rose-500/80 hover:bg-rose-500 text-white font-semibold py-2 px-4 rounded-lg transition-all text-sm flex items-center justify-center gap-2 mx-auto"> <span>🚫</span> ตัดออกจากวงล้อ </button> <!-- Confirm Dialog -->
+       <div id="remove-confirm-dialog" class="hidden mt-3 bg-slate-800 rounded-xl p-4 border border-rose-500/50">
+        <p class="text-white text-sm mb-3">ต้องการลบ "<span id="confirm-name" class="text-yellow-300 font-semibold"></span>" ออกจากวงล้อใช่ไหม?</p>
+        <div class="flex gap-2 justify-center"><button onclick="confirmRemoveWinner()" class="bg-rose-500 hover:bg-rose-400 text-white font-bold py-2 px-4 rounded-lg transition-all text-sm"> ✓ ใช่ ลบเลย </button> <button onclick="cancelRemoveWinner()" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg transition-all text-sm"> ✕ ยกเลิก </button>
+        </div>
+       </div>
+      </div><!-- Close Button --> <button onclick="closeResultPopup()" class="mt-4 w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"> <span>✓</span> ตกลง </button>
+     </div>
+    </div>
+   </div>
   </div><!-- Fullscreen Overlay -->
   <div id="fullscreen-overlay" class="hidden"><button onclick="toggleFullscreen()" class="fullscreen-exit-btn"> ✕ ออกจากโหมดเต็มจอ </button>
    <h2 id="fullscreen-title-display" class="fullscreen-title">🎰 วงล้อนำโชค 🎰</h2>
@@ -283,6 +334,9 @@
     let lastSliceIndex = -1;
     let controlWindow = null;
     let isFullscreen = false;
+    let lastWinner = '';
+    let popupTimer = null;
+    let popupCountdown = 30;
 
     const colors = [
       '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD',
@@ -348,6 +402,12 @@
       ctx.stroke();
 
       ctx.restore();
+      
+      updateItemCount();
+    }
+
+    function updateItemCount() {
+      document.getElementById('item-count').textContent = `(${items.length} รายการ)`;
     }
 
     function getCurrentSliceIndex() {
@@ -386,7 +446,273 @@
       }
     }
 
-    // Fullscreen Mode
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `removed-toast ${type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'} text-white px-4 py-2 rounded-xl shadow-lg font-semibold text-sm`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 2500);
+    }
+
+    // Export Functions - แก้ไขให้ใช้งานได้ในทุกกรณี
+    function generateCopyText() {
+      const titleText = config.wheel_title || defaultConfig.wheel_title;
+      let text = `🎰 ${titleText} - รายชื่อผู้ได้รับรางวัล 🎰\n`;
+      text += `📅 วันที่: ${new Date().toLocaleDateString('th-TH')}\n`;
+      text += `⏰ เวลา: ${new Date().toLocaleTimeString('th-TH')}\n`;
+      text += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+      history.forEach((h, i) => {
+        const status = items.includes(h.result) ? '✅' : '🚫 (ถูกลบแล้ว)';
+        text += `${i + 1}. ${h.result} ${status}\n   ⏰ ${h.time}\n\n`;
+      });
+
+      text += `━━━━━━━━━━━━━━━━━━━━━\n`;
+      text += `📊 รวมทั้งหมด: ${history.length} ครั้ง`;
+      return text;
+    }
+
+    function copyWinners() {
+      if (history.length === 0) {
+        showToast('ยังไม่มีประวัติให้ copy', 'error');
+        return;
+      }
+
+      const text = generateCopyText();
+
+      // Fallback: ใช้ execCommand
+      function fallbackCopy(textToCopy) {
+        const textArea = document.createElement('textarea');
+        textArea.value = textToCopy;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        textArea.style.top = '-9999px';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          const successful = document.execCommand('copy');
+          document.body.removeChild(textArea);
+          return successful;
+        } catch (err) {
+          document.body.removeChild(textArea);
+          return false;
+        }
+      }
+
+      function onCopySuccess() {
+        const btn = document.getElementById('copy-btn');
+        const btnText = document.getElementById('copy-btn-text');
+        btn.classList.add('copy-success');
+        btnText.textContent = 'Copied!';
+        showToast('📋 คัดลอกรายชื่อแล้ว!');
+        
+        setTimeout(() => {
+          btn.classList.remove('copy-success');
+          btnText.textContent = 'Copy';
+        }, 2000);
+      }
+
+      function onCopyFail() {
+        // แสดง modal ให้ copy เอง
+        showCopyModal(text);
+      }
+
+      // ลอง Clipboard API ก่อน
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        navigator.clipboard.writeText(text)
+          .then(onCopySuccess)
+          .catch(() => {
+            // ถ้า Clipboard API ไม่ทำงาน ใช้ fallback
+            if (fallbackCopy(text)) {
+              onCopySuccess();
+            } else {
+              onCopyFail();
+            }
+          });
+      } else {
+        // ถ้าไม่มี Clipboard API ใช้ fallback
+        if (fallbackCopy(text)) {
+          onCopySuccess();
+        } else {
+          onCopyFail();
+        }
+      }
+    }
+
+    function showCopyModal(text) {
+      const modal = document.getElementById('copy-modal');
+      const textarea = document.getElementById('copy-modal-text');
+      textarea.value = text;
+      modal.classList.remove('hidden');
+      
+      // เลือกข้อความอัตโนมัติ
+      setTimeout(() => {
+        textarea.focus();
+        textarea.select();
+      }, 100);
+    }
+
+    function selectCopyModalText() {
+      const textarea = document.getElementById('copy-modal-text');
+      textarea.focus();
+      textarea.select();
+      showToast('✓ เลือกข้อความแล้ว กด Ctrl+C เพื่อคัดลอก');
+    }
+
+    function closeCopyModal() {
+      const modal = document.getElementById('copy-modal');
+      modal.classList.add('hidden');
+    }
+
+    function downloadCSV() {
+      if (history.length === 0) {
+        showToast('ยังไม่มีประวัติให้ดาวน์โหลด', 'error');
+        return;
+      }
+
+      const titleText = config.wheel_title || defaultConfig.wheel_title;
+      const today = new Date().toLocaleDateString('th-TH').replace(/\//g, '-');
+      
+      // BOM for UTF-8
+      let csv = '\uFEFF';
+      csv += 'ลำดับ,ชื่อผู้ได้รับรางวัล,เวลา,สถานะ\n';
+
+      history.forEach((h, i) => {
+        const status = items.includes(h.result) ? 'อยู่ในวงล้อ' : 'ถูกลบแล้ว';
+        // Escape quotes in result
+        const escapedResult = h.result.replace(/"/g, '""');
+        csv += `${i + 1},"${escapedResult}",${h.time},${status}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${titleText}_ผู้ได้รับรางวัล_${today}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      showToast('📥 ดาวน์โหลด CSV แล้ว!');
+    }
+
+    function updateExportButtons() {
+      const exportButtons = document.getElementById('export-buttons');
+      if (history.length > 0) {
+        exportButtons.classList.remove('hidden');
+      } else {
+        exportButtons.classList.add('hidden');
+      }
+    }
+
+    // Popup Functions
+    function showResultPopup(result) {
+      const overlay = document.getElementById('result-overlay');
+      const text = document.getElementById('result-text');
+      const removeBtn = document.getElementById('remove-winner-btn');
+      const dialog = document.getElementById('remove-confirm-dialog');
+      
+      text.textContent = result;
+      removeBtn.classList.remove('hidden');
+      dialog.classList.add('hidden');
+      overlay.classList.remove('hidden', 'popup-closing');
+      
+      startPopupTimer();
+      createStars();
+    }
+
+    function closeResultPopup() {
+      const overlay = document.getElementById('result-overlay');
+      overlay.classList.add('popup-closing');
+      
+      if (popupTimer) {
+        clearInterval(popupTimer);
+        popupTimer = null;
+      }
+      
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('popup-closing');
+      }, 300);
+    }
+
+    function startPopupTimer() {
+      popupCountdown = 30;
+      const timerText = document.getElementById('timer-text');
+      const timerRing = document.getElementById('timer-ring-progress');
+      const circumference = 100.53;
+      
+      timerText.textContent = popupCountdown;
+      timerRing.style.strokeDashoffset = 0;
+      
+      if (popupTimer) {
+        clearInterval(popupTimer);
+      }
+      
+      popupTimer = setInterval(() => {
+        popupCountdown--;
+        timerText.textContent = popupCountdown;
+        
+        const progress = (30 - popupCountdown) / 30;
+        timerRing.style.strokeDashoffset = circumference * progress;
+        
+        if (popupCountdown <= 0) {
+          clearInterval(popupTimer);
+          popupTimer = null;
+          closeResultPopup();
+        }
+      }, 1000);
+    }
+
+    function showRemoveConfirm() {
+      const dialog = document.getElementById('remove-confirm-dialog');
+      const confirmName = document.getElementById('confirm-name');
+      const removeBtn = document.getElementById('remove-winner-btn');
+      
+      confirmName.textContent = lastWinner;
+      dialog.classList.remove('hidden');
+      removeBtn.classList.add('hidden');
+    }
+
+    function cancelRemoveWinner() {
+      const dialog = document.getElementById('remove-confirm-dialog');
+      const removeBtn = document.getElementById('remove-winner-btn');
+      
+      dialog.classList.add('hidden');
+      removeBtn.classList.remove('hidden');
+    }
+
+    function confirmRemoveWinner() {
+      const index = items.indexOf(lastWinner);
+      if (index > -1) {
+        items.splice(index, 1);
+        document.getElementById('items-input').value = items.join('\n');
+        drawWheel();
+        
+        if (controlWindow && !controlWindow.closed) {
+          controlWindow.postMessage({ type: 'updateItems', items: items }, '*');
+        }
+        
+        showToast(`🚫 ลบ "${lastWinner}" ออกแล้ว!`);
+        
+        if (items.length < 2) {
+          closeResultPopup();
+          showToast('⚠️ ต้องมีอย่างน้อย 2 รายการในวงล้อ', 'error');
+        } else {
+          closeResultPopup();
+        }
+      }
+      
+      cancelRemoveWinner();
+    }
+
     function toggleFullscreen() {
       const wheelSection = document.getElementById('wheel-section');
       const overlay = document.getElementById('fullscreen-overlay');
@@ -399,7 +725,6 @@
       isFullscreen = !isFullscreen;
 
       if (isFullscreen) {
-        // Enter fullscreen mode
         wheelSection.classList.add('fullscreen-mode');
         overlay.classList.remove('hidden');
         leftPanel.classList.add('hidden');
@@ -408,11 +733,9 @@
         appWrapper.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
         
-        // Update fullscreen title
         const titleText = config.wheel_title || defaultConfig.wheel_title;
         fullscreenTitle.textContent = '🎰 ' + titleText + ' 🎰';
       } else {
-        // Exit fullscreen mode
         wheelSection.classList.remove('fullscreen-mode');
         overlay.classList.add('hidden');
         leftPanel.classList.remove('hidden');
@@ -423,14 +746,24 @@
       }
     }
 
-    // ESC key to exit fullscreen
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && isFullscreen) {
-        toggleFullscreen();
+      if (e.key === 'Escape') {
+        if (isFullscreen) {
+          toggleFullscreen();
+        }
+        const overlay = document.getElementById('result-overlay');
+        if (!overlay.classList.contains('hidden')) {
+          closeResultPopup();
+        }
+        const copyModal = document.getElementById('copy-modal');
+        if (!copyModal.classList.contains('hidden')) {
+          closeCopyModal();
+        }
       }
     });
 
     function getControlPanelHTML() {
+      const currentTitle = config.wheel_title || defaultConfig.wheel_title;
       return `<!DOCTYPE html>
 <html lang="th">
 <head>
@@ -446,13 +779,45 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
+    .input-glow:focus {
+      outline: none;
+      border-color: #fbbf24;
+      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3);
+    }
+    .save-flash {
+      animation: flashGreen 0.5s ease;
+    }
+    @keyframes flashGreen {
+      0%, 100% { background-color: rgba(34, 197, 94, 0); }
+      50% { background-color: rgba(34, 197, 94, 0.3); }
+    }
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900 p-6">
-  <div class="max-w-md mx-auto">
+  <div class="max-w-md mx-auto space-y-4">
     <div class="text-center mb-6">
       <h1 class="text-2xl font-bold text-white">🎛️ หน้าควบคุมลับ</h1>
       <p class="text-red-300 text-sm mt-1">⚠️ อย่าให้คนดูเห็นหน้านี้!</p>
+    </div>
+
+    <div class="bg-white/10 backdrop-blur rounded-2xl p-5 border border-yellow-500/30">
+      <h3 class="text-yellow-300 font-bold text-lg mb-4 flex items-center gap-2">
+        <span>✏️</span> แก้ไขชื่อวงล้อ
+      </h3>
+      
+      <label for="title-input" class="text-white/70 text-sm mb-2 block">ชื่อที่แสดงบนหน้าจอ:</label>
+      <div class="flex gap-2">
+        <input type="text" id="title-input" value="${currentTitle}" class="input-glow flex-1 bg-slate-800 text-white rounded-xl p-3 border border-white/20" placeholder="วงล้อนำโชค">
+        <button onclick="updateTitle()" class="bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold px-4 rounded-xl transition-all">
+          บันทึก
+        </button>
+      </div>
+      <p id="title-saved-msg" class="text-emerald-400 text-xs mt-2 hidden">✓ บันทึกแล้ว!</p>
+      
+      <div class="mt-3 bg-slate-800/50 rounded-xl p-3 text-center">
+        <p class="text-white/50 text-xs mb-1">ตัวอย่าง:</p>
+        <p class="text-yellow-300 font-bold text-lg">🎰 <span id="preview-text">${currentTitle}</span> 🎰</p>
+      </div>
     </div>
 
     <div class="bg-white/10 backdrop-blur rounded-2xl p-5 border border-red-500/30">
@@ -480,17 +845,17 @@
       </div>
     </div>
 
-    <div class="mt-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
+    <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
       <h4 class="text-yellow-300 font-semibold mb-2">💡 วิธีใช้งาน:</h4>
       <ol class="text-white/70 text-sm space-y-1 list-decimal list-inside">
-        <li>เปิดสวิตช์ "ล็อค"</li>
-        <li>เลือกรางวัลที่ต้องการ</li>
+        <li>แก้ไขชื่อวงล้อได้ตามต้องการ</li>
+        <li>เปิดสวิตช์ "ล็อค" แล้วเลือกรางวัล</li>
         <li>กลับไปหน้าวงล้อแล้วกด "หมุน!"</li>
         <li>วงล้อจะหยุดที่รางวัลที่เลือกไว้</li>
       </ol>
     </div>
 
-    <div class="mt-4 text-center">
+    <div class="text-center">
       <p class="text-white/40 text-xs">เปิดหน้านี้ไว้ในจอแยก หรือ minimize ไว้</p>
     </div>
   </div>
@@ -501,6 +866,35 @@
     const status = document.getElementById('lock-status');
     const indicator = document.getElementById('lock-indicator');
     const lockedName = document.getElementById('locked-name');
+    const titleInput = document.getElementById('title-input');
+    const previewText = document.getElementById('preview-text');
+    const savedMsg = document.getElementById('title-saved-msg');
+
+    titleInput.addEventListener('input', function() {
+      previewText.textContent = this.value || 'วงล้อนำโชค';
+    });
+
+    titleInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        updateTitle();
+      }
+    });
+
+    function updateTitle() {
+      const newTitle = titleInput.value.trim() || 'วงล้อนำโชค';
+      titleInput.value = newTitle;
+      previewText.textContent = newTitle;
+      
+      window.opener.postMessage({ type: 'updateTitle', title: newTitle }, '*');
+      
+      savedMsg.classList.remove('hidden');
+      titleInput.parentElement.classList.add('save-flash');
+      
+      setTimeout(() => {
+        savedMsg.classList.add('hidden');
+        titleInput.parentElement.classList.remove('save-flash');
+      }, 2000);
+    }
 
     toggle.addEventListener('change', function() {
       select.disabled = !this.checked;
@@ -541,6 +935,10 @@
         indicator.classList.add('hidden');
         window.opener.postMessage({ type: 'lock', isLocked: false, lockedIndex: -1 }, '*');
       }
+      if (e.data.type === 'syncTitle') {
+        titleInput.value = e.data.title;
+        previewText.textContent = e.data.title;
+      }
     });
   <\/script>
 </body>
@@ -549,7 +947,7 @@
 
     function openControlPanel() {
       const width = 420;
-      const height = 600;
+      const height = 700;
       const left = window.screenX + window.outerWidth + 10;
       const top = window.screenY;
       
@@ -567,6 +965,14 @@
         lockedIndex = e.data.lockedIndex;
         updateLockDot();
       }
+      if (e.data.type === 'updateTitle') {
+        config.wheel_title = e.data.title;
+        if (window.elementSdk) {
+          window.elementSdk.setConfig({ wheel_title: e.data.title });
+        }
+        onConfigChange(config);
+        showToast('✏️ เปลี่ยนชื่อวงล้อแล้ว!');
+      }
     });
 
     function spin() {
@@ -575,10 +981,9 @@
       isSpinning = true;
       lastSliceIndex = -1;
       document.getElementById('spin-btn').disabled = true;
-      document.getElementById('result-container').classList.add('hidden');
 
       let targetIndex;
-      if (isLocked && lockedIndex >= 0) {
+      if (isLocked && lockedIndex >= 0 && lockedIndex < items.length) {
         targetIndex = lockedIndex;
       } else {
         targetIndex = Math.floor(Math.random() * items.length);
@@ -614,22 +1019,15 @@
         } else {
           isSpinning = false;
           document.getElementById('spin-btn').disabled = false;
-          showResult(items[targetIndex]);
-          addToHistory(items[targetIndex]);
+          lastWinner = items[targetIndex];
+          showResultPopup(lastWinner);
+          addToHistory(lastWinner);
           createConfetti();
           createFireworks();
-          createStars();
         }
       }
 
       requestAnimationFrame(animate);
-    }
-
-    function showResult(result) {
-      const container = document.getElementById('result-container');
-      const text = document.getElementById('result-text');
-      text.textContent = result;
-      container.classList.remove('hidden');
     }
 
     function createStars() {
@@ -687,11 +1085,13 @@
     function addToHistory(result) {
       history.unshift({
         result: result,
-        time: new Date().toLocaleTimeString('th-TH')
+        time: new Date().toLocaleTimeString('th-TH'),
+        removed: false
       });
       
       if (history.length > 20) history.pop();
       renderHistory();
+      updateExportButtons();
     }
 
     function renderHistory() {
@@ -702,10 +1102,10 @@
       }
 
       list.innerHTML = history.map((h, i) => `
-        <div class="bg-white/5 rounded-lg p-2 flex items-center gap-2 ${i === 0 ? 'ring-2 ring-yellow-400/50' : ''}">
-          <span class="text-lg">🎲</span>
+        <div class="bg-white/5 rounded-lg p-2 flex items-center gap-2 ${i === 0 ? 'ring-2 ring-yellow-400/50' : ''} ${!items.includes(h.result) ? 'opacity-50' : ''}">
+          <span class="text-lg">${!items.includes(h.result) ? '🚫' : '🎲'}</span>
           <div class="flex-1 min-w-0">
-            <p class="text-white text-sm font-semibold truncate">${h.result}</p>
+            <p class="text-white text-sm font-semibold truncate ${!items.includes(h.result) ? 'line-through' : ''}">${h.result}</p>
             <p class="text-white/40 text-xs">${h.time}</p>
           </div>
         </div>
@@ -715,6 +1115,7 @@
     function clearHistory() {
       history = [];
       renderHistory();
+      updateExportButtons();
     }
 
     function createConfetti() {
@@ -797,6 +1198,10 @@
       const titleText = cfg.wheel_title || defaultConfig.wheel_title;
       title.textContent = '🎰 ' + titleText + ' 🎰';
       fullscreenTitle.textContent = '🎰 ' + titleText + ' 🎰';
+      
+      if (controlWindow && !controlWindow.closed) {
+        controlWindow.postMessage({ type: 'syncTitle', title: titleText }, '*');
+      }
     }
 
     function mapToCapabilities(cfg) {
@@ -827,5 +1232,5 @@
     drawWheel();
     onConfigChange(config);
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b679960c0eafd0c',t:'MTc2NzE2MTI3Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b67ca9ce0e1cdf5',t:'MTc2NzE2MzI4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
