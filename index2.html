@@ -252,7 +252,7 @@
 รางวัลที่ 6</textarea> <button onclick="updateWheel()" class="w-full mt-3 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-2"> <span>🔄</span> อัพเดทวงล้อ </button>
      </div><!-- Secret Control Panel Button -->
      <div id="control-btn-container" class="hidden"><button onclick="openControlPanel()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 glow-border"> <span>🎛️</span> เปิดหน้าควบคุม (หน้าต่างแยก) </button>
-      <p class="text-white/40 text-xs text-center mt-2">🔒 เปิดหน้าต่างน��้ในจอแยก ไม่ให้คนดูเห็น</p>
+      <p class="text-white/40 text-xs text-center mt-2">🔒 เปิดหน้าต่างนี้ในจอแยก ไม่ให้คนดูเห็น</p>
      </div><!-- Fullscreen Button --> <button onclick="toggleFullscreen()" id="fullscreen-btn" class="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 border border-white/20"> <span>🖥️</span> โหมดเต็มจอ </button>
     </aside><!-- Center - Wheel -->
     <section id="wheel-section" class="flex-1 flex flex-col items-center justify-center">
@@ -261,7 +261,7 @@
        <svg width="50" height="60" viewbox="0 0 50 60" aria-hidden="true"><polygon points="25,60 5,10 45,10" fill="#FFD700" stroke="#FFA500" stroke-width="3" /> <circle cx="25" cy="15" r="8" fill="#FF6B6B" />
        </svg>
       </div><!-- Wheel Canvas -->
-      <canvas id="wheel" width="500" height="500" class="w-72 h-72 md:w-96 md:h-96 lg:w-[450px] lg:h-[450px]" aria-label="วงล้อสุ่มรางวัล"></canvas><!-- Center Button --> <button id="spin-btn" onclick="spin()" class="spin-btn absolute w-20 h-20 md:w-24 md:h-24 rounded-full text-slate-900 font-extrabold text-lg md:text-xl z-10 border-4 border-yellow-200" style="top: 50%; left: 50%; transform: translate(-50%, -50%);"> หมุ��! </button>
+      <canvas id="wheel" width="500" height="500" class="w-72 h-72 md:w-96 md:h-96 lg:w-[450px] lg:h-[450px]" aria-label="วงล้อสุ่มรางวัล"></canvas><!-- Center Button --> <button id="spin-btn" onclick="spin()" class="spin-btn absolute w-20 h-20 md:w-24 md:h-24 rounded-full text-slate-900 font-extrabold text-lg md:text-xl z-10 border-4 border-yellow-200" style="top: 50%; left: 50%; transform: translate(-50%, -50%);"> หมุน! </button>
      </div>
     </section><!-- Right Panel - History -->
     <aside id="right-panel" class="xl:w-72">
@@ -281,14 +281,14 @@
     </aside>
    </main><!-- Footer -->
    <footer class="text-center mt-6 text-white/30 text-xs">
-    สร้างสำหรับไลฟ์สด • กด "หมุน!" เพื��อเริ่มต้น
+    สร้างสำหรับไลฟ์สด • กด "หมุน!" เพื่อเริ่มต้น
    </footer>
   </div><!-- Copy Modal -->
   <div id="copy-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[10003] flex items-center justify-center p-4">
    <div class="bg-slate-800 rounded-2xl p-5 max-w-md w-full border border-yellow-500/30">
     <h3 class="text-yellow-300 font-bold text-lg mb-3 flex items-center gap-2"><span>📋</span> คัดลอกข้อความ</h3>
-    <p class="text-white/70 text-sm mb-3">���ดค้างที่ข้อความแล้วเลือก "คัดลอก" หรือกด Ctrl+C / Cmd+C</p><textarea id="copy-modal-text" readonly class="w-full h-48 bg-slate-900 text-white rounded-xl p-3 text-xs border border-white/20 resize-none"></textarea>
-    <div class="flex gap-2 mt-3"><button onclick="selectCopyModalText()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2 rounded-xl transition-all text-sm"> เลือกทั้งหมด </button> <button onclick="closeCopyModal()" class="flex-1 bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 rounded-xl transition-all text-sm"> ��ิด </button>
+    <p class="text-white/70 text-sm mb-3">กดค้างที่ข้อความแล้วเลือก "คัดลอก" หรือกด Ctrl+C / Cmd+C</p><textarea id="copy-modal-text" readonly class="w-full h-48 bg-slate-900 text-white rounded-xl p-3 text-xs border border-white/20 resize-none"></textarea>
+    <div class="flex gap-2 mt-3"><button onclick="selectCopyModalText()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2 rounded-xl transition-all text-sm"> เลือกทั้งหมด </button> <button onclick="closeCopyModal()" class="flex-1 bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 rounded-xl transition-all text-sm"> ปิด </button>
     </div>
    </div>
   </div><!-- Result Popup Overlay -->
@@ -463,7 +463,7 @@
     function generateCopyText() {
       const titleText = config.wheel_title || defaultConfig.wheel_title;
       let text = `🎰 ${titleText} - รายชื่อผู้ได้รับรางวัล 🎰\n`;
-      text += `📅 ��ันที่: ${new Date().toLocaleDateString('th-TH')}\n`;
+      text += `📅 วันที่: ${new Date().toLocaleDateString('th-TH')}\n`;
       text += `⏰ เวลา: ${new Date().toLocaleTimeString('th-TH')}\n`;
       text += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
@@ -575,7 +575,6 @@
       const titleText = config.wheel_title || defaultConfig.wheel_title;
       const today = new Date().toLocaleDateString('th-TH').replace(/\//g, '-');
       
-      // สร้าง CSV content พร้อม BOM สำหรับ UTF-8 ที่ Excel รองรับ
       let csvRows = [];
       csvRows.push(['ลำดับ', 'ชื่อผู้ได้รับรางวัล', 'เวลา', 'สถานะ']);
 
@@ -584,7 +583,6 @@
         csvRows.push([i + 1, h.result, h.time, status]);
       });
 
-      // แปลงเป็น CSV string โดย escape quote อ��่างถูกต้อง
       const csvContent = csvRows.map(row => 
         row.map(cell => {
           const cellStr = String(cell);
@@ -595,7 +593,6 @@
         }).join(',')
       ).join('\r\n');
 
-      // เพิ่ม BOM (Byte Order Mark) สำหรับ UTF-8 ที่ Excel รองรับภาษาไทย
       const BOM = '\uFEFF';
       const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8' });
       
@@ -610,7 +607,7 @@
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      showToast('📥 ดาวน์โหลด CSV ���ล้ว!');
+      showToast('📥 ดาวน์โหลด CSV แล้ว!');
     }
 
     function updateExportButtons() {
@@ -714,7 +711,7 @@
         
         if (items.length < 2) {
           closeResultPopup();
-          showToast('⚠️ ต้อง��ีอย่างน้อย 2 รายการในวงล้อ', 'error');
+          showToast('⚠️ ต้องมีอย่างน้อย 2 รายการในวงล้อ', 'error');
         } else {
           closeResultPopup();
         }
@@ -807,7 +804,7 @@
   <div class="max-w-md mx-auto space-y-4">
     <div class="text-center mb-6">
       <h1 class="text-2xl font-bold text-white">🎛️ หน้าควบคุมลับ</h1>
-      <p class="text-red-300 text-sm mt-1">⚠�� อย่าให้คนดูเห็นหน้านี้!</p>
+      <p class="text-red-300 text-sm mt-1">⚠️ อย่าให้คนดูเห็นหน้านี้!</p>
     </div>
 
     <div class="bg-white/10 backdrop-blur rounded-2xl p-5 border border-yellow-500/30">
@@ -819,7 +816,7 @@
       <div class="flex gap-2">
         <input type="text" id="title-input" value="${currentTitle}" class="input-glow flex-1 bg-slate-800 text-white rounded-xl p-3 border border-white/20" placeholder="วงล้อนำโชค">
         <button onclick="updateTitle()" class="bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold px-4 rounded-xl transition-all">
-          ��ันทึก
+          บันทึก
         </button>
       </div>
       <p id="title-saved-msg" class="text-emerald-400 text-xs mt-2 hidden">✓ บันทึกแล้ว!</p>
@@ -840,7 +837,7 @@
           <input type="checkbox" id="lock-toggle" class="sr-only peer">
           <div class="w-14 h-7 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-red-500"></div>
         </label>
-        <span id="lock-status" class="text-white/70">��ิดการล็อค</span>
+        <span id="lock-status" class="text-white/70">ปิดการล็อค</span>
       </div>
 
       <label for="lock-target" class="text-white/70 text-sm mb-2 block">เลือกรางวัลที่ต้องการล็อค:</label>
@@ -856,7 +853,7 @@
     </div>
 
     <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
-      <h4 class="text-yellow-300 font-semibold mb-2">��� ��ิธีใช้งาน:</h4>
+      <h4 class="text-yellow-300 font-semibold mb-2">💡 วิธีใช้งาน:</h4>
       <ol class="text-white/70 text-sm space-y-1 list-decimal list-inside">
         <li>แก้ไขชื่อวงล้อได้ตามต้องการ</li>
         <li>เปิดสวิตช์ "ล็อค" แล้วเลือกรางวัล</li>
@@ -940,7 +937,7 @@
         
         toggle.checked = false;
         select.disabled = true;
-        status.textContent = 'ปิดการล็���ค';
+        status.textContent = 'ปิดการล็อค';
         status.classList.remove('text-red-400');
         indicator.classList.add('hidden');
         window.opener.postMessage({ type: 'lock', isLocked: false, lockedIndex: -1 }, '*');
@@ -1261,5 +1258,5 @@
     drawWheel();
     onConfigChange(config);
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b6803131757fd35',t:'MTc2NzE2NTYwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b6810496278aa1c',t:'MTc2NzE2NjE0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
