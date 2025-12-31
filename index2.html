@@ -392,14 +392,25 @@
       const sliceAngle = 360 / names.length;
       
       // Calculate destination angle
-      // Pointer is on the right (0 degrees), wheel starts from top (-90 degrees offset)
-      // Target slice center needs to align with pointer
-      const sliceMidAngle = targetIndex * sliceAngle;
-      const destinationAngle = -sliceMidAngle;
+      // Wheel is drawn with slice 0 starting at top (-90 deg in canvas)
+      // Pointer is on the right (0 deg in canvas, which is 90 deg from top)
+      // We need the center of target slice to align with the pointer (right side)
+      // Slice i center is at: i * sliceAngle + sliceAngle/2 (from top, clockwise)
+      // To align with right pointer (90 deg from top), we need to rotate:
+      // rotation = 90 - (targetIndex * sliceAngle + sliceAngle/2)
+      const targetSliceCenter = targetIndex * sliceAngle + sliceAngle / 2;
+      const destinationAngle = 90 - targetSliceCenter;
       
-      // Add multiple full rotations
+      // Normalize destination and add multiple full rotations
       const spins = 5 + Math.floor(Math.random() * 3);
-      const finalRotation = currentRotation + spins * 360 + (destinationAngle - (currentRotation % 360));
+      const normalizedCurrent = ((currentRotation % 360) + 360) % 360;
+      const normalizedDest = ((destinationAngle % 360) + 360) % 360;
+      
+      // Calculate shortest path then add full spins
+      let diff = normalizedDest - normalizedCurrent;
+      if (diff > 0) diff -= 360; // Always spin clockwise (negative direction in our rotation)
+      
+      const finalRotation = currentRotation + diff - (spins * 360);
 
       const startRotation = currentRotation;
       const duration = 4000 + Math.random() * 1000;
@@ -499,7 +510,7 @@
       });
 
       // Sample names
-      namesTextarea.value = 'สมชาย\nสมหญิง\nสมศักดิ์\nสมศรี\nสมปอง\nสมใจ';
+      namesTextarea.value = 'สมชาย\nสมห���ิง\nสมศักดิ์\nสมศรี\nสมปอง\nสมใจ';
       parseNames();
     }
 
@@ -520,5 +531,5 @@
 
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b66db68c30c3e2b',t:'MTc2NzE1MzQ5MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b66de9165ce9aaf',t:'MTc2NzE1MzYyMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
