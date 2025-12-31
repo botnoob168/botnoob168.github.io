@@ -17,16 +17,16 @@
     }
     
     .wheel-shadow {
-      box-shadow: 0 0 0 8px #5c4d8a, 0 0 0 12px #3d3266, 0 10px 40px rgba(0,0,0,0.4);
+      box-shadow: 0 0 0 8px var(--wheel-border), 0 0 0 12px var(--wheel-border-outer), 0 10px 40px rgba(0,0,0,0.4);
     }
     
     .spin-btn {
-      background: linear-gradient(180deg, #8b5cf6 0%, #6d28d9 100%);
-      box-shadow: 0 4px 15px rgba(109, 40, 217, 0.4);
+      background: var(--btn-gradient);
+      box-shadow: 0 4px 15px var(--btn-shadow);
     }
     
     .spin-btn:hover {
-      background: linear-gradient(180deg, #a78bfa 0%, #7c3aed 100%);
+      filter: brightness(1.1);
     }
     
     .spin-btn:active {
@@ -35,6 +35,41 @@
     
     .pointer-arrow {
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+    
+    .wheel-container {
+      position: relative;
+    }
+    
+    /* Confetti */
+    .confetti-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+      overflow: hidden;
+    }
+    
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      top: -20px;
+      opacity: 0;
+    }
+    
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(0) rotate(0deg) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg) scale(0.5);
+        opacity: 0;
+      }
     }
     
     @keyframes winner-pulse {
@@ -61,7 +96,7 @@
     
     .textarea-names:focus {
       outline: none;
-      border-color: #8b5cf6;
+      border-color: var(--accent-color);
     }
 
     .names-scroll::-webkit-scrollbar {
@@ -72,25 +107,112 @@
       border-radius: 3px;
     }
     .names-scroll::-webkit-scrollbar-thumb {
-      background: #c4b5fd;
+      background: var(--accent-light);
       border-radius: 3px;
     }
     .names-scroll::-webkit-scrollbar-thumb:hover {
-      background: #8b5cf6;
+      background: var(--accent-color);
+    }
+    
+    /* Theme selector */
+    .theme-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .theme-btn:hover {
+      transform: scale(1.1);
+    }
+    
+    .theme-btn.active {
+      border-color: #333;
+      box-shadow: 0 0 0 2px white, 0 0 0 4px #333;
+    }
+    
+    .theme-vivid {
+      background: linear-gradient(135deg, #e74c3c, #9b59b6, #3498db);
+    }
+    
+    .theme-pastel {
+      background: linear-gradient(135deg, #ffb3ba, #bae1ff, #baffc9);
+    }
+    
+    .theme-dark {
+      background: linear-gradient(135deg, #2c3e50, #34495e, #1a252f);
+    }
+    
+    /* Theme variables */
+    :root {
+      --bg-gradient-from: #7c3aed;
+      --bg-gradient-via: #9333ea;
+      --bg-gradient-to: #4f46e5;
+      --wheel-border: #5c4d8a;
+      --wheel-border-outer: #3d3266;
+      --btn-gradient: linear-gradient(180deg, #8b5cf6 0%, #6d28d9 100%);
+      --btn-shadow: rgba(109, 40, 217, 0.4);
+      --accent-color: #8b5cf6;
+      --accent-light: #c4b5fd;
+      --result-text: #7c3aed;
+      --title-color: #fbbf24;
+    }
+    
+    [data-theme="pastel"] {
+      --bg-gradient-from: #fce7f3;
+      --bg-gradient-via: #ddd6fe;
+      --bg-gradient-to: #cffafe;
+      --wheel-border: #f9a8d4;
+      --wheel-border-outer: #e879f9;
+      --btn-gradient: linear-gradient(180deg, #f9a8d4 0%, #f472b6 100%);
+      --btn-shadow: rgba(244, 114, 182, 0.4);
+      --accent-color: #f472b6;
+      --accent-light: #fbcfe8;
+      --result-text: #db2777;
+      --title-color: #be185d;
+    }
+    
+    [data-theme="dark"] {
+      --bg-gradient-from: #1e293b;
+      --bg-gradient-via: #0f172a;
+      --bg-gradient-to: #020617;
+      --wheel-border: #475569;
+      --wheel-border-outer: #334155;
+      --btn-gradient: linear-gradient(180deg, #475569 0%, #334155 100%);
+      --btn-shadow: rgba(51, 65, 85, 0.6);
+      --accent-color: #64748b;
+      --accent-light: #94a3b8;
+      --result-text: #f1f5f9;
+      --title-color: #f8fafc;
+    }
+    
+    .main-bg {
+      background: linear-gradient(135deg, var(--bg-gradient-from), var(--bg-gradient-via), var(--bg-gradient-to));
+    }
+    
+    .result-text-color {
+      color: var(--result-text);
+    }
+    
+    .title-color {
+      color: var(--title-color);
     }
   </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
- <body class="h-full overflow-auto bg-gradient-to-br from-violet-900 via-purple-900 to-indigo-900">
+ <body class="h-full overflow-auto"><!-- Confetti Container -->
+  <div id="confetti-container" class="confetti-container"></div>
   <div id="app-wrapper" class="min-h-full w-full">
    <div class="flex flex-col lg:flex-row min-h-full"><!-- Left Sidebar - Names Input -->
     <aside class="w-full lg:w-80 bg-white p-4 lg:min-h-full order-2 lg:order-1 relative">
-     <div class="flex flex-col h-full"><!-- Header - กดที่ "รายชื่อ" 5 ครั้งเพื่อเปิดโหมดแอดมิน -->
+     <div class="flex flex-col h-full"><!-- Header -->
       <div class="flex items-center justify-between mb-3">
        <h2 id="secret-trigger" class="text-lg font-semibold text-gray-700 cursor-default select-none">รายชื่อ</h2><span id="name-count" class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">0 ชื่อ</span>
       </div><!-- Names Textarea -->
-      <div class="flex-1 mb-3"><label for="names-textarea" class="sr-only">รายชื่อทั้งหมด</label> <textarea id="names-textarea" class="textarea-names w-full h-64 lg:h-96 p-3 border-2 border-gray-200 rounded-lg text-gray-700 text-sm resize-none names-scroll" placeholder="พิมพ์ชื่อ (บรรทัดละชื่อ)
+      <div class="flex-1 mb-3"><label for="names-textarea" class="sr-only">รายชื่อทั้งหมด</label> <textarea id="names-textarea" class="textarea-names w-full h-64 lg:h-80 p-3 border-2 border-gray-200 rounded-lg text-gray-700 text-sm resize-none names-scroll" placeholder="พิมพ์ชื่อ (บรรทัดละชื่อ)
 
 ตัวอย่าง:
 สมชาย
@@ -102,6 +224,11 @@
         </svg> เรียงลำดับ </button> <button id="shuffle-btn" class="flex-1 py-2 px-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-all text-sm font-medium flex items-center justify-center gap-1">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg> สุ่มลำดับ </button>
+      </div><!-- Theme Selector -->
+      <div class="border-t pt-3 mb-3">
+       <p class="text-sm font-medium text-gray-600 mb-2">ธีมสี</p>
+       <div class="flex gap-3"><button id="theme-vivid" class="theme-btn theme-vivid active" title="สีสดใส"></button> <button id="theme-pastel" class="theme-btn theme-pastel" title="พาสเทล"></button> <button id="theme-dark" class="theme-btn theme-dark" title="มืด"></button>
+       </div>
       </div><!-- Hidden Admin Panel -->
       <div id="admin-section" class="border-t pt-3 hidden">
        <div class="flex items-center gap-2 mb-2">
@@ -119,20 +246,21 @@
       </div>
      </div>
     </aside><!-- Main Content - Wheel -->
-    <main class="flex-1 flex flex-col items-center justify-center p-6 lg:p-10 order-1 lg:order-2"><!-- Wheel Container -->
-     <div class="relative mb-8"><!-- Pointer -->
+    <main class="main-bg flex-1 flex flex-col items-center justify-center p-6 lg:p-10 order-1 lg:order-2"><!-- Wheel Title -->
+     <h1 id="wheel-title" class="title-color text-2xl lg:text-3xl font-bold mb-6 text-center drop-shadow-lg">🎲 วงล้อ 🎲</h1><!-- Wheel Container -->
+     <div class="wheel-container relative mb-8"><!-- Pointer -->
       <div class="pointer-arrow absolute -right-2 top-1/2 -translate-y-1/2 z-20">
-       <svg width="40" height="40" viewbox="0 0 40 40"><polygon points="0,10 0,30 35,20" fill="#fbbf24" stroke="#f59e0b" stroke-width="2" />
+       <svg width="40" height="40" viewbox="0 0 40 40"><polygon points="40,10 40,30 5,20" fill="#fbbf24" stroke="#f59e0b" stroke-width="2" />
        </svg>
       </div><!-- Wheel -->
-      <div class="wheel-shadow rounded-full">
+      <div class="wheel-shadow rounded-full relative z-10">
        <canvas id="wheel" width="400" height="400" class="rounded-full"></canvas>
       </div><!-- Center Button --> <button id="spin-btn" class="spin-btn absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full text-white font-bold text-lg transition-all z-10 disabled:opacity-50"> หมุน </button>
      </div><!-- Result Display -->
      <div id="result-container" class="hidden w-full max-w-md">
       <div id="result-box" class="bg-white rounded-2xl p-6 text-center shadow-2xl fade-in">
-       <p class="text-gray-500 text-sm mb-2">🎉 ผู้โชคดี 🎉</p>
-       <p id="result-name" class="text-3xl font-bold text-violet-600 mb-4"></p>
+       <p class="text-gray-500 text-sm mb-2">🎉 ผู้โชคดีคือ 🎉</p>
+       <p id="result-name" class="text-3xl font-bold result-text-color mb-4"></p>
        <div class="flex gap-3 justify-center"><button id="remove-winner-btn" class="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-all text-sm font-medium"> ลบชื่อนี้ </button> <button id="close-result-btn" class="px-4 py-2 bg-violet-100 text-violet-600 rounded-lg hover:bg-violet-200 transition-all text-sm font-medium"> ปิด </button>
        </div>
       </div>
@@ -141,6 +269,124 @@
    </div>
   </div>
   <script>
+    // Default config
+    const defaultConfig = {
+      wheel_title: 'สุ่มคนล้างจาน',
+      theme: 'vivid'
+    };
+    
+    let config = { ...defaultConfig };
+    
+    // Theme color palettes
+    const themeColors = {
+      vivid: [
+        '#e74c3c', '#9b59b6', '#3498db', '#1abc9c', 
+        '#2ecc71', '#f1c40f', '#e67e22', '#e91e63',
+        '#00bcd4', '#8bc34a', '#ff9800', '#673ab7'
+      ],
+      pastel: [
+        '#ffb3ba', '#ffdfba', '#ffffba', '#baffc9',
+        '#bae1ff', '#e2baff', '#ffbae1', '#baffea',
+        '#ffd4ba', '#d4baff', '#baffd4', '#ffbad4'
+      ],
+      dark: [
+        '#5c6bc0', '#7e57c2', '#26a69a', '#66bb6a',
+        '#ffa726', '#ef5350', '#42a5f5', '#ab47bc',
+        '#26c6da', '#9ccc65', '#ffca28', '#ec407a'
+      ]
+    };
+    
+    let currentColors = themeColors.vivid;
+    
+    // Audio Context for sounds
+    let audioContext = null;
+    
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+    }
+    
+    function playTickSound() {
+      if (!audioContext) return;
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 800 + Math.random() * 400;
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.05);
+    }
+    
+    function playWinSound() {
+      if (!audioContext) return;
+      
+      const notes = [523.25, 659.25, 783.99, 1046.50];
+      
+      notes.forEach((freq, i) => {
+        setTimeout(() => {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          oscillator.frequency.value = freq;
+          oscillator.type = 'sine';
+          
+          gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+          
+          oscillator.start(audioContext.currentTime);
+          oscillator.stop(audioContext.currentTime + 0.3);
+        }, i * 100);
+      });
+    }
+    
+    // Confetti
+    function createConfetti() {
+      const container = document.getElementById('confetti-container');
+      container.innerHTML = '';
+      
+      const shapes = ['square', 'circle'];
+      
+      for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        
+        const color = currentColors[Math.floor(Math.random() * currentColors.length)];
+        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+        const left = Math.random() * 100;
+        const delay = Math.random() * 0.5;
+        const duration = 2 + Math.random() * 2;
+        const size = 8 + Math.random() * 8;
+        
+        confetti.style.left = left + '%';
+        confetti.style.width = size + 'px';
+        confetti.style.height = size + 'px';
+        confetti.style.backgroundColor = color;
+        confetti.style.borderRadius = shape === 'circle' ? '50%' : '2px';
+        confetti.style.animation = `confetti-fall ${duration}s ease-out ${delay}s forwards`;
+        
+        container.appendChild(confetti);
+      }
+      
+      setTimeout(() => {
+        container.innerHTML = '';
+      }, 5000);
+    }
+    
     // State
     let names = [];
     let lockedName = null;
@@ -148,13 +394,7 @@
     let currentRotation = 0;
     let lastWinnerIndex = -1;
     let isAdminMode = false;
-
-    const colors = [
-      '#e74c3c', '#9b59b6', '#3498db', '#1abc9c', 
-      '#2ecc71', '#f1c40f', '#e67e22', '#1abc9c',
-      '#e91e63', '#00bcd4', '#8bc34a', '#ff9800',
-      '#795548', '#607d8b', '#673ab7', '#009688'
-    ];
+    let lastTickRotation = 0;
 
     // DOM Elements
     const canvas = document.getElementById('wheel');
@@ -175,12 +415,15 @@
     const closeResultBtn = document.getElementById('close-result-btn');
     const secretTrigger = document.getElementById('secret-trigger');
     const adminSection = document.getElementById('admin-section');
+    const wheelTitle = document.getElementById('wheel-title');
+    const themeVividBtn = document.getElementById('theme-vivid');
+    const themePastelBtn = document.getElementById('theme-pastel');
+    const themeDarkBtn = document.getElementById('theme-dark');
     
-    // Secret tap counter for admin mode
+    // Secret tap counter
     let tapCount = 0;
     let tapTimer = null;
     
-    // Toggle admin mode with secret 5-tap on "รายชื่อ"
     function handleSecretTap() {
       tapCount++;
       
@@ -198,6 +441,24 @@
         } else {
           adminSection.classList.add('hidden');
         }
+      }
+    }
+    
+    function setTheme(theme) {
+      config.theme = theme;
+      document.body.setAttribute('data-theme', theme);
+      currentColors = themeColors[theme];
+      
+      // Update active button
+      [themeVividBtn, themePastelBtn, themeDarkBtn].forEach(btn => btn.classList.remove('active'));
+      if (theme === 'vivid') themeVividBtn.classList.add('active');
+      else if (theme === 'pastel') themePastelBtn.classList.add('active');
+      else if (theme === 'dark') themeDarkBtn.classList.add('active');
+      
+      drawWheel();
+      
+      if (window.elementSdk) {
+        window.elementSdk.setConfig({ theme });
       }
     }
 
@@ -242,10 +503,10 @@
       if (names.length === 0) {
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-        ctx.fillStyle = '#4a4366';
+        ctx.fillStyle = config.theme === 'dark' ? '#1e293b' : '#4a4366';
         ctx.fill();
         
-        ctx.fillStyle = '#8b83a8';
+        ctx.fillStyle = config.theme === 'dark' ? '#64748b' : '#8b83a8';
         ctx.font = '18px Kanit';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -269,7 +530,7 @@
         ctx.moveTo(centerX, centerY);
         ctx.arc(centerX, centerY, radius, startAngle, endAngle);
         ctx.closePath();
-        ctx.fillStyle = colors[i % colors.length];
+        ctx.fillStyle = currentColors[i % currentColors.length];
         ctx.fill();
         
         ctx.strokeStyle = 'rgba(255,255,255,0.3)';
@@ -281,7 +542,14 @@
         ctx.rotate(startAngle + sliceAngle / 2);
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#ffffff';
+        
+        // Text color based on theme
+        if (config.theme === 'pastel') {
+          ctx.fillStyle = '#374151';
+        } else {
+          ctx.fillStyle = '#ffffff';
+        }
+        
         ctx.font = 'bold 14px Kanit';
         ctx.shadowColor = 'rgba(0,0,0,0.3)';
         ctx.shadowBlur = 2;
@@ -296,9 +564,11 @@
 
       ctx.restore();
 
+      // Border color from CSS variable
+      const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--wheel-border').trim() || '#5c4d8a';
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-      ctx.strokeStyle = '#5c4d8a';
+      ctx.strokeStyle = borderColor;
       ctx.lineWidth = 8;
       ctx.stroke();
     }
@@ -339,6 +609,8 @@
 
     function spin() {
       if (isSpinning || names.length < 2) return;
+      
+      initAudio();
 
       isSpinning = true;
       spinBtn.disabled = true;
@@ -370,6 +642,7 @@
 
       const startRotation = 0;
       currentRotation = 0;
+      lastTickRotation = 0;
       
       const duration = 4000 + Math.random() * 1000;
       const startTime = Date.now();
@@ -381,6 +654,14 @@
         const easeOut = 1 - Math.pow(1 - progress, 3);
         
         currentRotation = startRotation + (finalRotation - startRotation) * easeOut;
+        
+        // Tick sound
+        const tickInterval = sliceAngle;
+        if (Math.floor(currentRotation / tickInterval) > Math.floor(lastTickRotation / tickInterval)) {
+          playTickSound();
+        }
+        lastTickRotation = currentRotation;
+        
         drawWheel();
 
         if (progress < 1) {
@@ -390,6 +671,9 @@
           spinBtn.disabled = false;
           currentRotation = currentRotation % 360;
           
+          // Celebrate!
+          playWinSound();
+          createConfetti();
           showResult(names[targetIndex]);
         }
       }
@@ -420,6 +704,10 @@
         lastWinnerIndex = -1;
       }
     }
+    
+    function updateTitle(title) {
+      wheelTitle.textContent = '🎲 ' + title + ' 🎲';
+    }
 
     function init() {
       namesTextarea.addEventListener('input', parseNames);
@@ -434,7 +722,6 @@
         shuffleNames();
       });
       
-      // กดที่คำว่า "รายชื่อ" 5 ครั้งเพื่อเปิดโหมดแอดมิน
       secretTrigger.addEventListener('click', handleSecretTap);
       
       lockSelect.addEventListener('change', lockName);
@@ -458,26 +745,58 @@
         e.preventDefault();
         resultContainer.classList.add('hidden');
       });
+      
+      // Theme buttons
+      themeVividBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        setTheme('vivid');
+      });
+      
+      themePastelBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        setTheme('pastel');
+      });
+      
+      themeDarkBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        setTheme('dark');
+      });
 
       namesTextarea.value = 'สมชาย\nสมหญิง\nสมศักดิ์\nสมศรี\nสมปอง\nสมใจ';
       parseNames();
+      updateTitle(config.wheel_title);
     }
 
+    // Element SDK
     if (window.elementSdk) {
       window.elementSdk.init({
-        defaultConfig: {},
-        onConfigChange: async (config) => {},
+        defaultConfig: defaultConfig,
+        onConfigChange: async (newConfig) => {
+          config = { ...defaultConfig, ...newConfig };
+          
+          // Update title
+          if (config.wheel_title) {
+            updateTitle(config.wheel_title);
+          }
+          
+          // Update theme
+          if (config.theme) {
+            setTheme(config.theme);
+          }
+        },
         mapToCapabilities: (config) => ({
           recolorables: [],
           borderables: [],
           fontEditable: undefined,
           fontSizeable: undefined
         }),
-        mapToEditPanelValues: (config) => new Map()
+        mapToEditPanelValues: (config) => new Map([
+          ['wheel_title', config.wheel_title || defaultConfig.wheel_title]
+        ])
       });
     }
 
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b66ef5d30ec8a13',t:'MTc2NzE1NDMwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b6704db24adcbe1',t:'MTc2NzE1NTE4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
