@@ -104,7 +104,7 @@
      <div class="flex flex-col h-full"><!-- Mode Toggle -->
       <div class="flex items-center justify-between mb-3 pb-3 border-b">
        <div class="flex items-center gap-2"><span id="mode-icon" class="text-lg">👤</span> <span id="mode-label" class="text-sm font-medium text-gray-600">โหมดผู้ใช้</span>
-       </div><button id="toggle-mode-btn" class="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-all text-xs font-medium"> สลับเป็นแอดมิน </button>
+       </div><button id="toggle-mode-btn" class="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-all text-xs font-medium"> สลับเ���็นแอดมิน </button>
       </div><!-- Header -->
       <div class="flex items-center justify-between mb-3">
        <h2 class="text-lg font-semibold text-gray-700">รายชื่อ</h2><span id="name-count" class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">0 ชื่อ</span>
@@ -391,28 +391,37 @@
 
       const sliceAngle = 360 / names.length;
       
-      // Calculate destination angle
-      // Wheel is drawn with slice 0 starting at top (-90 deg in canvas)
-      // Pointer is on the right (0 deg in canvas, which is 90 deg from top)
-      // We need the center of target slice to align with the pointer (right side)
-      // Slice i center is at: i * sliceAngle + sliceAngle/2 (from top, clockwise)
-      // To align with right pointer (90 deg from top), we need to rotate:
-      // rotation = 90 - (targetIndex * sliceAngle + sliceAngle/2)
-      const targetSliceCenter = targetIndex * sliceAngle + sliceAngle / 2;
-      const destinationAngle = 90 - targetSliceCenter;
+      // Calculate where the wheel needs to stop
+      // Slices are drawn starting from top (-90deg), going clockwise
+      // Pointer is on the RIGHT side of the wheel
+      // For pointer to point at slice N, the center of slice N must be at the right (0 degrees)
+      // Slice N center position (before rotation) = -90 + N * sliceAngle + sliceAngle/2
+      // After rotation R, slice N center is at: -90 + N * sliceAngle + sliceAngle/2 + R
+      // We want this to equal 0 (right side), so:
+      // R = 90 - N * sliceAngle - sliceAngle/2
+      // R = 90 - (N + 0.5) * sliceAngle
       
-      // Normalize destination and add multiple full rotations
+      const targetAngle = 90 - (targetIndex + 0.5) * sliceAngle;
+      
+      // Add random offset within the slice (but not too close to edges)
+      const edgeBuffer = sliceAngle * 0.15;
+      const randomOffset = (Math.random() - 0.5) * (sliceAngle - 2 * edgeBuffer);
+      
+      // Calculate final rotation with multiple spins
       const spins = 5 + Math.floor(Math.random() * 3);
-      const normalizedCurrent = ((currentRotation % 360) + 360) % 360;
-      const normalizedDest = ((destinationAngle % 360) + 360) % 360;
+      const baseRotation = spins * 360;
       
-      // Calculate shortest path then add full spins
-      let diff = normalizedDest - normalizedCurrent;
-      if (diff > 0) diff -= 360; // Always spin clockwise (negative direction in our rotation)
+      // Normalize target to positive and add base rotation
+      let finalAngle = targetAngle + randomOffset;
+      while (finalAngle < 0) finalAngle += 360;
+      finalAngle = finalAngle % 360;
       
-      const finalRotation = currentRotation + diff - (spins * 360);
+      // Final rotation: go from current, spin multiple times, end at target
+      const finalRotation = baseRotation + finalAngle;
 
-      const startRotation = currentRotation;
+      const startRotation = 0; // Always start fresh for consistency
+      currentRotation = 0;
+      
       const duration = 4000 + Math.random() * 1000;
       const startTime = Date.now();
 
@@ -420,7 +429,7 @@
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
         
-        // Easing: slow down at the end
+        // Easing: slow down at the end (cubic ease out)
         const easeOut = 1 - Math.pow(1 - progress, 3);
         
         currentRotation = startRotation + (finalRotation - startRotation) * easeOut;
@@ -531,5 +540,5 @@
 
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b66de9165ce9aaf',t:'MTc2NzE1MzYyMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b66e168119c9a98',t:'MTc2NzE1MzczNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
