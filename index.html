@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wheel of Names</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/_sdk/element_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&amp;display=swap" rel="stylesheet">
   <style>
     body {
@@ -43,6 +42,7 @@
   </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full overflow-auto">
   <div id="app-wrapper" class="min-h-full w-full bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 p-4 md:p-8"><!-- Header -->
@@ -323,7 +323,7 @@
 
       const sliceAngle = 360 / names.length;
       
-      // คำนวณมุมที่ต้องหมุนให้ช่องที่ต้องการอยู่ตรงลูกศร (ด้านบน = 270 องศา)
+      // คำนวณมุมที่ต้องหมุนให้ช่องที่ต้องการอยู่ตรงลูกศ��� (ด้านบน = 270 องศา)
       // ลูกศรชี้ที่ด้านบน ��ังนั้นต้อ��หมุนให้กึ่งกลางของช่องเป้าหม��ยไปอยู่ที่ 270 องศา
       const sliceMidAngle = targetIndex * sliceAngle + (sliceAngle / 2);
       const targetAngle = 270 - sliceMidAngle;
@@ -420,5 +420,5 @@
     // Start app when ready
     initApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b66c86df0724116',t:'MTc2NzE1MjcxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b66c98e74abddfc',t:'MTc2NzE1Mjc2MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
