@@ -33,15 +33,6 @@
       transform: scale(0.98);
     }
     
-    .name-entry {
-      border-left: 4px solid transparent;
-      transition: all 0.15s ease;
-    }
-    
-    .name-entry:hover {
-      background: rgba(139, 92, 246, 0.1);
-    }
-    
     .pointer-arrow {
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
     }
@@ -64,11 +55,6 @@
       animation: fade-in 0.3s ease-out;
     }
     
-    .modal-overlay {
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
-    }
-    
     .textarea-names {
       line-height: 1.8;
     }
@@ -78,7 +64,6 @@
       border-color: #8b5cf6;
     }
 
-    /* Custom scrollbar */
     .names-scroll::-webkit-scrollbar {
       width: 6px;
     }
@@ -98,16 +83,12 @@
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full overflow-auto bg-gradient-to-br from-violet-900 via-purple-900 to-indigo-900">
-  <div id="app-wrapper" class="min-h-full w-full"><!-- Main Container -->
+  <div id="app-wrapper" class="min-h-full w-full">
    <div class="flex flex-col lg:flex-row min-h-full"><!-- Left Sidebar - Names Input -->
-    <aside class="w-full lg:w-80 bg-white p-4 lg:min-h-full order-2 lg:order-1">
-     <div class="flex flex-col h-full"><!-- Mode Toggle -->
-      <div class="flex items-center justify-between mb-3 pb-3 border-b">
-       <div class="flex items-center gap-2"><span id="mode-icon" class="text-lg">👤</span> <span id="mode-label" class="text-sm font-medium text-gray-600">โหมดผู้ใช้</span>
-       </div><button id="toggle-mode-btn" class="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-all text-xs font-medium"> สลับเ���็นแอดมิน </button>
-      </div><!-- Header -->
+    <aside class="w-full lg:w-80 bg-white p-4 lg:min-h-full order-2 lg:order-1 relative">
+     <div class="flex flex-col h-full"><!-- Header - กดที่ "รายชื่อ" 5 ครั้งเพื่อเปิดโหมดแอดมิน -->
       <div class="flex items-center justify-between mb-3">
-       <h2 class="text-lg font-semibold text-gray-700">รายชื่อ</h2><span id="name-count" class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">0 ชื่อ</span>
+       <h2 id="secret-trigger" class="text-lg font-semibold text-gray-700 cursor-default select-none">รายชื่อ</h2><span id="name-count" class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">0 ชื่อ</span>
       </div><!-- Names Textarea -->
       <div class="flex-1 mb-3"><label for="names-textarea" class="sr-only">รายชื่อทั้งหมด</label> <textarea id="names-textarea" class="textarea-names w-full h-64 lg:h-96 p-3 border-2 border-gray-200 rounded-lg text-gray-700 text-sm resize-none names-scroll" placeholder="พิมพ์ชื่อ (บรรทัดละชื่อ)
 
@@ -121,18 +102,18 @@
         </svg> เรียงลำดับ </button> <button id="shuffle-btn" class="flex-1 py-2 px-3 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-all text-sm font-medium flex items-center justify-center gap-1">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg> สุ่มลำดับ </button>
-      </div><!-- Lock Section (Admin Only) -->
+      </div><!-- Hidden Admin Panel -->
       <div id="admin-section" class="border-t pt-3 hidden">
        <div class="flex items-center gap-2 mb-2">
-        <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-        </svg><span class="text-sm font-medium text-gray-600">ล็อคผลลัพธ์ (ลับ)</span>
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg><span class="text-sm font-medium text-gray-500">ตั้งค่าเริ่มต้น</span>
        </div>
-       <div class="flex gap-2"><label for="lock-select" class="sr-only">เลือกชื่อที่ต้องการล็อค</label> <select id="lock-select" class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-gray-600 text-sm focus:outline-none focus:border-violet-400"> <option value="">-- ไม่ล็อค --</option> </select>
+       <div class="flex gap-2"><label for="lock-select" class="sr-only">เลือกชื่อที่ต้องการล็อค</label> <select id="lock-select" class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-gray-500 text-sm focus:outline-none focus:border-gray-300 bg-gray-50"> <option value="">ค่าเริ่มต้น</option> </select>
        </div>
        <div id="lock-status" class="mt-2 hidden">
-        <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-         <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-         </svg><span class="text-amber-700 text-sm flex-1">ล็อค: <strong id="locked-name"></strong></span> <button id="unlock-btn" class="text-amber-600 hover:text-amber-800 text-xs font-medium">ยกเลิก</button>
+        <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+         <svg class="w-3 h-3 text-gray-400" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+         </svg><span class="text-gray-500 text-xs flex-1">ตั้งค่าแล้ว: <span id="locked-name" class="font-medium"></span></span> <button id="unlock-btn" class="text-gray-400 hover:text-gray-600 text-xs">รีเซ็ต</button>
         </div>
        </div>
       </div>
@@ -168,7 +149,6 @@
     let lastWinnerIndex = -1;
     let isAdminMode = false;
 
-    // Vibrant colors similar to wheelofnames.com
     const colors = [
       '#e74c3c', '#9b59b6', '#3498db', '#1abc9c', 
       '#2ecc71', '#f1c40f', '#e67e22', '#1abc9c',
@@ -193,36 +173,34 @@
     const resultName = document.getElementById('result-name');
     const removeWinnerBtn = document.getElementById('remove-winner-btn');
     const closeResultBtn = document.getElementById('close-result-btn');
-    const toggleModeBtn = document.getElementById('toggle-mode-btn');
-    const modeIcon = document.getElementById('mode-icon');
-    const modeLabel = document.getElementById('mode-label');
+    const secretTrigger = document.getElementById('secret-trigger');
     const adminSection = document.getElementById('admin-section');
     
-    // Toggle admin mode
-    function toggleAdminMode() {
-      isAdminMode = !isAdminMode;
-      if (isAdminMode) {
-        modeIcon.innerHTML = '&#128119;'; // Admin icon
-        modeLabel.textContent = 'โหมดแอดมิน';
-        modeLabel.classList.remove('text-gray-600');
-        modeLabel.classList.add('text-amber-600');
-        toggleModeBtn.textContent = 'สลับเป็นผู้ใช้';
-        toggleModeBtn.classList.remove('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
-        toggleModeBtn.classList.add('bg-amber-100', 'text-amber-600', 'hover:bg-amber-200');
-        adminSection.classList.remove('hidden');
-      } else {
-        modeIcon.innerHTML = '&#128100;'; // User icon
-        modeLabel.textContent = 'โหมดผู้ใช้';
-        modeLabel.classList.remove('text-amber-600');
-        modeLabel.classList.add('text-gray-600');
-        toggleModeBtn.textContent = 'สลับเป็นแอดมิน';
-        toggleModeBtn.classList.remove('bg-amber-100', 'text-amber-600', 'hover:bg-amber-200');
-        toggleModeBtn.classList.add('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
-        adminSection.classList.add('hidden');
+    // Secret tap counter for admin mode
+    let tapCount = 0;
+    let tapTimer = null;
+    
+    // Toggle admin mode with secret 5-tap on "รายชื่อ"
+    function handleSecretTap() {
+      tapCount++;
+      
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => {
+        tapCount = 0;
+      }, 2000);
+      
+      if (tapCount >= 5) {
+        tapCount = 0;
+        isAdminMode = !isAdminMode;
+        
+        if (isAdminMode) {
+          adminSection.classList.remove('hidden');
+        } else {
+          adminSection.classList.add('hidden');
+        }
       }
     }
 
-    // Parse names from textarea
     function parseNames() {
       const text = namesTextarea.value;
       names = text.split('\n')
@@ -233,15 +211,13 @@
       drawWheel();
     }
 
-    // Update name count display
     function updateNameCount() {
       nameCountEl.textContent = names.length + ' ชื่อ';
     }
 
-    // Update lock select options
     function updateLockSelect() {
       const currentValue = lockSelect.value;
-      lockSelect.innerHTML = '<option value="">-- ไม่ล็อค --</option>';
+      lockSelect.innerHTML = '<option value="">ค่าเริ่มต้น</option>';
       names.forEach((name, i) => {
         const option = document.createElement('option');
         option.value = name;
@@ -256,7 +232,6 @@
       }
     }
 
-    // Draw the wheel
     function drawWheel() {
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
@@ -265,7 +240,6 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (names.length === 0) {
-        // Empty wheel
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
         ctx.fillStyle = '#4a4366';
@@ -275,7 +249,7 @@
         ctx.font = '18px Kanit';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('เพิ่มชื่อทางซ้า���', centerX, centerY - 10);
+        ctx.fillText('เพิ่มชื่อทางซ้าย', centerX, centerY - 10);
         ctx.fillText('เพื่อเริ่มต้น', centerX, centerY + 15);
         return;
       }
@@ -291,7 +265,6 @@
         const startAngle = i * sliceAngle - Math.PI / 2;
         const endAngle = startAngle + sliceAngle;
 
-        // Draw slice
         ctx.beginPath();
         ctx.moveTo(centerX, centerY);
         ctx.arc(centerX, centerY, radius, startAngle, endAngle);
@@ -299,12 +272,10 @@
         ctx.fillStyle = colors[i % colors.length];
         ctx.fill();
         
-        // Slice border
         ctx.strokeStyle = 'rgba(255,255,255,0.3)';
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Draw text
         ctx.save();
         ctx.translate(centerX, centerY);
         ctx.rotate(startAngle + sliceAngle / 2);
@@ -325,7 +296,6 @@
 
       ctx.restore();
 
-      // Outer ring
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
       ctx.strokeStyle = '#5c4d8a';
@@ -333,14 +303,12 @@
       ctx.stroke();
     }
 
-    // Sort names alphabetically
     function sortNames() {
       const sorted = [...names].sort((a, b) => a.localeCompare(b, 'th'));
       namesTextarea.value = sorted.join('\n');
       parseNames();
     }
 
-    // Shuffle names randomly
     function shuffleNames() {
       const shuffled = [...names];
       for (let i = shuffled.length - 1; i > 0; i--) {
@@ -351,7 +319,6 @@
       parseNames();
     }
 
-    // Lock a name
     function lockName() {
       const selected = lockSelect.value;
       if (selected && names.includes(selected)) {
@@ -364,14 +331,12 @@
       }
     }
 
-    // Unlock
     function unlock() {
       lockedName = null;
       lockStatus.classList.add('hidden');
       lockSelect.value = '';
     }
 
-    // Spin the wheel
     function spin() {
       if (isSpinning || names.length < 2) return;
 
@@ -379,7 +344,6 @@
       spinBtn.disabled = true;
       resultContainer.classList.add('hidden');
 
-      // Determine winner
       let targetIndex;
       if (lockedName && names.includes(lockedName)) {
         targetIndex = names.indexOf(lockedName);
@@ -390,36 +354,21 @@
       lastWinnerIndex = targetIndex;
 
       const sliceAngle = 360 / names.length;
-      
-      // Calculate where the wheel needs to stop
-      // Slices are drawn starting from top (-90deg), going clockwise
-      // Pointer is on the RIGHT side of the wheel
-      // For pointer to point at slice N, the center of slice N must be at the right (0 degrees)
-      // Slice N center position (before rotation) = -90 + N * sliceAngle + sliceAngle/2
-      // After rotation R, slice N center is at: -90 + N * sliceAngle + sliceAngle/2 + R
-      // We want this to equal 0 (right side), so:
-      // R = 90 - N * sliceAngle - sliceAngle/2
-      // R = 90 - (N + 0.5) * sliceAngle
-      
       const targetAngle = 90 - (targetIndex + 0.5) * sliceAngle;
       
-      // Add random offset within the slice (but not too close to edges)
       const edgeBuffer = sliceAngle * 0.15;
       const randomOffset = (Math.random() - 0.5) * (sliceAngle - 2 * edgeBuffer);
       
-      // Calculate final rotation with multiple spins
       const spins = 5 + Math.floor(Math.random() * 3);
       const baseRotation = spins * 360;
       
-      // Normalize target to positive and add base rotation
       let finalAngle = targetAngle + randomOffset;
       while (finalAngle < 0) finalAngle += 360;
       finalAngle = finalAngle % 360;
       
-      // Final rotation: go from current, spin multiple times, end at target
       const finalRotation = baseRotation + finalAngle;
 
-      const startRotation = 0; // Always start fresh for consistency
+      const startRotation = 0;
       currentRotation = 0;
       
       const duration = 4000 + Math.random() * 1000;
@@ -429,7 +378,6 @@
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
         
-        // Easing: slow down at the end (cubic ease out)
         const easeOut = 1 - Math.pow(1 - progress, 3);
         
         currentRotation = startRotation + (finalRotation - startRotation) * easeOut;
@@ -442,7 +390,6 @@
           spinBtn.disabled = false;
           currentRotation = currentRotation % 360;
           
-          // Show result
           showResult(names[targetIndex]);
         }
       }
@@ -450,16 +397,14 @@
       animate();
     }
 
-    // Show result
     function showResult(winner) {
       resultName.textContent = winner;
       resultContainer.classList.remove('hidden');
       resultBox.classList.remove('winner-animation');
-      void resultBox.offsetWidth; // Trigger reflow
+      void resultBox.offsetWidth;
       resultBox.classList.add('winner-animation');
     }
 
-    // Remove winner from list
     function removeWinner() {
       if (lastWinnerIndex >= 0 && lastWinnerIndex < names.length) {
         const winner = names[lastWinnerIndex];
@@ -476,9 +421,7 @@
       }
     }
 
-    // Initialize
     function init() {
-      // Event listeners
       namesTextarea.addEventListener('input', parseNames);
       
       sortBtn.addEventListener('click', (e) => {
@@ -491,10 +434,8 @@
         shuffleNames();
       });
       
-      toggleModeBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        toggleAdminMode();
-      });
+      // กดที่คำว่า "รายชื่อ" 5 ครั้งเพื่อเปิดโหมดแอดมิน
+      secretTrigger.addEventListener('click', handleSecretTap);
       
       lockSelect.addEventListener('change', lockName);
       
@@ -518,12 +459,10 @@
         resultContainer.classList.add('hidden');
       });
 
-      // Sample names
-      namesTextarea.value = 'สมชาย\nสมห���ิง\nสมศักดิ์\nสมศรี\nสมปอง\nสมใจ';
+      namesTextarea.value = 'สมชาย\nสมหญิง\nสมศักดิ์\nสมศรี\nสมปอง\nสมใจ';
       parseNames();
     }
 
-    // Initialize SDK
     if (window.elementSdk) {
       window.elementSdk.init({
         defaultConfig: {},
@@ -540,5 +479,5 @@
 
     init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b66e168119c9a98',t:'MTc2NzE1MzczNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b66ef5d30ec8a13',t:'MTc2NzE1NDMwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
