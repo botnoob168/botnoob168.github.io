@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>วงล้อนำโชคv3</title>
+  <title>วงล้อนำโชคv4</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet">
@@ -422,7 +422,7 @@
     function spin() {
       if (spinning) return;
       if (names.length < 2) {
-        showToast('ต้องมีอย่างน้อย 2 รายการ', 'error');
+        showToast('��้องมีอย่างน้อย 2 รายการ', 'error');
         return;
       }
 
@@ -430,12 +430,13 @@
       spinning = true;
       spinBtn.disabled = true;
 
-      const targetIndex = Math.floor(Math.random() * names.length);
       const sliceAngle = 360 / names.length;
-      const targetRotation = 360 * (5 + Math.random() * 3) + (360 - targetIndex * sliceAngle - sliceAngle / 2);
+      // หมุนหลายรอบ
+      const extraSpins = 360 * (5 + Math.random() * 3);
+      const randomOffset = Math.random() * 360;
+      const targetRotation = extraSpins + randomOffset;
       
       const startRotation = currentRotation;
-      const totalRotation = targetRotation - (startRotation % 360);
       const duration = 5000 + Math.random() * 2000;
       const startTime = performance.now();
 
@@ -445,7 +446,7 @@
         
         // Easing function (ease out)
         const eased = 1 - Math.pow(1 - progress, 4);
-        currentRotation = startRotation + totalRotation * eased;
+        currentRotation = startRotation + targetRotation * eased;
         
         drawWheel();
 
@@ -454,7 +455,15 @@
         } else {
           spinning = false;
           spinBtn.disabled = false;
-          lastWinner = names[targetIndex];
+          
+          // คำนวณผู้ชนะจากตำแหน่งลูกศร (ขวา = 0 องศา)
+          const normalizedRotation = ((currentRotation % 360) + 360) % 360;
+          // ลูกศรอยู่ทางขวา (0 องศา) แต่วงล้อเริ่มวาดจาก -90 องศา (บน)
+          // ดังนั้นต้องปรับ offset
+          const pointerAngle = (360 - normalizedRotation + 90) % 360;
+          const winnerIndex = Math.floor(pointerAngle / sliceAngle) % names.length;
+          
+          lastWinner = names[winnerIndex];
           showResult(lastWinner);
           createConfetti();
           // เริ่มหมุนช้าๆ ใหม่
@@ -555,7 +564,7 @@
       namesArea.value = '';
       countLabel.textContent = '(0/100 รายการ)';
       drawWheel();
-      showToast('ล้างทั้งหมดแล้ว');
+      showToast('ล้างทั้ง��มดแล้ว');
     }
 
     // === Config Change Handler ===
@@ -643,5 +652,5 @@
     onConfigChange(config);
     startIdleAnimation();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b89c5d9740645c8',t:'MTc2NzUxOTYxMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b89d01b61ea45c8',t:'MTc2NzUyMDAzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
