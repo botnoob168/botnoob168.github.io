@@ -2,750 +2,618 @@
 <html lang="th" class="h-full">
  <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lucky Spin Wheel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>วงล้อนำโชค</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
     body {
       box-sizing: border-box;
-    }
-    * {
       font-family: 'Prompt', sans-serif;
+      margin: 0;
+      padding: 0;
     }
-    .wheel-container {
-      filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.4));
-      transition: filter 0.3s ease;
-    }
-    .wheel-container:not(.spinning) {
-      animation: wheelGlow 3s ease-in-out infinite;
-    }
-    .wheel-idle-spin {
-      animation: idleSpin 20s linear infinite;
-    }
-    @keyframes idleSpin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    .wheel-container:not(.spinning):hover {
-      filter: drop-shadow(0 0 50px rgba(255, 215, 0, 0.8));
-      transform: scale(1.02);
-    }
-    @keyframes wheelGlow {
-      0%, 100% { filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.4)); }
-      50% { filter: drop-shadow(0 0 50px rgba(255, 215, 0, 0.7)); }
-    }
-    .idle-float {
-      animation: idleFloat 4s ease-in-out infinite;
-    }
-    @keyframes idleFloat {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-    .sparkle {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background: #FFD700;
-      border-radius: 50%;
-      pointer-events: none;
-      animation: sparkleAnim 1.5s ease-out forwards;
-    }
-    @keyframes sparkleAnim {
-      0% { opacity: 1; transform: scale(0) rotate(0deg); }
-      50% { opacity: 1; transform: scale(1.5) rotate(180deg); }
-      100% { opacity: 0; transform: scale(0) rotate(360deg); }
-    }
-    .wheel-highlight {
-      position: absolute;
-      inset: -5px;
-      border-radius: 50%;
-      background: conic-gradient(from 0deg, transparent, rgba(255,215,0,0.3), transparent, rgba(255,215,0,0.3), transparent);
-      animation: rotateHighlight 8s linear infinite;
-      pointer-events: none;
-    }
-    @keyframes rotateHighlight {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    .spin-btn {
-      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-      box-shadow: 0 8px 32px rgba(255, 165, 0, 0.5);
-      transition: all 0.3s ease;
-    }
-    .spin-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 12px 40px rgba(255, 165, 0, 0.7);
-    }
-    .spin-btn:active {
-      transform: scale(0.98);
-    }
-    .spin-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-    .pointer {
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-    }
-    .pointer-bounce {
-      animation: pointerBounce 0.15s ease-in-out;
-    }
-    @keyframes pointerBounce {
-      0%, 100% { transform: translateY(-50%) rotate(0deg); }
-      50% { transform: translateY(-50%) rotate(-8deg); }
-    }
-    .result-popup {
-      animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    }
-    @keyframes popIn {
-      0% { transform: scale(0) rotate(-10deg); opacity: 0; }
-      50% { transform: scale(1.1) rotate(3deg); }
-      70% { transform: scale(0.95) rotate(-2deg); }
-      100% { transform: scale(1) rotate(0deg); opacity: 1; }
-    }
-    .winner-text {
-      animation: textGlow 0.8s ease-in-out infinite alternate, textBounce 0.5s ease-in-out infinite;
-    }
-    @keyframes textGlow {
-      0% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3); }
-      100% { text-shadow: 0 0 25px rgba(255, 215, 0, 1), 0 0 50px rgba(255, 215, 0, 0.6), 0 0 75px rgba(255, 165, 0, 0.4); }
-    }
-    @keyframes textBounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-    .emoji-bounce {
-      display: inline-block;
-      animation: emojiBounce 0.6s ease-in-out infinite;
-    }
-    @keyframes emojiBounce {
-      0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
-      25% { transform: translateY(-20px) scale(1.3) rotate(-10deg); }
-      50% { transform: translateY(-10px) scale(1.1) rotate(10deg); }
-      75% { transform: translateY(-15px) scale(1.2) rotate(-5deg); }
-    }
-    .stars-container {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
+    html, body {
+      height: 100%;
+      width: 100%;
       overflow: hidden;
     }
-    .star {
-      position: absolute;
-      font-size: 28px;
-      animation: starFloat 1.5s ease-out forwards;
+    .app-container {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
     }
-    @keyframes starFloat {
-      0% { opacity: 1; transform: translateY(0) scale(0); }
-      50% { opacity: 1; transform: scale(1.5); }
-      100% { opacity: 0; transform: translateY(-100px) scale(0.5); }
+    .wheel-wrapper {
+      position: relative;
+      filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.4));
+    }
+    .spin-button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+      border: 4px solid #fff;
+      color: #1a1a2e;
+      font-weight: 800;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(255, 165, 0, 0.5);
+      transition: all 0.2s;
+      z-index: 10;
+    }
+    .spin-button:hover:not(:disabled) {
+      transform: translate(-50%, -50%) scale(1.1);
+      box-shadow: 0 6px 30px rgba(255, 165, 0, 0.7);
+    }
+    .spin-button:active:not(:disabled) {
+      transform: translate(-50%, -50%) scale(0.95);
+    }
+    .spin-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .spin-button:not(:disabled) {
+      animation: buttonPulse 2s ease-in-out infinite;
+    }
+    @keyframes buttonPulse {
+      0%, 100% { box-shadow: 0 4px 20px rgba(255, 165, 0, 0.5); }
+      50% { box-shadow: 0 4px 35px rgba(255, 165, 0, 0.9), 0 0 50px rgba(255, 215, 0, 0.4); }
+    }
+    .pointer {
+      position: absolute;
+      top: 50%;
+      right: -15px;
+      transform: translateY(-50%);
+      z-index: 20;
+    }
+    .card-panel {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+    .input-field {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: 'Prompt', sans-serif;
+      transition: all 0.2s;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: #ffd700;
+      box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+    }
+    .input-field::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+      color: #1a1a2e;
+      font-weight: 700;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4);
+    }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.8);
+      color: #fff;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 1);
+    }
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      z-index: 9999;
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    @keyframes toastOut {
+      to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    }
+    .result-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .result-card {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+      border: 2px solid #ffd700;
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+      animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .winner-text {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      animation: glow 1s ease-in-out infinite alternate;
+    }
+    @keyframes glow {
+      from { text-shadow: 0 0 8px rgba(255, 215, 0, 0.3); }
+      to { text-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
     }
     .confetti {
       position: fixed;
       pointer-events: none;
+      z-index: 9999;
     }
-    .glow-border {
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.1);
-    }
-    .item-input:focus {
-      outline: none;
-      border-color: #FFD700;
-      box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
-    }
-    .firework {
-      position: fixed;
-      pointer-events: none;
-      width: 12px;
-      height: 12px;
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
+      animation: fall 3s linear forwards;
     }
-    .rainbow-border {
-      background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
-      background-size: 400% 100%;
-      animation: rainbowMove 2s linear infinite;
-    }
-    @keyframes rainbowMove {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 400% 50%; }
-    }
-    .lock-dot {
-      animation: pulseDot 1s infinite;
-    }
-    @keyframes pulseDot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.2); }
-    }
-    
-    .removed-toast {
-      animation: slideIn 0.3s ease, fadeOut 0.3s ease 2s forwards;
-    }
-    @keyframes slideIn {
-      from { transform: translateY(-20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    @keyframes fadeOut {
-      to { opacity: 0; transform: translateY(-10px); }
-    }
-    .popup-overlay {
-      animation: fadeInOverlay 0.3s ease;
-    }
-    @keyframes fadeInOverlay {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    .popup-closing {
-      animation: fadeOutOverlay 0.3s ease forwards;
-    }
-    @keyframes fadeOutOverlay {
-      from { opacity: 1; }
-      to { opacity: 0; }
-    }
-    .timer-ring {
-      transform: rotate(-90deg);
-    }
-    .timer-ring-circle {
-      transition: stroke-dashoffset 1s linear;
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
     }
   </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
- <body class="h-full bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900 overflow-auto">
-  <div id="app-wrapper" class="app-wrapper w-full min-h-full p-4 sm:p-6 md:p-8"><!-- Lock Indicator -->
-   <div id="lock-dot" class="hidden fixed top-4 left-4 z-50">
-    <div class="lock-dot w-3 h-3 bg-red-500 rounded-full" title="ล็อคอยู่"></div>
-   </div><!-- Toast Notification -->
-   <div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-[10001] pointer-events-none"></div><!-- Header -->
-   <header id="main-header" class="text-center mb-6 md:mb-8">
-    <h1 id="wheel-title" class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 drop-shadow-lg">🎰 วงล้อนำโชค 🎰</h1>
-   </header>
-   <main class="flex flex-col lg:flex-row gap-6 md:gap-8 max-w-7xl mx-auto items-center lg:items-start"><!-- Center - Wheel -->
-    <section id="wheel-section" class="flex-1 flex flex-col items-center justify-center">
-     <div id="wheel-wrapper" class="wheel-container idle-float relative flex items-center justify-center">
-      <div id="wheel-highlight" class="wheel-highlight"></div>
-      <div id="pointer" class="pointer absolute top-1/2 -right-3 -translate-y-1/2 z-20">
-       <svg width="80" height="65" viewbox="0 0 60 50" aria-hidden="true"><polygon points="0,25 50,5 50,45" fill="#FFD700" stroke="#FFA500" stroke-width="3" /> <circle cx="45" cy="25" r="8" fill="#FF6B6B" />
+ <body class="h-full">
+  <div class="app-container"><!-- Header -->
+   <header class="text-center py-4 flex-shrink-0">
+    <div class="flex items-center justify-center gap-2">
+     <h1 id="mainTitle" class="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity" onclick="showTitleEditor()">🎰 วงล้อนำโชค 🎰</h1><button onclick="showTitleEditor()" class="text-yellow-400/60 hover:text-yellow-400 transition-colors" aria-label="แก้ไขชื่อวงล้อ">
+      <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /> <path d="m15 5 4 4" />
+      </svg></button>
+    </div><!-- Title Editor Modal -->
+    <div id="titleEditorModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+     <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 w-full max-w-sm border border-yellow-500/30 shadow-2xl">
+      <h2 class="text-yellow-400 font-bold text-lg mb-4 flex items-center gap-2">✏️ แก้ไขชื่อวงล้อ</h2><label for="titleInput" class="sr-only">ชื่อวงล้อ</label> <input type="text" id="titleInput" class="w-full bg-black/30 border border-white/20 rounded-lg px-4 py-3 text-white font-semibold text-center focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/30 transition-all" placeholder="วงล้อนำโชค" value="วงล้อนำโชค">
+      <div class="flex gap-3 mt-5"><button onclick="closeTitleEditor()" class="flex-1 py-2.5 rounded-lg bg-white/10 text-white font-semibold hover:bg-white/20 transition-colors">ยกเลิก</button> <button onclick="saveTitle()" class="flex-1 py-2.5 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 text-slate-900 font-bold hover:from-yellow-400 hover:to-orange-400 transition-all">บันทึก</button>
+      </div>
+     </div>
+    </div>
+   </header><!-- Main Content -->
+   <main class="flex-1 flex flex-col lg:flex-row gap-6 p-4 md:p-6 overflow-auto"><!-- Left: Wheel -->
+    <section class="flex-1 flex items-center justify-center min-h-[350px]">
+     <div class="wheel-wrapper">
+      <canvas id="wheelCanvas" width="340" height="340"></canvas><button id="spinBtn" class="spin-button">หมุน!</button>
+      <div class="pointer">
+       <svg width="50" height="40" viewbox="0 0 50 40"><polygon points="0,20 45,5 45,35" fill="#ffd700" stroke="#ff8c00" stroke-width="2" /> <circle cx="40" cy="20" r="5" fill="#ef4444" />
        </svg>
       </div>
-      <canvas id="wheel" width="600" height="600" class="wheel-idle-spin w-[min(88vw,400px)] h-[min(88vw,400px)] sm:w-[min(75vw,500px)] sm:h-[min(75vw,500px)] md:w-[min(60vw,580px)] md:h-[min(60vw,580px)] lg:w-[min(55vw,650px)] lg:h-[min(55vw,650px)]" aria-label="วงล้อสุ่มรางวัล"></canvas><button id="spin-btn" onclick="spin()" class="spin-btn absolute w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 rounded-full text-slate-900 font-extrabold text-lg sm:text-xl md:text-2xl lg:text-3xl z-10 border-4 border-yellow-200" style="top: 50%; left: 50%; transform: translate(-50%, -50%);"> หมุน! </button>
      </div>
-    </section><!-- Right Panel -->
-    <aside id="right-panel" class="w-full lg:w-[450px] space-y-5"><!-- Title Edit -->
-     <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-5 glow-border">
-      <h2 class="text-yellow-300 font-bold text-xl md:text-2xl mb-4 flex items-center gap-3"><span class="text-2xl md:text-3xl">✏️</span> ชื่อวงล้อ</h2>
-      <div class="flex gap-3"><label for="title-input" class="sr-only">ชื่อวงล้อ</label> <input type="text" id="title-input" value="วงล้อนำโชค" class="item-input flex-1 bg-slate-800/50 text-white rounded-xl p-4 text-base md:text-lg border border-white/20" placeholder="วงล้อนำโชค"> <button onclick="saveTitle()" class="bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold px-5 py-3 text-base md:text-lg rounded-xl transition-all"> บันทึก </button>
-      </div>
-     </div><!-- Add Name Input -->
-     <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-5 glow-border">
-      <h2 id="secret-trigger" class="text-yellow-300 font-bold text-xl md:text-2xl mb-4 flex items-center gap-3 cursor-pointer select-none hover:text-yellow-200 transition-colors"><span class="text-2xl md:text-3xl">➕</span> เพิ่มชื่อลงวงล้อ <span id="item-count" class="text-base md:text-lg text-white/50 font-normal">(4 รายการ)</span></h2>
-      <div class="mb-4"><label for="name-input" class="sr-only">พิมพ์ชื่อหรือวางหลายชื่อ (แต่ละบรรทัด)</label> <textarea id="name-input" rows="6" class="item-input w-full bg-slate-800/50 text-white rounded-xl p-4 text-base md:text-lg border border-white/20 resize-none" placeholder="พิมพ์ชื่อแต่ละบรรทัด เช่น:
+    </section><!-- Right: Controls -->
+    <aside class="w-full lg:w-80 flex-shrink-0 space-y-4"><!-- Names Input -->
+     <div class="card-panel">
+      <h2 class="text-yellow-400 font-bold mb-3 flex items-center gap-2">📝 รายชื่อในวงล้อ <span id="countLabel" class="text-xs text-white/50 font-normal">(4 รายการ)</span></h2><label for="namesArea" class="sr-only">พิมพ์ชื่อแต่ละบรรทัด</label> <textarea id="namesArea" rows="12" class="input-field resize-none mb-3" placeholder="พิมพ์ชื่อแต่ละบรรทัด เช่น:
 สมชาย
 สมหญิง
-สมศักดิ์"></textarea>
-      </div><button onclick="clearAllNames()" class="w-full bg-rose-500/80 hover:bg-rose-500 text-white font-semibold py-3 md:py-4 rounded-xl transition-all flex items-center justify-center gap-3 text-base md:text-lg"> <span class="text-xl md:text-2xl">🗑️</span> ล้างทั้งหมด </button>
-     </div><!-- Secret Control Panel Button -->
-     <div id="control-btn-container" class="hidden"><button onclick="openControlPanel()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 md:py-5 text-lg md:text-xl rounded-xl transition-all flex items-center justify-center gap-3 glow-border"> <span class="text-2xl md:text-3xl">🎛️</span> เปิดหน้าควบคุม (หน้าต่างแยก) </button>
-      <p class="text-white/40 text-sm md:text-base text-center mt-3">💡 เปิดหน้าต่างไว้ในจอแยก เพื่อไม่ให้คนดูเห็น</p>
+สมศักดิ์">สมชาย
+สมหญิง
+สมศักดิ์
+สมศรี</textarea> <button id="clearBtn" class="btn-danger w-full flex items-center justify-center gap-2"> 🗑️ ล้างทั้งหมด </button>
      </div>
     </aside>
    </main>
-   <footer class="text-center mt-8 text-white/30 text-sm md:text-base">
-    สร้างสำหรับไลฟ์สด • กด "หมุน!" เพื่อเริ่มต้น
-   </footer>
-  </div><!-- Result Popup -->
-  <div id="result-overlay" class="hidden popup-overlay fixed inset-0 bg-black/70 backdrop-blur-sm z-[10002] flex items-center justify-center p-4">
-   <div id="result-container" class="w-full max-w-xl relative">
-    <div class="stars-container" id="stars-container"></div>
-    <div class="result-popup rainbow-border rounded-3xl p-1">
-     <div class="bg-slate-900 rounded-2xl p-8 md:p-10 text-center relative overflow-hidden">
-      <div class="absolute top-4 right-4 w-14 h-14 md:w-16 md:h-16">
-       <svg class="timer-ring w-full h-full" viewbox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3" /> <circle id="timer-ring-progress" class="timer-ring-circle" cx="18" cy="18" r="16" fill="none" stroke="#fbbf24" stroke-width="3" stroke-linecap="round" stroke-dasharray="100.53" stroke-dashoffset="0" />
-       </svg><span id="timer-text" class="absolute inset-0 flex items-center justify-center text-white/80 text-base md:text-lg font-bold">30</span>
-      </div>
-      <div class="emoji-bounce text-6xl md:text-7xl mb-4">
-       🎉
-      </div>
-      <p id="result-title" class="text-yellow-300 text-2xl md:text-3xl font-bold mb-3">🎰 วงล้อนำโชค 🎰</p>
-      <p class="text-white/60 text-lg md:text-xl mb-4">🌟 ผลลัพธ์คือ 🌟</p>
-      <p id="result-text" class="winner-text text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold break-words"></p>
-      <div class="flex justify-center gap-4 mt-5 text-2xl md:text-3xl"><span class="emoji-bounce" style="animation-delay: 0s;">🎀</span> <span class="emoji-bounce" style="animation-delay: 0.1s;">⭐</span> <span class="emoji-bounce" style="animation-delay: 0.2s;">🎊</span> <span class="emoji-bounce" style="animation-delay: 0.3s;">🎁</span> <span class="emoji-bounce" style="animation-delay: 0.4s;">🌟</span>
-      </div>
-      <div id="remove-winner-section" class="mt-5 pt-5 border-t border-white/20"><button id="remove-winner-btn" onclick="showRemoveConfirm()" class="bg-rose-500/80 hover:bg-rose-500 text-white font-semibold py-3 md:py-4 px-6 rounded-xl transition-all text-base md:text-lg flex items-center justify-center gap-3 mx-auto"> <span class="text-xl md:text-2xl">🚫</span> ตัดออกจากวงล้อ </button>
-       <div id="remove-confirm-dialog" class="hidden mt-4 bg-slate-800 rounded-xl p-5 md:p-6 border border-rose-500/50">
-        <p class="text-white text-base md:text-lg mb-4">ต้องการลบ "<span id="confirm-name" class="text-yellow-300 font-semibold"></span>" ออกจากวงล้อใช่ไหม?</p>
-        <div class="flex gap-3 justify-center"><button onclick="confirmRemoveWinner()" class="bg-rose-500 hover:bg-rose-400 text-white font-bold py-3 px-5 rounded-xl transition-all text-base md:text-lg">ใช่ ลบเลย</button> <button onclick="cancelRemoveWinner()" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-3 px-5 rounded-xl transition-all text-base md:text-lg">ยกเลิก</button>
-        </div>
-       </div>
-      </div><button onclick="closeResultPopup()" class="mt-6 w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold py-4 md:py-5 text-lg md:text-xl rounded-xl transition-all flex items-center justify-center gap-3"> <span class="text-2xl md:text-3xl">👍</span> ตกลง </button>
-     </div>
+  </div><!-- Result Overlay (hidden by default) -->
+  <div id="resultOverlay" class="result-overlay hidden">
+   <div class="result-card">
+    <div class="text-5xl mb-4">
+     🎉
+    </div>
+    <p id="resultTitle" class="text-yellow-400 text-xl font-bold mb-2">🎰 วงล้อนำโชค 🎰</p>
+    <p class="text-white/60 mb-2">🌟 ผลลัพธ์คือ 🌟</p>
+    <p id="winnerName" class="winner-text mb-6"></p>
+    <div class="space-y-3"><button id="removeWinnerBtn" class="btn-danger w-full">🚫 ตัดออกจากวงล้อ</button> <button id="closeResultBtn" class="btn-primary w-full">👍 ตกลง</button>
     </div>
    </div>
-  </div>
-  <div id="confetti-container"></div>
+  </div><!-- Toast Container -->
+  <div id="toastContainer"></div><!-- Confetti Container -->
+  <div id="confettiContainer" class="confetti"></div>
   <script>
+    // === Configuration ===
     const defaultConfig = { wheel_title: 'วงล้อนำโชค' };
     let config = { ...defaultConfig };
-    let items = ['สมชาย', 'สมหญิง', 'สมศักดิ์', 'สมศรี'];
-    let isSpinning = false;
+
+    // === State ===
+    let names = [];
+    let spinning = false;
     let currentRotation = 0;
-    let isLocked = false;
-    let lockedIndex = -1;
-    let lastSliceIndex = -1;
-    let controlWindow = null;
     let lastWinner = '';
-    let popupTimer = null;
-    let popupCountdown = 30;
+    let idleAnimationId = null;
+    let lastIdleTime = 0;
 
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9', '#F8B500', '#00CED1'];
-    const canvas = document.getElementById('wheel');
+    // === Colors ===
+    const COLORS = [
+      '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', 
+      '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
+      '#BB8FCE', '#85C1E9', '#F8B500', '#00CED1'
+    ];
+
+    // === DOM Elements ===
+    const canvas = document.getElementById('wheelCanvas');
     const ctx = canvas.getContext('2d');
+    const spinBtn = document.getElementById('spinBtn');
+    const namesArea = document.getElementById('namesArea');
+    const countLabel = document.getElementById('countLabel');
+    const mainTitle = document.getElementById('mainTitle');
+    const titleInput = document.getElementById('titleInput');
+    
+    const clearBtn = document.getElementById('clearBtn');
+    const resultOverlay = document.getElementById('resultOverlay');
+    const resultTitle = document.getElementById('resultTitle');
+    const winnerName = document.getElementById('winnerName');
+    const removeWinnerBtn = document.getElementById('removeWinnerBtn');
+    const closeResultBtn = document.getElementById('closeResultBtn');
+    const toastContainer = document.getElementById('toastContainer');
+    const confettiContainer = document.getElementById('confettiContainer');
 
+    // === Draw Wheel ===
     function drawWheel() {
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
       const radius = Math.min(centerX, centerY) - 10;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      if (items.length === 0) {
+
+      if (names.length === 0) {
+        // Empty state
         ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
         ctx.fillStyle = '#374151';
         ctx.fill();
-        ctx.strokeStyle = '#FFD700';
-        ctx.lineWidth = 10;
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 6;
         ctx.stroke();
-        
+
         ctx.fillStyle = '#9CA3AF';
-        ctx.font = 'bold 28px Prompt';
+        ctx.font = 'bold 18px Prompt';
         ctx.textAlign = 'center';
-        ctx.fillText('เพิ่มชื่อลงวงล้อ', centerX, centerY - 15);
-        ctx.fillText('เพื่อเริ่มต้น! 👆', centerX, centerY + 30);
-        
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, 60, 0, 2 * Math.PI);
-        ctx.fillStyle = '#1e1b4b';
-        ctx.fill();
-        ctx.strokeStyle = '#FFD700';
-        ctx.lineWidth = 5;
-        ctx.stroke();
-        
-        updateItemCount();
+        ctx.fillText('เพิ่มชื่อลงวงล้อ', centerX, centerY - 10);
+        ctx.fillText('เพื่อเริ่มต้น! 👆', centerX, centerY + 15);
         return;
       }
-      
+
+      const sliceAngle = (Math.PI * 2) / names.length;
+
       ctx.save();
       ctx.translate(centerX, centerY);
-      ctx.rotate(currentRotation * Math.PI / 180);
+      ctx.rotate((currentRotation * Math.PI) / 180);
       ctx.translate(-centerX, -centerY);
 
-      const sliceAngle = (2 * Math.PI) / items.length;
-
-      items.forEach((item, i) => {
+      // Draw slices
+      names.forEach((name, i) => {
         const startAngle = i * sliceAngle - Math.PI / 2;
         const endAngle = startAngle + sliceAngle;
 
+        // Slice
         ctx.beginPath();
         ctx.moveTo(centerX, centerY);
         ctx.arc(centerX, centerY, radius, startAngle, endAngle);
         ctx.closePath();
-        ctx.fillStyle = colors[i % colors.length];
+        ctx.fillStyle = COLORS[i % COLORS.length];
         ctx.fill();
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
         ctx.stroke();
 
+        // Text
         ctx.save();
         ctx.translate(centerX, centerY);
         ctx.rotate(startAngle + sliceAngle / 2);
         ctx.textAlign = 'right';
-        ctx.fillStyle = '#000000';
-        ctx.font = 'bold 22px Prompt';
-        ctx.shadowColor = 'rgba(255,255,255,0.5)';
-        ctx.shadowBlur = 2;
-        const text = item.length > 10 ? item.substring(0, 10) + '...' : item;
-        ctx.fillText(text, radius - 25, 7);
+        ctx.fillStyle = '#000';
+        ctx.font = 'bold 16px Prompt';
+        const displayName = name.length > 8 ? name.substring(0, 8) + '..' : name;
+        ctx.fillText(displayName, radius - 20, 5);
         ctx.restore();
       });
 
+      // Outer ring
       ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-      ctx.strokeStyle = '#FFD700';
-      ctx.lineWidth = 10;
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 6;
       ctx.stroke();
 
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, 60, 0, 2 * Math.PI);
-      ctx.fillStyle = '#1e1b4b';
-      ctx.fill();
-      ctx.strokeStyle = '#FFD700';
-      ctx.lineWidth = 5;
-      ctx.stroke();
       ctx.restore();
-      
-      updateItemCount();
+
+      // Center circle
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 40, 0, Math.PI * 2);
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fill();
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 4;
+      ctx.stroke();
     }
 
-    function updateItemCount() {
-      document.getElementById('item-count').textContent = '(' + items.length + ' รายการ)';
-    }
-
-    function getCurrentSliceIndex() {
-      const sliceAngle = 360 / items.length;
-      const normalizedRotation = ((currentRotation % 360) + 360) % 360;
-      const pointerAngle = (360 - normalizedRotation) % 360;
-      return Math.floor(pointerAngle / sliceAngle) % items.length;
-    }
-
-    function bouncePointer() {
-      const pointer = document.getElementById('pointer');
-      pointer.classList.remove('pointer-bounce');
-      void pointer.offsetWidth;
-      pointer.classList.add('pointer-bounce');
-    }
-
-    function updateWheel() {
+    // === Update Names from Textarea ===
+    function updateNames() {
+      const lines = namesArea.value.split('\n').map(s => s.trim()).filter(s => s);
+      names = lines.slice(0, 20);
+      countLabel.textContent = `(${names.length} รายการ)`;
       drawWheel();
-      if (controlWindow && !controlWindow.closed) {
-        controlWindow.postMessage({ type: 'updateItems', items: items }, '*');
-      }
     }
 
-    function addNames() {
-      const input = document.getElementById('name-input');
-      const text = input.value.trim();
-      if (text === '') { showToast('กรุณาใส่ชื่อก่อนครับ', 'error'); return; }
-      const lines = text.split('\n').map(function(n) { return n.trim(); }).filter(function(n) { return n !== ''; });
-      if (lines.length === 0) { showToast('กรุณาใส่ชื่อก่อนครับ', 'error'); return; }
-      var added = 0;
-      var skipped = 0;
-      for (var i = 0; i < lines.length; i++) {
-        if (items.length >= 20) { skipped = lines.length - i; break; }
-        items.push(lines[i]);
-        added++;
-      }
-      input.value = '';
-      input.focus();
-      updateWheel();
-      if (skipped > 0) {
-        showToast('เพิ่ม ' + added + ' ชื่อ (ข้าม ' + skipped + ' เพราะเต็ม)', 'error');
-      } else if (added === 1) {
-        showToast('เพิ่ม "' + lines[0] + '" แล้ว!');
-      } else {
-        showToast('เพิ่ม ' + added + ' ชื่อแล้ว! 🎉');
-      }
-    }
-
-    function clearAllNames() {
-      items = [];
-      updateWheel();
-      updateTextareaFromItems();
-      showToast('ล้างทั้งหมดแล้ว');
-    }
-
-    function updateTextareaFromItems() {
-      const textarea = document.getElementById('name-input');
-      if (textarea) {
-        textarea.value = items.join('\n');
-      }
-    }
-
-    function syncItemsFromTextarea() {
-      const textarea = document.getElementById('name-input');
-      if (!textarea) return;
-      const lines = textarea.value.split('\n').map(function(n) { return n.trim(); }).filter(function(n) { return n !== ''; });
-      items = lines.slice(0, 20);
-      drawWheel();
-      if (controlWindow && !controlWindow.closed) {
-        controlWindow.postMessage({ type: 'updateItems', items: items }, '*');
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const nameInput = document.getElementById('name-input');
-      if (nameInput) {
-        nameInput.addEventListener('input', function() {
-          syncItemsFromTextarea();
-        });
-      }
-      updateTextareaFromItems();
-    });
-
-    function updateLockDot() {
-      const dot = document.getElementById('lock-dot');
-      if (isLocked && lockedIndex >= 0) { dot.classList.remove('hidden'); } 
-      else { dot.classList.add('hidden'); }
-    }
-
-    function showToast(message, type) {
-      type = type || 'success';
-      const container = document.getElementById('toast-container');
+    // === Show Toast ===
+    function showToast(message, type = 'success') {
       const toast = document.createElement('div');
-      toast.className = 'removed-toast ' + (type === 'success' ? 'bg-emerald-500' : 'bg-rose-500') + ' text-white px-5 py-3 rounded-xl shadow-lg font-semibold text-base md:text-lg';
+      toast.className = `toast ${type === 'error' ? 'bg-red-500' : 'bg-emerald-500'} text-white`;
       toast.textContent = message;
-      container.appendChild(toast);
-      setTimeout(function() { toast.remove(); }, 2500);
+      toastContainer.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
     }
 
-    function showResultPopup(result) {
-      const overlay = document.getElementById('result-overlay');
-      const text = document.getElementById('result-text');
-      const resultTitle = document.getElementById('result-title');
-      const titleText = config.wheel_title || defaultConfig.wheel_title;
-      resultTitle.textContent = '🎰 ' + titleText + ' 🎰';
-      text.textContent = result;
-      document.getElementById('remove-winner-btn').classList.remove('hidden');
-      document.getElementById('remove-confirm-dialog').classList.add('hidden');
-      overlay.classList.remove('hidden', 'popup-closing');
-      startPopupTimer();
-      createStars();
-    }
-
-    function closeResultPopup() {
-      const overlay = document.getElementById('result-overlay');
-      overlay.classList.add('popup-closing');
-      if (popupTimer) { clearInterval(popupTimer); popupTimer = null; }
-      setTimeout(function() { overlay.classList.add('hidden'); overlay.classList.remove('popup-closing'); }, 300);
-    }
-
-    function startPopupTimer() {
-      popupCountdown = 30;
-      const timerText = document.getElementById('timer-text');
-      const timerRing = document.getElementById('timer-ring-progress');
-      const circumference = 100.53;
-      timerText.textContent = popupCountdown;
-      timerRing.style.strokeDashoffset = 0;
-      if (popupTimer) { clearInterval(popupTimer); }
-      popupTimer = setInterval(function() {
-        popupCountdown--;
-        timerText.textContent = popupCountdown;
-        const progress = (30 - popupCountdown) / 30;
-        timerRing.style.strokeDashoffset = circumference * progress;
-        if (popupCountdown <= 0) { clearInterval(popupTimer); popupTimer = null; closeResultPopup(); }
-      }, 1000);
-    }
-
-    function showRemoveConfirm() {
-      document.getElementById('confirm-name').textContent = lastWinner;
-      document.getElementById('remove-confirm-dialog').classList.remove('hidden');
-      document.getElementById('remove-winner-btn').classList.add('hidden');
-    }
-
-    function cancelRemoveWinner() {
-      document.getElementById('remove-confirm-dialog').classList.add('hidden');
-      document.getElementById('remove-winner-btn').classList.remove('hidden');
-    }
-
-    function confirmRemoveWinner() {
-      const index = items.indexOf(lastWinner);
-      if (index > -1) {
-        items.splice(index, 1);
-        drawWheel();
-        updateTextareaFromItems();
-        if (controlWindow && !controlWindow.closed) { controlWindow.postMessage({ type: 'updateItems', items: items }, '*'); }
-        showToast('ลบ "' + lastWinner + '" ออกแล้ว!');
-        if (items.length < 2) { closeResultPopup(); showToast('ต้องมีอย่างน้อย 2 รายการในวงล้อ', 'error'); } 
-        else { closeResultPopup(); }
-      }
-      cancelRemoveWinner();
-    }
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        if (!document.getElementById('result-overlay').classList.contains('hidden')) { closeResultPopup(); }
-      }
-    });
-
-    function getControlPanelHTML() {
-      var currentTitle = config.wheel_title || defaultConfig.wheel_title;
-      return '<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>หน้าควบคุมลับ</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet"><style>body { font-family: "Prompt", sans-serif; box-sizing: border-box; }.pulse { animation: pulse 2s infinite; }@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }.input-glow:focus { outline: none; border-color: #fbbf24; box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3); }</style></head><body class="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900 p-6"><div class="max-w-md mx-auto space-y-4"><div class="text-center mb-6"><h1 class="text-3xl font-bold text-white">🎛️ หน้าควบคุมลับ</h1><p class="text-red-300 text-base mt-2">⚠️ อย่าให้คนดูเห็นหน้านี้!</p></div><div class="bg-white/10 backdrop-blur rounded-2xl p-6 border border-red-500/30"><h3 class="text-yellow-300 font-bold text-xl mb-4 flex items-center gap-2">🔒 ล็อคผลลัพธ์</h3><div class="flex items-center gap-3 mb-4"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="lock-toggle" class="sr-only peer"><div class="w-16 h-8 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[\'\'] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-red-500"></div></label><span id="lock-status" class="text-white/70 text-lg">ปิดการล็อค</span></div><label for="lock-target" class="text-white/70 text-base mb-2 block">เลือกรางวัลที่ต้องการล็อค:</label><select id="lock-target" class="w-full bg-slate-800 text-white rounded-xl p-4 text-lg border border-white/20 disabled:opacity-50 mb-3" disabled><option value="">-- เลือกรางวัล --</option>' + items.map(function(item, i) { return '<option value="' + i + '">' + item + '</option>'; }).join('') + '</select><div id="lock-indicator" class="hidden bg-red-500/30 border border-red-500 rounded-xl p-5 text-center"><span class="text-red-200 pulse font-semibold text-xl">🎯 ล็อคไปที่:</span><p id="locked-name" class="text-white text-2xl font-bold mt-2"></p></div></div><div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-5"><h4 class="text-yellow-300 font-semibold text-lg mb-3">📖 วิธีใช้งาน:</h4><ol class="text-white/70 text-base space-y-2 list-decimal list-inside"><li>เปิดสวิตช์ "ล็อค" แล้วเลือกรางวัล</li><li>กลับไปหน้าวงล้อแล้วกด "หมุน!"</li><li>วงล้อจะหยุดที่รางวัลที่เลือกไว้</li></ol></div></div><script>var toggle = document.getElementById("lock-toggle");var select = document.getElementById("lock-target");var status = document.getElementById("lock-status");var indicator = document.getElementById("lock-indicator");var lockedName = document.getElementById("locked-name");toggle.addEventListener("change", function() {select.disabled = !this.checked;if (this.checked) {status.textContent = "เปิดการล็อค";status.classList.add("text-red-400");} else {status.textContent = "ปิดการล็อค";status.classList.remove("text-red-400");indicator.classList.add("hidden");select.value = "";window.opener.postMessage({ type: "lock", isLocked: false, lockedIndex: -1 }, "*");}});select.addEventListener("change", function() {if (this.value !== "") {var idx = parseInt(this.value);lockedName.textContent = this.options[this.selectedIndex].text;indicator.classList.remove("hidden");window.opener.postMessage({ type: "lock", isLocked: true, lockedIndex: idx }, "*");} else {indicator.classList.add("hidden");window.opener.postMessage({ type: "lock", isLocked: false, lockedIndex: -1 }, "*");}});window.addEventListener("message", function(e) {if (e.data.type === "updateItems") {var newItems = e.data.items;select.innerHTML = \'<option value="">-- เลือกรางวัล --</option>\' + newItems.map(function(item, i) { return \'<option value="\' + i + \'">\' + item + \'</option>\'; }).join("");toggle.checked = false;select.disabled = true;status.textContent = "ปิดการล็อค";status.classList.remove("text-red-400");indicator.classList.add("hidden");window.opener.postMessage({ type: "lock", isLocked: false, lockedIndex: -1 }, "*");}});<\/script></body></html>';
-    }
-
-    function openControlPanel() {
-      var width = 480;
-      var height = 700;
-      var left = window.screenX + window.outerWidth + 10;
-      var top = window.screenY;
-      controlWindow = window.open('', 'ControlPanel', 'width=' + width + ',height=' + height + ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=yes');
-      if (controlWindow) { controlWindow.document.write(getControlPanelHTML()); controlWindow.document.close(); }
-    }
-
-    window.addEventListener('message', function(e) {
-      if (e.data.type === 'lock') { isLocked = e.data.isLocked; lockedIndex = e.data.lockedIndex; updateLockDot(); }
-      if (e.data.type === 'updateTitle') { config.wheel_title = e.data.title; if (window.elementSdk) { window.elementSdk.setConfig({ wheel_title: e.data.title }); } onConfigChange(config); showToast('เปลี่ยนชื่อวงล้อแล้ว!'); }
-    });
-
+    // === Spin Wheel ===
     function spin() {
-      if (isSpinning) return;
-      if (items.length < 2) { showToast('ต้องมีอย่างน้อย 2 รายการถึงจะหมุนได้', 'error'); return; }
-      isSpinning = true;
-      lastSliceIndex = -1;
-      document.getElementById('spin-btn').disabled = true;
-      var wrapper = document.getElementById('wheel-wrapper');
-      var wheelCanvas = document.getElementById('wheel');
-      wrapper.classList.add('spinning');
-      wrapper.classList.remove('idle-float');
-      wheelCanvas.classList.remove('wheel-idle-spin');
-      document.getElementById('wheel-highlight').style.display = 'none';
+      if (spinning) return;
+      if (names.length < 2) {
+        showToast('ต้องมีอย่างน้อย 2 รายการ', 'error');
+        return;
+      }
 
-      var targetIndex;
-      if (isLocked && lockedIndex >= 0 && lockedIndex < items.length) { targetIndex = lockedIndex; } 
-      else { targetIndex = Math.floor(Math.random() * items.length); }
+      stopIdleAnimation();
+      spinning = true;
+      spinBtn.disabled = true;
 
-      var sliceAngle = 360 / items.length;
-      var padding = sliceAngle * 0.15;
-      var randomOffset = padding + (Math.random() * (sliceAngle - padding * 2));
-      var targetSlicePosition = (targetIndex * sliceAngle) + randomOffset - 90;
-      var spinRotations = 5 + Math.floor(Math.random() * 3);
-      var targetRotation = (360 * spinRotations) - targetSlicePosition;
-      var startRotation = currentRotation;
-      var rotationAmount = targetRotation - (startRotation % 360) + 360;
-      var duration = 5000 + Math.random() * 2000;
-      var startTime = performance.now();
+      const targetIndex = Math.floor(Math.random() * names.length);
+      const sliceAngle = 360 / names.length;
+      const targetRotation = 360 * (5 + Math.random() * 3) + (360 - targetIndex * sliceAngle - sliceAngle / 2);
+      
+      const startRotation = currentRotation;
+      const totalRotation = targetRotation - (startRotation % 360);
+      const duration = 5000 + Math.random() * 2000;
+      const startTime = performance.now();
 
-      function animate(currentTime) {
-        var elapsed = currentTime - startTime;
-        var progress = Math.min(elapsed / duration, 1);
-        var easeOut = 1 - Math.pow(1 - progress, 4);
-        currentRotation = startRotation + rotationAmount * easeOut;
+      function animate(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function (ease out)
+        const eased = 1 - Math.pow(1 - progress, 4);
+        currentRotation = startRotation + totalRotation * eased;
+        
         drawWheel();
-        var currentSlice = getCurrentSliceIndex();
-        if (currentSlice !== lastSliceIndex && lastSliceIndex !== -1) { bouncePointer(); }
-        lastSliceIndex = currentSlice;
-        if (progress < 1) { requestAnimationFrame(animate); } 
-        else {
-          isSpinning = false;
-          document.getElementById('spin-btn').disabled = false;
-          wrapper.classList.remove('spinning');
-          wrapper.classList.add('idle-float');
-          wheelCanvas.classList.add('wheel-idle-spin');
-          document.getElementById('wheel-highlight').style.display = '';
-          lastWinner = items[targetIndex];
-          showResultPopup(lastWinner);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          spinning = false;
+          spinBtn.disabled = false;
+          lastWinner = names[targetIndex];
+          showResult(lastWinner);
           createConfetti();
-          createFireworks();
+          // เริ่มหมุนช้าๆ ใหม่
+          startIdleAnimation();
         }
       }
+
       requestAnimationFrame(animate);
     }
 
-    function createStars() {
-      var container = document.getElementById('stars-container');
-      container.innerHTML = '';
-      var emojis = ['⭐', '✨', '🌟', '💫', '🎇'];
-      for (var i = 0; i < 15; i++) {
-        var star = document.createElement('span');
-        star.className = 'star';
-        star.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-        star.style.left = (Math.random() * 100) + '%';
-        star.style.top = (Math.random() * 100) + '%';
-        star.style.animationDelay = (Math.random() * 1) + 's';
-        container.appendChild(star);
-      }
+    // === Show Result ===
+    function showResult(winner) {
+      resultTitle.textContent = `🎰 ${config.wheel_title || defaultConfig.wheel_title} 🎰`;
+      winnerName.textContent = winner;
+      resultOverlay.classList.remove('hidden');
     }
 
-    function createFireworks() {
-      var fwColors = ['#FF6B6B', '#4ECDC4', '#FFD700', '#FF69B4', '#00FF7F', '#FF4500'];
-      for (var i = 0; i < 5; i++) {
-        (function(index) {
-          setTimeout(function() {
-            var x = Math.random() * window.innerWidth;
-            var y = Math.random() * (window.innerHeight / 2);
-            for (var j = 0; j < 20; j++) {
-              var particle = document.createElement('div');
-              particle.className = 'firework';
-              particle.style.background = fwColors[Math.floor(Math.random() * fwColors.length)];
-              particle.style.left = x + 'px';
-              particle.style.top = y + 'px';
-              particle.style.boxShadow = '0 0 10px ' + particle.style.background;
-              var angle = (j / 20) * Math.PI * 2;
-              var velocity = 50 + Math.random() * 50;
-              var dx = Math.cos(angle) * velocity;
-              var dy = Math.sin(angle) * velocity;
-              particle.animate([{ transform: 'translate(0, 0) scale(1)', opacity: 1 }, { transform: 'translate(' + dx + 'px, ' + dy + 'px) scale(0)', opacity: 0 }], { duration: 1000 + Math.random() * 500, easing: 'ease-out' });
-              document.body.appendChild(particle);
-              setTimeout(function() { particle.remove(); }, 1500);
-            }
-          }, index * 300);
-        })(i);
-      }
+    // === Hide Result ===
+    function hideResult() {
+      resultOverlay.classList.add('hidden');
     }
 
+    // === Remove Winner ===
+    function removeWinner() {
+      const index = names.indexOf(lastWinner);
+      if (index > -1) {
+        names.splice(index, 1);
+        namesArea.value = names.join('\n');
+        countLabel.textContent = `(${names.length} รายการ)`;
+        drawWheel();
+        showToast(`ลบ "${lastWinner}" แล้ว!`);
+      }
+      hideResult();
+    }
+
+    // === Create Confetti ===
     function createConfetti() {
-      var container = document.getElementById('confetti-container');
-      var confettiColors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFEAA7', '#DDA0DD', '#FF69B4', '#00FF7F'];
-      for (var i = 0; i < 80; i++) {
-        var confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        var size = Math.random() * 14 + 8;
-        confetti.style.cssText = 'position: fixed; width: ' + size + 'px; height: ' + size + 'px; background: ' + confettiColors[Math.floor(Math.random() * confettiColors.length)] + '; left: ' + (Math.random() * 100) + '%; top: -20px; border-radius: 50%; animation: fall ' + (Math.random() * 3 + 2) + 's linear forwards; z-index: 9999;';
-        container.appendChild(confetti);
-        (function(el) { setTimeout(function() { el.remove(); }, 5000); })(confetti);
+      const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#ffeaa7', '#dda0dd'];
+      for (let i = 0; i < 50; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + 'vw';
+        piece.style.top = '-10px';
+        piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+        piece.style.animationDelay = Math.random() * 0.5 + 's';
+        confettiContainer.appendChild(piece);
+        setTimeout(() => piece.remove(), 4000);
       }
     }
 
-    var fallStyle = document.createElement('style');
-    fallStyle.textContent = '@keyframes fall { to { transform: translateY(100%) rotate(1080deg); opacity: 0; } }';
-    document.head.appendChild(fallStyle);
+    // === Title Editor ===
+    const titleEditorModal = document.getElementById('titleEditorModal');
+
+    function showTitleEditor() {
+      titleInput.value = config.wheel_title || defaultConfig.wheel_title;
+      titleEditorModal.classList.remove('hidden');
+      titleInput.focus();
+      titleInput.select();
+    }
+
+    function closeTitleEditor() {
+      titleEditorModal.classList.add('hidden');
+    }
 
     function saveTitle() {
-      var titleInput = document.getElementById('title-input');
-      var newTitle = titleInput.value.trim() || 'วงล้อนำโชค';
-      titleInput.value = newTitle;
-      config.wheel_title = newTitle;
-      if (window.elementSdk) { window.elementSdk.setConfig({ wheel_title: newTitle }); }
-      onConfigChange(config);
+      const value = titleInput.value.trim() || 'วงล้อนำโชค';
+      titleInput.value = value;
+      config.wheel_title = value;
+      mainTitle.textContent = `🎰 ${value} 🎰`;
+      if (window.elementSdk) {
+        window.elementSdk.setConfig({ wheel_title: value });
+      }
+      closeTitleEditor();
       showToast('บันทึกชื่อวงล้อแล้ว!');
     }
 
-    var secretClickCount = 0;
-    var secretClickTimer = null;
-    document.getElementById('secret-trigger').addEventListener('click', function() {
-      secretClickCount++;
-      clearTimeout(secretClickTimer);
-      secretClickTimer = setTimeout(function() { secretClickCount = 0; }, 2000);
-      if (secretClickCount >= 5) { document.getElementById('control-btn-container').classList.toggle('hidden'); secretClickCount = 0; }
+    // กด Enter เพื่อบันทึก, Escape เพื่อยกเลิก
+    titleInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveTitle();
+      } else if (e.key === 'Escape') {
+        closeTitleEditor();
+      }
     });
 
-    async function onConfigChange(cfg) {
-      var titleText = cfg.wheel_title || defaultConfig.wheel_title;
-      document.getElementById('wheel-title').textContent = '🎰 ' + titleText + ' 🎰';
-      var titleInput = document.getElementById('title-input');
-      if (titleInput && titleInput.value !== titleText) { titleInput.value = titleText; }
-      if (controlWindow && !controlWindow.closed) { controlWindow.postMessage({ type: 'syncTitle', title: titleText }, '*'); }
+    // คลิกพื้นหลังเพื่อปิด
+    titleEditorModal.addEventListener('click', (e) => {
+      if (e.target === titleEditorModal) {
+        closeTitleEditor();
+      }
+    });
+
+    // === Clear All ===
+    function clearAll() {
+      names = [];
+      namesArea.value = '';
+      countLabel.textContent = '(0 รายการ)';
+      drawWheel();
+      showToast('ล้างทั้งหมดแล้ว');
     }
 
-    function mapToCapabilities(cfg) { return { recolorables: [], borderables: [], fontEditable: undefined, fontSizeable: undefined }; }
-    function mapToEditPanelValues(cfg) { return new Map([['wheel_title', cfg.wheel_title || defaultConfig.wheel_title]]); }
+    // === Config Change Handler ===
+    function onConfigChange(cfg) {
+      const title = cfg.wheel_title || defaultConfig.wheel_title;
+      mainTitle.textContent = `🎰 ${title} 🎰`;
+      if (titleInput.value !== title) {
+        titleInput.value = title;
+      }
+    }
 
+    function mapToCapabilities(cfg) {
+      return {
+        recolorables: [],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      };
+    }
+
+    function mapToEditPanelValues(cfg) {
+      return new Map([
+        ['wheel_title', cfg.wheel_title || defaultConfig.wheel_title]
+      ]);
+    }
+
+    // === Event Listeners ===
+    spinBtn.addEventListener('click', spin);
+    namesArea.addEventListener('input', updateNames);
+    
+    clearBtn.addEventListener('click', clearAll);
+    closeResultBtn.addEventListener('click', hideResult);
+    removeWinnerBtn.addEventListener('click', removeWinner);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !resultOverlay.classList.contains('hidden')) {
+        hideResult();
+      }
+    });
+
+    // === Idle Animation (หมุนช้าๆ ระหว่างรอ) ===
+    function startIdleAnimation() {
+      if (idleAnimationId) return;
+      lastIdleTime = performance.now();
+      
+      function idleLoop(now) {
+        if (spinning) {
+          idleAnimationId = null;
+          return;
+        }
+        
+        const delta = now - lastIdleTime;
+        lastIdleTime = now;
+        
+        // หมุนช้าๆ 5 องศาต่อวินาที
+        currentRotation += (delta / 1000) * 5;
+        drawWheel();
+        
+        idleAnimationId = requestAnimationFrame(idleLoop);
+      }
+      
+      idleAnimationId = requestAnimationFrame(idleLoop);
+    }
+
+    function stopIdleAnimation() {
+      if (idleAnimationId) {
+        cancelAnimationFrame(idleAnimationId);
+        idleAnimationId = null;
+      }
+    }
+
+    // === Initialize ===
     if (window.elementSdk) {
-      window.elementSdk.init({ defaultConfig: defaultConfig, onConfigChange: onConfigChange, mapToCapabilities: mapToCapabilities, mapToEditPanelValues: mapToEditPanelValues });
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
       config = window.elementSdk.config || defaultConfig;
     }
 
-    drawWheel();
+    updateNames();
     onConfigChange(config);
-
-    setInterval(function() {
-      if (!isSpinning && Math.random() > 0.5) {
-        var wrapper = document.getElementById('wheel-wrapper');
-        var rect = wrapper.getBoundingClientRect();
-        var centerX = rect.width / 2;
-        var centerY = rect.height / 2;
-        var radius = Math.min(centerX, centerY) * 0.9;
-        var angle = Math.random() * Math.PI * 2;
-        var distance = radius * (0.3 + Math.random() * 0.7);
-        var sparkle = document.createElement('div');
-        sparkle.className = 'sparkle';
-        sparkle.style.left = (centerX + Math.cos(angle) * distance) + 'px';
-        sparkle.style.top = (centerY + Math.sin(angle) * distance) + 'px';
-        sparkle.style.boxShadow = '0 0 10px #FFD700, 0 0 20px #FFA500';
-        wrapper.appendChild(sparkle);
-        setTimeout(function() { sparkle.remove(); }, 1500);
-      }
-    }, 400);
+    startIdleAnimation();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b898d2ad77baeb9',t:'MTc2NzUxNzI4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b89b5b246aa45c8',t:'MTc2NzUxODk0OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
