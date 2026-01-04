@@ -3,10 +3,10 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>วงล้อนำโชค Demo</title>
+  <title>วงล้อนำโชคv3</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/_sdk/element_sdk.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
     body {
       box-sizing: border-box;
@@ -172,7 +172,7 @@
     }
     .winner-text {
       font-size: 3.5rem;
-      font-weight: 800;
+      font-weight: 300;
       color: #fff;
       text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
       animation: glow 1s ease-in-out infinite alternate;
@@ -200,7 +200,7 @@
     }
     @keyframes fall {
       to {
-        transform: translateY(100vh) rotate(720deg);
+        transform: translateY(100%) rotate(720deg);
         opacity: 0;
       }
     }
@@ -239,7 +239,9 @@
       <h2 class="text-yellow-400 font-bold text-lg mb-3 flex items-center gap-2">📝 รายชื่อในวงล้อ <span id="countLabel" class="text-sm text-white/50 font-normal">(4 รายการ)</span></h2><label for="namesArea" class="sr-only">พิมพ์ชื่อแต่ละบรรทัด</label> <textarea id="namesArea" class="input-field resize-none mb-3 text-base leading-relaxed h-32 sm:h-40 lg:h-64 xl:h-80" placeholder="พิมพ์ชื่อแต่ละบรรทัด เช่น:
 สมชาย
 สมหญิง
-สมศักดิ์">สมชาย
+สมศักดิ์
+
+(สูงสุด 100 รายการ)">สมชาย
 สมหญิง
 สมศักดิ์
 สมศรี</textarea> <button id="clearBtn" class="btn-danger w-full flex items-center justify-center gap-2 py-3 text-base"> 🗑️ ล้างทั้งหมด </button>
@@ -359,17 +361,20 @@
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Text - scale font with canvas size
+        // Text - scale font with canvas size and number of names
         ctx.save();
         ctx.translate(centerX, centerY);
         ctx.rotate(startAngle + sliceAngle / 2);
         ctx.textAlign = 'right';
         ctx.fillStyle = '#000';
-        const fontSize = Math.max(14, Math.floor(radius * 0.1));
+        // ปรับขนาดฟอนต์ตามจำนวนชื่อ
+        let fontSize = Math.max(10, Math.floor(radius * 0.08));
+        if (names.length > 30) fontSize = Math.max(8, Math.floor(radius * 0.05));
+        if (names.length > 50) fontSize = Math.max(6, Math.floor(radius * 0.04));
         ctx.font = `bold ${fontSize}px Prompt`;
-        const maxChars = Math.max(6, Math.floor(radius / 20));
+        const maxChars = names.length > 30 ? 4 : Math.max(6, Math.floor(radius / 20));
         const displayName = name.length > maxChars ? name.substring(0, maxChars) + '..' : name;
-        ctx.fillText(displayName, radius - 15, 5);
+        ctx.fillText(displayName, radius - 10, fontSize / 3);
         ctx.restore();
       });
 
@@ -396,8 +401,11 @@
     // === Update Names from Textarea ===
     function updateNames() {
       const lines = namesArea.value.split('\n').map(s => s.trim()).filter(s => s);
-      names = lines.slice(0, 20);
-      countLabel.textContent = `(${names.length} รายการ)`;
+      names = lines.slice(0, 100);
+      countLabel.textContent = `(${names.length}/100 รายการ)`;
+      if (lines.length > 100) {
+        showToast('สูงสุด 100 รายการ', 'error');
+      }
       drawWheel();
     }
 
@@ -475,7 +483,7 @@
       if (index > -1) {
         names.splice(index, 1);
         namesArea.value = names.join('\n');
-        countLabel.textContent = `(${names.length} รายการ)`;
+        countLabel.textContent = `(${names.length}/100 รายการ)`;
         drawWheel();
         showToast(`ลบ "${lastWinner}" แล้ว!`);
       }
@@ -488,7 +496,7 @@
       for (let i = 0; i < 50; i++) {
         const piece = document.createElement('div');
         piece.className = 'confetti-piece';
-        piece.style.left = Math.random() * 100 + 'vw';
+        piece.style.left = Math.random() * 100 + '%';
         piece.style.top = '-10px';
         piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
         piece.style.animationDuration = (2 + Math.random() * 2) + 's';
@@ -545,7 +553,7 @@
     function clearAll() {
       names = [];
       namesArea.value = '';
-      countLabel.textContent = '(0 รายการ)';
+      countLabel.textContent = '(0/100 รายการ)';
       drawWheel();
       showToast('ล้างทั้งหมดแล้ว');
     }
@@ -602,7 +610,7 @@
         const delta = now - lastIdleTime;
         lastIdleTime = now;
         
-        // �����มุนช้าๆ 5 องศาต่อวินาที
+        // หมุนช้าๆ 5 องศาต่อวินาที
         currentRotation += (delta / 1000) * 5;
         drawWheel();
         
@@ -635,5 +643,5 @@
     onConfigChange(config);
     startIdleAnimation();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b89bd26b48445c8',t:'MTc2NzUxOTI1My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b89c5d9740645c8',t:'MTc2NzUxOTYxMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
