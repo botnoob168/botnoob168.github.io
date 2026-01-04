@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>วงล้อนำโชค111</title>
+  <title>วงล้อนำโชค</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet">
@@ -19,7 +19,6 @@
       width: 100%;
       overflow: hidden;
     }
-    /* ซูม 115% */
     html {
       zoom: 1.15;
       -moz-transform: scale(1.15);
@@ -251,10 +250,10 @@
       </div>
      </div>
     </section><!-- Right: Controls -->
-    <aside class="w-full lg:w-64 xl:w-72 flex-shrink-0 lg:self-center order-3"><!-- Names Input -->
+    <aside class="w-full lg:w-64 xl:w-72 flex-shrink-0 lg:self-center order-3">
      <div class="card-panel h-full lg:h-auto flex flex-col" id="controlPanel">
       <h2 class="text-yellow-400 font-bold text-sm md:text-base mb-2 flex items-center gap-2 flex-shrink-0">📝 รายชื่อบนวงล้อ <span id="countLabel" class="text-xs md:text-sm text-white/50 font-normal">(4 รายการ)</span></h2><label for="namesArea" class="sr-only">พิมพ์ชื่อแต่ละบรรทัด</label> <textarea id="namesArea" class="input-field resize-none mb-2 text-sm md:text-base leading-relaxed flex-1 min-h-[120px]" placeholder="พิมพ์ชื่อแต่ละบรรทัด เช่น:
-สมช��ย
+สมชาย
 สมหญิง
 สมศักดิ์
 
@@ -265,7 +264,7 @@
      </div>
     </aside>
    </main>
-  </div><!-- Result Overlay (hidden by default) -->
+  </div><!-- Result Overlay -->
   <div id="resultOverlay" class="result-overlay hidden">
    <div class="result-card">
     <div class="text-6xl md:text-7xl mb-4">
@@ -285,6 +284,12 @@
     const defaultConfig = { wheel_title: 'วงล้อนำโชค' };
     let config = { ...defaultConfig };
 
+    // === Audio ===
+    const spinSound = new Audio('https://gfxsounds.com/wp-content/uploads/2024/08/Fortune-wheel-spinning.mp3');
+    const winSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3');
+    spinSound.volume = 0.7;
+    winSound.volume = 0.8;
+
     // === State ===
     let names = [];
     let spinning = false;
@@ -293,34 +298,6 @@
     let idleAnimationId = null;
     let lastIdleTime = 0;
     let spinHistory = [];
-   // ===== SOUND EFFECTS =====
-const spinSound = new Audio(
-  'https://cdn.pixabay.com/download/audio/2022/03/15/audio_1c3e0c4d3a.mp3'
-); // เสียงหมุน
-
-const winSound = new Audio(
-  'https://cdn.pixabay.com/download/audio/2022/10/30/audio_946b8c6e7b.mp3'
-); // เสียงฉลอง
-
-spinSound.loop = true;
-spinSound.volume = 0.5;
-winSound.volume = 0.8;
-
-function playSpinSound() {
-  spinSound.currentTime = 0;
-  spinSound.play().catch(() => {});
-}
-
-function stopSpinSound() {
-  spinSound.pause();
-  spinSound.currentTime = 0;
-}
-
-function playWinSound() {
-  winSound.currentTime = 0;
-  winSound.play().catch(() => {});
-}
-
 
     // === Colors ===
     const COLORS = [
@@ -333,23 +310,10 @@ function playWinSound() {
     const canvas = document.getElementById('wheelCanvas');
     const ctx = canvas.getContext('2d');
     const spinBtn = document.getElementById('spinBtn');
-
-    // === Resize Canvas for Responsive ===
-    function resizeCanvas() {
-      const wrapper = canvas.parentElement;
-      const maxSize = window.innerWidth < 640 ? 400 : window.innerWidth < 1024 ? 450 : 500;
-      const size = Math.min(wrapper.clientWidth, wrapper.clientHeight, maxSize);
-      canvas.width = size;
-      canvas.height = size;
-      drawWheel();
-    }
-    window.addEventListener('resize', resizeCanvas);
-    window.addEventListener('load', resizeCanvas);
     const namesArea = document.getElementById('namesArea');
     const countLabel = document.getElementById('countLabel');
     const mainTitle = document.getElementById('mainTitle');
     const titleInput = document.getElementById('titleInput');
-    
     const clearBtn = document.getElementById('clearBtn');
     const historyList = document.getElementById('historyList');
     const historyCount = document.getElementById('historyCount');
@@ -362,6 +326,18 @@ function playWinSound() {
     const toastContainer = document.getElementById('toastContainer');
     const confettiContainer = document.getElementById('confettiContainer');
 
+    // === Resize Canvas ===
+    function resizeCanvas() {
+      const wrapper = canvas.parentElement;
+      const maxSize = window.innerWidth < 640 ? 400 : window.innerWidth < 1024 ? 450 : 500;
+      const size = Math.min(wrapper.clientWidth, wrapper.clientHeight, maxSize);
+      canvas.width = size;
+      canvas.height = size;
+      drawWheel();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('load', resizeCanvas);
+
     // === Draw Wheel ===
     function drawWheel() {
       const centerX = canvas.width / 2;
@@ -371,7 +347,6 @@ function playWinSound() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (names.length === 0) {
-        // Empty state
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
         ctx.fillStyle = '#374151';
@@ -395,12 +370,10 @@ function playWinSound() {
       ctx.rotate((currentRotation * Math.PI) / 180);
       ctx.translate(-centerX, -centerY);
 
-      // Draw slices
       names.forEach((name, i) => {
         const startAngle = i * sliceAngle - Math.PI / 2;
         const endAngle = startAngle + sliceAngle;
 
-        // Slice
         ctx.beginPath();
         ctx.moveTo(centerX, centerY);
         ctx.arc(centerX, centerY, radius, startAngle, endAngle);
@@ -411,13 +384,11 @@ function playWinSound() {
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Text - scale font with canvas size and number of names
         ctx.save();
         ctx.translate(centerX, centerY);
         ctx.rotate(startAngle + sliceAngle / 2);
         ctx.textAlign = 'right';
         ctx.fillStyle = '#000';
-        // ปรับขนาดฟอนต์ตามจำนวนชื่อ
         let fontSize = Math.max(10, Math.floor(radius * 0.08));
         if (names.length > 30) fontSize = Math.max(8, Math.floor(radius * 0.05));
         if (names.length > 50) fontSize = Math.max(6, Math.floor(radius * 0.04));
@@ -428,7 +399,6 @@ function playWinSound() {
         ctx.restore();
       });
 
-      // Outer ring
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
       ctx.strokeStyle = '#ffd700';
@@ -437,7 +407,6 @@ function playWinSound() {
 
       ctx.restore();
 
-      // Center circle - scale with canvas size
       const centerRadius = Math.max(30, radius * 0.15);
       ctx.beginPath();
       ctx.arc(centerX, centerY, centerRadius, 0, Math.PI * 2);
@@ -448,7 +417,7 @@ function playWinSound() {
       ctx.stroke();
     }
 
-    // === Update Names from Textarea ===
+    // === Update Names ===
     function updateNames() {
       const lines = namesArea.value.split('\n').map(s => s.trim()).filter(s => s);
       names = lines.slice(0, 100);
@@ -468,6 +437,18 @@ function playWinSound() {
       setTimeout(() => toast.remove(), 3000);
     }
 
+    // === Play Sound Helper ===
+    function playSound(sound) {
+      sound.currentTime = 0;
+      sound.play().catch(() => {});
+    }
+
+    // === Stop Sound Helper ===
+    function stopSound(sound) {
+      sound.pause();
+      sound.currentTime = 0;
+    }
+
     // === Spin Wheel ===
     function spin() {
       if (spinning) return;
@@ -479,10 +460,11 @@ function playWinSound() {
       stopIdleAnimation();
       spinning = true;
       spinBtn.disabled = true;
-     playSpinSound();
+
+      // เล่นเสียงหมุน
+      playSound(spinSound);
 
       const sliceAngle = 360 / names.length;
-      // หมุนหลายรอบ
       const extraSpins = 360 * (5 + Math.random() * 3);
       const randomOffset = Math.random() * 360;
       const targetRotation = extraSpins + randomOffset;
@@ -495,7 +477,6 @@ function playWinSound() {
         const elapsed = now - startTime;
         const progress = Math.min(elapsed / duration, 1);
         
-        // Easing function (ease out)
         const eased = 1 - Math.pow(1 - progress, 4);
         currentRotation = startRotation + targetRotation * eased;
         
@@ -506,13 +487,12 @@ function playWinSound() {
         } else {
           spinning = false;
           spinBtn.disabled = false;
-         stopSpinSound();
-playWinSound();
           
-          // คำนวณผู้���นะจากตำแหน่งลูกศร (ขวา = 0 องศา)
+          // หยุดเสียงหมุน และเล่นเสียงชนะ
+          stopSound(spinSound);
+          playSound(winSound);
+          
           const normalizedRotation = ((currentRotation % 360) + 360) % 360;
-          // ลูกศรอยู่ทางขวา (0 องศา) แต่วงล้อเริ่มวาดจาก -90 องศา (บน)
-          // ดังนั้นต้องปรับ offset
           const pointerAngle = (360 - normalizedRotation + 90) % 360;
           const winnerIndex = Math.floor(pointerAngle / sliceAngle) % names.length;
           
@@ -520,7 +500,6 @@ playWinSound();
           addToHistory(lastWinner);
           showResult(lastWinner);
           createConfetti();
-          // เริ่มหมุนช้า��� ใหม่
           startIdleAnimation();
         }
       }
@@ -536,10 +515,9 @@ playWinSound();
     }
 
     // === Hide Result ===
-function hideResult() {
-  stopSpinSound();
-  resultOverlay.classList.add('hidden');
-}
+    function hideResult() {
+      resultOverlay.classList.add('hidden');
+    }
 
     // === Remove Winner ===
     function removeWinner() {
@@ -632,7 +610,6 @@ function hideResult() {
       showToast('บันทึกชื่อวงล้อแล้ว!');
     }
 
-    // กด Enter เพื่อ��ั���ทึก, Escape เพื่อ��กเลิก
     titleInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -642,7 +619,6 @@ function hideResult() {
       }
     });
 
-    // คลิกพื้นหลังเพื่อปิด
     titleEditorModal.addEventListener('click', (e) => {
       if (e.target === titleEditorModal) {
         closeTitleEditor();
@@ -685,7 +661,6 @@ function hideResult() {
     // === Event Listeners ===
     spinBtn.addEventListener('click', spin);
     namesArea.addEventListener('input', updateNames);
-    
     clearBtn.addEventListener('click', clearAll);
     clearHistoryBtn.addEventListener('click', clearHistory);
     closeResultBtn.addEventListener('click', hideResult);
@@ -697,7 +672,7 @@ function hideResult() {
       }
     });
 
-    // === Idle Animation (หมุนช้าๆ ระหว่างรอ) ===
+    // === Idle Animation ===
     function startIdleAnimation() {
       if (idleAnimationId) return;
       lastIdleTime = performance.now();
@@ -711,7 +686,6 @@ function hideResult() {
         const delta = now - lastIdleTime;
         lastIdleTime = now;
         
-        // หมุนช้าๆ 5 องศาต่อวินาที
         currentRotation += (delta / 1000) * 5;
         drawWheel();
         
@@ -728,7 +702,7 @@ function hideResult() {
       }
     }
 
-    // === Match Panel Height to Wheel ===
+    // === Match Panel Height ===
     function matchPanelHeight() {
       const controlPanel = document.getElementById('controlPanel');
       const historyPanel = document.getElementById('historyPanel');
@@ -762,11 +736,10 @@ function hideResult() {
     onConfigChange(config);
     startIdleAnimation();
     
-    // Match panel height after layout settles
     setTimeout(matchPanelHeight, 100);
     window.addEventListener('resize', () => {
       setTimeout(matchPanelHeight, 100);
     });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b89f476a2a345c8',t:'MTc2NzUyMTUxOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b8a8e2e74609d08',t:'MTc2NzUyNzgxNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
