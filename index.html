@@ -235,18 +235,19 @@
     <aside id="right-panel" class="w-full lg:w-96 space-y-4"><!-- Title Edit -->
      <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-4 glow-border">
       <h2 class="text-yellow-300 font-bold text-lg mb-3 flex items-center gap-2"><span>✏️</span> ชื่อวงล้อ</h2>
-      <div class="flex gap-2"><label for="title-input" class="sr-only">ชื่อวงล้อ</label> <input type="text" id="title-input" value="วงล้อนำโชค" class="item-input flex-1 bg-slate-800/50 text-white rounded-xl p-3 text-sm border border-white/20" placeholder="วงล้อนำโ������"> <button onclick="saveTitle()" class="bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold px-4 rounded-xl transition-all"> บันทึก </button>
+      <div class="flex gap-2"><label for="title-input" class="sr-only">ชื่อวงล้อ</label> <input type="text" id="title-input" value="วงล้อนำโชค" class="item-input flex-1 bg-slate-800/50 text-white rounded-xl p-3 text-sm border border-white/20" placeholder="วงล้อนำโชค"> <button onclick="saveTitle()" class="bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold px-4 rounded-xl transition-all"> บันทึก </button>
       </div>
      </div><!-- Add Name Input -->
      <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-4 glow-border">
       <h2 id="secret-trigger" class="text-yellow-300 font-bold text-lg mb-3 flex items-center gap-2 cursor-pointer select-none hover:text-yellow-200 transition-colors"><span>➕</span> เพิ่มชื่อลงวงล้อ <span id="item-count" class="text-sm text-white/50 font-normal">(6 รายการ)</span></h2>
-      <div class="flex gap-2 mb-3"><label for="name-input" class="sr-only">พิมพ์ชื่อหรือวางหลายชื่อ</label> <input type="text" id="name-input" class="item-input flex-1 bg-slate-800/50 text-white rounded-xl p-3 text-sm border border-white/20" placeholder="พิมพ์ชื่อ หรือ วางหลายชื่อได้เลย"> <button onclick="addName()" class="bg-emerald-500 hover:bg-emerald-400 text-white font-bold px-4 rounded-xl transition-all"> เพิ่ม </button>
-      </div>
-      <p class="text-white/40 text-xs mb-3">💡 วางหลายชื่อ (แต่ละบรรทัด) ระบบจะเพิ่มให้อัตโนมัติ</p>
-      <div id="names-list" class="space-y-2 max-h-48 overflow-y-auto mb-3"></div><button onclick="clearAllNames()" class="w-full bg-rose-500/80 hover:bg-rose-500 text-white font-semibold py-2 rounded-xl transition-all flex items-center justify-center gap-2 text-sm"> <span>🗑️</span> ล้างทั้งหมด </button>
+      <div class="mb-3"><label for="name-input" class="sr-only">พิมพ์ชื่อหรือวางหลายชื่อ (แต่ละบรรทัด)</label> <textarea id="name-input" rows="4" class="item-input w-full bg-slate-800/50 text-white rounded-xl p-3 text-sm border border-white/20 resize-none" placeholder="พิมพ์ชื่อแต่ละบรรทัด เช่น:
+สมชาย
+สมหญิง
+สมศักดิ์"></textarea>
+      </div><button onclick="clearAllNames()" class="w-full bg-rose-500/80 hover:bg-rose-500 text-white font-semibold py-2 rounded-xl transition-all flex items-center justify-center gap-2 text-sm"> <span>🗑️</span> ล้างทั้งหมด </button>
      </div><!-- Secret Control Panel Button -->
      <div id="control-btn-container" class="hidden"><button onclick="openControlPanel()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 glow-border"> <span>🎛️</span> เปิดหน้าควบคุม (หน้าต่างแยก) </button>
-      <p class="text-white/40 text-xs text-center mt-2">🔒 เปิดหน้าต่างไว้ในจอแยก เพื่อไม่ให้คนดูเห็น</p>
+      <p class="text-white/40 text-xs text-center mt-2">💡 เปิดหน้าต่างไว้ในจอแยก เพื่อไม่ให้คนดูเห็น</p>
      </div>
     </aside>
    </main>
@@ -269,7 +270,7 @@
       <p id="result-title" class="text-yellow-300 text-xl font-bold mb-2">🎰 วงล้อนำโชค 🎰</p>
       <p class="text-white/60 text-sm mb-3">🌟 ผลลัพธ์คือ 🌟</p>
       <p id="result-text" class="winner-text text-white text-xl sm:text-2xl md:text-4xl font-extrabold break-words"></p>
-      <div class="flex justify-center gap-2 mt-3"><span class="emoji-bounce" style="animation-delay: 0s;">🎀</span> <span class="emoji-bounce" style="animation-delay: 0.1s;">⭐</span> <span class="emoji-bounce" style="animation-delay: 0.2s;">🎊</span> <span class="emoji-bounce" style="animation-delay: 0.3s;">��</span> <span class="emoji-bounce" style="animation-delay: 0.4s;">🌟</span>
+      <div class="flex justify-center gap-2 mt-3"><span class="emoji-bounce" style="animation-delay: 0s;">🎀</span> <span class="emoji-bounce" style="animation-delay: 0.1s;">⭐</span> <span class="emoji-bounce" style="animation-delay: 0.2s;">🎊</span> <span class="emoji-bounce" style="animation-delay: 0.3s;">🎁</span> <span class="emoji-bounce" style="animation-delay: 0.4s;">🌟</span>
       </div>
       <div id="remove-winner-section" class="mt-4 pt-4 border-t border-white/20"><button id="remove-winner-btn" onclick="showRemoveConfirm()" class="bg-rose-500/80 hover:bg-rose-500 text-white font-semibold py-2 px-4 rounded-lg transition-all text-sm flex items-center justify-center gap-2 mx-auto"> <span>🚫</span> ตัดออกจากวงล้อ </button>
        <div id="remove-confirm-dialog" class="hidden mt-3 bg-slate-800 rounded-xl p-4 border border-rose-500/50">
@@ -277,7 +278,7 @@
         <div class="flex gap-2 justify-center"><button onclick="confirmRemoveWinner()" class="bg-rose-500 hover:bg-rose-400 text-white font-bold py-2 px-4 rounded-lg transition-all text-sm">ใช่ ลบเลย</button> <button onclick="cancelRemoveWinner()" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded-lg transition-all text-sm">ยกเลิก</button>
         </div>
        </div>
-      </div><button onclick="closeResultPopup()" class="mt-4 w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"> <span>✅</span> ตกลง </button>
+      </div><button onclick="closeResultPopup()" class="mt-4 w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"> <span>👍</span> ตกลง </button>
      </div>
     </div>
    </div>
@@ -286,7 +287,7 @@
   <script>
     const defaultConfig = { wheel_title: 'วงล้อนำโชค' };
     let config = { ...defaultConfig };
-    let items = ['รางวัลที่ 1', 'รางวัลที่ 2', 'รางวัลที่ 3', 'รางวัลที่ 4', 'รางวัลที่ 5', 'รางวัลที่ 6'];
+    let items = ['สมชาย', 'สมหญิง', 'สมศักดิ์', 'สมศรี'];
     let isSpinning = false;
     let currentRotation = 0;
     let isLocked = false;
@@ -307,6 +308,35 @@
       const radius = Math.min(centerX, centerY) - 10;
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // ถ้าไม่มีรายการ แสดงวงล้อ��่าง
+      if (items.length === 0) {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = '#374151';
+        ctx.fill();
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 8;
+        ctx.stroke();
+        
+        ctx.fillStyle = '#9CA3AF';
+        ctx.font = 'bold 20px Prompt';
+        ctx.textAlign = 'center';
+        ctx.fillText('เพิ่มชื่อลงวงล้อ', centerX, centerY - 10);
+        ctx.fillText('เพื่อเริ่มต้น! 👆', centerX, centerY + 20);
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 50, 0, 2 * Math.PI);
+        ctx.fillStyle = '#1e1b4b';
+        ctx.fill();
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        
+        updateItemCount();
+        return;
+      }
+      
       ctx.save();
       ctx.translate(centerX, centerY);
       ctx.rotate(currentRotation * Math.PI / 180);
@@ -379,125 +409,76 @@
 
     function updateWheel() {
       drawWheel();
-      renderNamesList();
       if (controlWindow && !controlWindow.closed) {
         controlWindow.postMessage({ type: 'updateItems', items: items }, '*');
       }
     }
 
-    function addName() {
+    function addNames() {
       const input = document.getElementById('name-input');
-      const name = input.value.trim();
-      if (name === '') { showToast('กรุณาใส่ชื่อก่อนครับ', 'error'); return; }
-      if (items.length >= 20) { showToast('เต็มแล้ว! (สูงสุด 20 ชื่อ)', 'error'); return; }
-      items.push(name);
+      const text = input.value.trim();
+      if (text === '') { showToast('กรุณาใส่ชื่อก่อนครับ', 'error'); return; }
+      const lines = text.split('\n').map(function(n) { return n.trim(); }).filter(function(n) { return n !== ''; });
+      if (lines.length === 0) { showToast('กรุณาใส่ชื่อก่อนครับ', 'error'); return; }
+      var added = 0;
+      var skipped = 0;
+      for (var i = 0; i < lines.length; i++) {
+        if (items.length >= 20) { skipped = lines.length - i; break; }
+        items.push(lines[i]);
+        added++;
+      }
       input.value = '';
       input.focus();
       updateWheel();
-      showToast('เพิ่ม "' + name + '" แล้ว!');
-    }
-
-    function removeName(index) {
-      const removed = items[index];
-      items.splice(index, 1);
-      if (items.length < 2) { items = ['รายการ 1', 'รายการ 2']; showToast('ต้องมีอย่างน้อย 2 รายการ', 'error'); }
-      updateWheel();
-      showToast('ลบ "' + removed + '" แล้ว');
+      if (skipped > 0) {
+        showToast('เพิ่ม ' + added + ' ชื่อ (ข้าม ' + skipped + ' เพราะเต็ม)', 'error');
+      } else if (added === 1) {
+        showToast('เพิ่ม "' + lines[0] + '" แล้ว!');
+      } else {
+        showToast('เพิ่ม ' + added + ' ชื่อแล้ว! 🎉');
+      }
     }
 
     function clearAllNames() {
-      items = ['รายการ 1', 'รายการ 2'];
+      items = [];
       updateWheel();
+      updateTextareaFromItems();
       showToast('ล้างทั้งหมดแล้ว');
     }
 
-    function renderNamesList() {
-      const list = document.getElementById('names-list');
-      list.innerHTML = items.map((name, i) => 
-        '<div id="item-' + i + '" class="bg-slate-800/50 rounded-lg p-2 flex items-center gap-2 group hover:bg-slate-700/50 transition-colors">' +
-          '<span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background: ' + colors[i % colors.length] + '">' + (i + 1) + '</span>' +
-          '<span id="name-text-' + i + '" class="flex-1 text-white text-sm truncate cursor-pointer hover:text-yellow-300" onclick="startEditName(' + i + ')" title="คลิกเพื่อแก้ไข">' + name + '</span>' +
-          '<input type="text" id="name-edit-' + i + '" class="hidden flex-1 bg-slate-700 text-white text-sm rounded px-2 py-1 border border-yellow-400 focus:outline-none" value="' + name.replace(/"/g, '&quot;') + '" onkeydown="handleEditKeydown(event, ' + i + ')" onblur="saveEditName(' + i + ')">' +
-          '<button onclick="startEditName(' + i + ')" class="text-yellow-400 hover:text-yellow-300 opacity-0 group-hover:opacity-100 transition-opacity px-1" title="���ก้ไข">✏️</button>' +
-          '<button onclick="removeName(' + i + ')" class="text-rose-400 hover:text-rose-300 opacity-0 group-hover:opacity-100 transition-opacity text-lg px-1" title="ลบ">×</button>' +
-        '</div>'
-      ).join('');
-    }
+    
 
-    function startEditName(index) {
-      const textEl = document.getElementById('name-text-' + index);
-      const inputEl = document.getElementById('name-edit-' + index);
-      if (textEl && inputEl) {
-        textEl.classList.add('hidden');
-        inputEl.classList.remove('hidden');
-        inputEl.value = items[index];
-        inputEl.focus();
-        inputEl.select();
+    // ฟังก์ชันอัพเดท textarea จาก items
+    function updateTextareaFromItems() {
+      const textarea = document.getElementById('name-input');
+      if (textarea) {
+        textarea.value = items.join('\n');
       }
     }
 
-    function saveEditName(index) {
-      const textEl = document.getElementById('name-text-' + index);
-      const inputEl = document.getElementById('name-edit-' + index);
-      if (textEl && inputEl) {
-        const newName = inputEl.value.trim();
-        if (newName && newName !== items[index]) {
-          items[index] = newName;
-          drawWheel();
-          showToast('แก้ไขเป็น "' + newName + '" แล้ว!');
-          if (controlWindow && !controlWindow.closed) {
-            controlWindow.postMessage({ type: 'updateItems', items: items }, '*');
-          }
-        }
-        textEl.textContent = items[index];
-        textEl.classList.remove('hidden');
-        inputEl.classList.add('hidden');
-      }
-    }
-
-    function handleEditKeydown(event, index) {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        saveEditName(index);
-      } else if (event.key === 'Escape') {
-        const textEl = document.getElementById('name-text-' + index);
-        const inputEl = document.getElementById('name-edit-' + index);
-        if (textEl && inputEl) {
-          textEl.classList.remove('hidden');
-          inputEl.classList.add('hidden');
-        }
+    // ฟังก์ชันอัพเดท items จาก textarea (อัตโนมัติ)
+    function syncItemsFromTextarea() {
+      const textarea = document.getElementById('name-input');
+      if (!textarea) return;
+      const lines = textarea.value.split('\n').map(function(n) { return n.trim(); }).filter(function(n) { return n !== ''; });
+      // จำกัด 20 รายการ
+      items = lines.slice(0, 20);
+      drawWheel();
+      if (controlWindow && !controlWindow.closed) {
+        controlWindow.postMessage({ type: 'updateItems', items: items }, '*');
       }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
       const nameInput = document.getElementById('name-input');
       if (nameInput) {
-        nameInput.addEventListener('keydown', function(e) {
-          if (e.key === 'Enter') { e.preventDefault(); addName(); }
-        });
-        nameInput.addEventListener('paste', function(e) {
-          e.preventDefault();
-          var pastedText = (e.clipboardData || window.clipboardData).getData('text');
-          var lines = pastedText.split('\n').map(function(n) { return n.trim(); }).filter(function(n) { return n !== ''; });
-          if (lines.length > 1) {
-            var added = 0;
-            var skipped = 0;
-            for (var i = 0; i < lines.length; i++) {
-              if (items.length >= 20) { skipped = lines.length - i; break; }
-              items.push(lines[i]);
-              added++;
-            }
-            updateWheel();
-            if (skipped > 0) {
-              showToast('เพิ่ม ' + added + ' ชื่อ (ข้าม ' + skipped + ' เพราะเต็ม)', 'error');
-            } else {
-              showToast('เพิ่ม ' + added + ' ชื่อแล้ว! 🎉');
-            }
-          } else {
-            nameInput.value = pastedText.trim();
-          }
+        // อัพเดททันทีเมื่อพิมพ์หรือแก้ไข
+        nameInput.addEventListener('input', function() {
+          syncItemsFromTextarea();
         });
       }
+      // ใส่ชื่อตั้งต้นใน textarea
+      updateTextareaFromItems();
     });
 
     function updateLockDot() {
@@ -570,7 +551,7 @@
       if (index > -1) {
         items.splice(index, 1);
         drawWheel();
-        renderNamesList();
+        updateTextareaFromItems();
         if (controlWindow && !controlWindow.closed) { controlWindow.postMessage({ type: 'updateItems', items: items }, '*'); }
         showToast('ลบ "' + lastWinner + '" ออกแล้ว!');
         if (items.length < 2) { closeResultPopup(); showToast('ต้องมีอย่างน้อย 2 รายการในวงล้อ', 'error'); } 
@@ -587,7 +568,7 @@
 
     function getControlPanelHTML() {
       var currentTitle = config.wheel_title || defaultConfig.wheel_title;
-      return '<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>หน้าควบคุมลับ</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet"><style>body { font-family: "Prompt", sans-serif; box-sizing: border-box; }.pulse { animation: pulse 2s infinite; }@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }.input-glow:focus { outline: none; border-color: #fbbf24; box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3); }</style></head><body class="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900 p-6"><div class="max-w-md mx-auto space-y-4"><div class="text-center mb-6"><h1 class="text-2xl font-bold text-white">🎛️ หน้าควบคุมลับ</h1><p class="text-red-300 text-sm mt-1">⚠️ อย่าให้คนดูเห็นหน้าน����!</p></div><div class="bg-white/10 backdrop-blur rounded-2xl p-5 border border-red-500/30"><h3 class="text-yellow-300 font-bold text-lg mb-4 flex items-center gap-2">🔒 ล็อคผลลัพธ์</h3><div class="flex items-center gap-3 mb-4"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="lock-toggle" class="sr-only peer"><div class="w-14 h-7 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[\'\'] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-red-500"></div></label><span id="lock-status" class="text-white/70">ปิดการล็อค</span></div><label for="lock-target" class="text-white/70 text-sm mb-2 block">เลือกรางวัลที่ต้องการล็อค:</label><select id="lock-target" class="w-full bg-slate-800 text-white rounded-xl p-3 border border-white/20 disabled:opacity-50 mb-3" disabled><option value="">-- เลือกรางวัล --</option>' + items.map(function(item, i) { return '<option value="' + i + '">' + item + '</option>'; }).join('') + '</select><div id="lock-indicator" class="hidden bg-red-500/30 border border-red-500 rounded-xl p-4 text-center"><span class="text-red-200 pulse font-semibold text-lg">🎯 ล็อคไปที่:</span><p id="locked-name" class="text-white text-xl font-bold mt-1"></p></div></div><div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4"><h4 class="text-yellow-300 font-semibold mb-2">💡 วิธีใช้งาน:</h4><ol class="text-white/70 text-sm space-y-1 list-decimal list-inside"><li>เปิดสวิตช์ "ล็อค" แล้วเลือกรางวัล</li><li>กลับไปหน้าวงล้อแล้วกด "หมุน!"</li><li>วงล้อจะหยุดที่รางวัลที่เลือกไว้</li></ol></div></div><script>var toggle = document.getElementById("lock-toggle");var select = document.getElementById("lock-target");var status = document.getElementById("lock-status");var indicator = document.getElementById("lock-indicator");var lockedName = document.getElementById("locked-name");toggle.addEventListener("change", function() {select.disabled = !this.checked;if (this.checked) {status.textContent = "เปิดการล็อค";status.classList.add("text-red-400");} else {status.textContent = "ปิดการล็อค";status.classList.remove("text-red-400");indicator.classList.add("hidden");select.value = "";window.opener.postMessage({ type: "lock", isLocked: false, lockedIndex: -1 }, "*");}});select.addEventListener("change", function() {if (this.value !== "") {var idx = parseInt(this.value);lockedName.textContent = this.options[this.selectedIndex].text;indicator.classList.remove("hidden");window.opener.postMessage({ type: "lock", isLocked: true, lockedIndex: idx }, "*");} else {indicator.classList.add("hidden");window.opener.postMessage({ type: "lock", isLocked: false, lockedIndex: -1 }, "*");}});window.addEventListener("message", function(e) {if (e.data.type === "updateItems") {var newItems = e.data.items;select.innerHTML = \'<option value="">-- เลือ���รางวัล --</option>\' + newItems.map(function(item, i) { return \'<option value="\' + i + \'">\' + item + \'</option>\'; }).join("");toggle.checked = false;select.disabled = true;status.textContent = "ปิดการล็อค";status.classList.remove("text-red-400");indicator.classList.add("hidden");window.opener.postMessage({ type: "lock", isLocked: false, lockedIndex: -1 }, "*");}});<\/script></body></html>';
+      return '<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>หน้าควบคุมลับ</title><script src="https://cdn.tailwindcss.com"><\/script><link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet"><style>body { font-family: "Prompt", sans-serif; box-sizing: border-box; }.pulse { animation: pulse 2s infinite; }@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }.input-glow:focus { outline: none; border-color: #fbbf24; box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.3); }</style></head><body class="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-slate-900 p-6"><div class="max-w-md mx-auto space-y-4"><div class="text-center mb-6"><h1 class="text-2xl font-bold text-white">🎛️ หน้าควบคุมลับ</h1><p class="text-red-300 text-sm mt-1">⚠️ อย่าให้คนดูเห็นหน้านี้!</p></div><div class="bg-white/10 backdrop-blur rounded-2xl p-5 border border-red-500/30"><h3 class="text-yellow-300 font-bold text-lg mb-4 flex items-center gap-2">🔒 ล็อคผลลัพธ์</h3><div class="flex items-center gap-3 mb-4"><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="lock-toggle" class="sr-only peer"><div class="w-14 h-7 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[\'\'] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-red-500"></div></label><span id="lock-status" class="text-white/70">ปิดการล็อค</span></div><label for="lock-target" class="text-white/70 text-sm mb-2 block">เลือกรางวัลที่ต้องการล็อค:</label><select id="lock-target" class="w-full bg-slate-800 text-white rounded-xl p-3 border border-white/20 disabled:opacity-50 mb-3" disabled><option value="">-- เลือกรางวัล --</option>' + items.map(function(item, i) { return '<option value="' + i + '">' + item + '</option>'; }).join('') + '</select><div id="lock-indicator" class="hidden bg-red-500/30 border border-red-500 rounded-xl p-4 text-center"><span class="text-red-200 pulse font-semibold text-lg">🎯 ล็อคไปที่:</span><p id="locked-name" class="text-white text-xl font-bold mt-1"></p></div></div><div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4"><h4 class="text-yellow-300 font-semibold mb-2">📖 วิธีใช้งาน:</h4><ol class="text-white/70 text-sm space-y-1 list-decimal list-inside"><li>เปิดสวิตช์ "ล็อค" แล้วเลือกรางวัล</li><li>กลับไปหน้าวงล้อแล้วกด "หมุน!"</li><li>วงล้อจะหยุดที่รางวัลที่เลือกไว้</li></ol></div></div><script>var toggle = document.getElementById("lock-toggle");var select = document.getElementById("lock-target");var status = document.getElementById("lock-status");var indicator = document.getElementById("lock-indicator");var lockedName = document.getElementById("locked-name");toggle.addEventListener("change", function() {select.disabled = !this.checked;if (this.checked) {status.textContent = "เปิดการล็อค";status.classList.add("text-red-400");} else {status.textContent = "ปิดการล็อค";status.classList.remove("text-red-400");indicator.classList.add("hidden");select.value = "";window.opener.postMessage({ type: "lock", isLocked: false, lockedIndex: -1 }, "*");}});select.addEventListener("change", function() {if (this.value !== "") {var idx = parseInt(this.value);lockedName.textContent = this.options[this.selectedIndex].text;indicator.classList.remove("hidden");window.opener.postMessage({ type: "lock", isLocked: true, lockedIndex: idx }, "*");} else {indicator.classList.add("hidden");window.opener.postMessage({ type: "lock", isLocked: false, lockedIndex: -1 }, "*");}});window.addEventListener("message", function(e) {if (e.data.type === "updateItems") {var newItems = e.data.items;select.innerHTML = \'<option value="">-- เลือกรางวัล --</option>\' + newItems.map(function(item, i) { return \'<option value="\' + i + \'">\' + item + \'</option>\'; }).join("");toggle.checked = false;select.disabled = true;status.textContent = "ปิดการล็อค";status.classList.remove("text-red-400");indicator.classList.add("hidden");window.opener.postMessage({ type: "lock", isLocked: false, lockedIndex: -1 }, "*");}});<\/script></body></html>';
     }
 
     function openControlPanel() {
@@ -605,7 +586,8 @@
     });
 
     function spin() {
-      if (isSpinning || items.length < 2) return;
+      if (isSpinning) return;
+      if (items.length < 2) { showToast('ต้องมีอย่างน้อย 2 รายการถึงจะหมุนได้', 'error'); return; }
       isSpinning = true;
       lastSliceIndex = -1;
       document.getElementById('spin-btn').disabled = true;
@@ -751,8 +733,8 @@
       config = window.elementSdk.config || defaultConfig;
     }
 
+    // เริ่มต้นแสดงผล
     drawWheel();
-    renderNamesList();
     onConfigChange(config);
 
     setInterval(function() {
@@ -774,5 +756,5 @@
       }
     }, 400);
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b896ad6b4561d47',t:'MTc2NzUxNTg4Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b897fe8d6601d47',t:'MTc2NzUxNjc0NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
