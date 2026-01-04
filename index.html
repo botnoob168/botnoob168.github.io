@@ -36,14 +36,14 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 80px;
-      height: 80px;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
       background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
-      border: 4px solid #fff;
+      border: 5px solid #fff;
       color: #1a1a2e;
       font-weight: 800;
-      font-size: 1.1rem;
+      font-size: 1.4rem;
       cursor: pointer;
       box-shadow: 0 4px 20px rgba(255, 165, 0, 0.5);
       transition: all 0.2s;
@@ -157,13 +157,13 @@
     }
     .result-card {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      border-radius: 20px;
-      padding: 30px;
+      border-radius: 24px;
+      padding: 40px;
       text-align: center;
-      max-width: 400px;
-      width: 100%;
-      border: 2px solid #ffd700;
-      box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+      max-width: 500px;
+      width: 90%;
+      border: 3px solid #ffd700;
+      box-shadow: 0 0 60px rgba(255, 215, 0, 0.4);
       animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     }
     @keyframes popIn {
@@ -171,11 +171,16 @@
       to { transform: scale(1); opacity: 1; }
     }
     .winner-text {
-      font-size: 2.5rem;
+      font-size: 3.5rem;
       font-weight: 800;
       color: #fff;
       text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
       animation: glow 1s ease-in-out infinite alternate;
+    }
+    @media (max-width: 640px) {
+      .winner-text {
+        font-size: 2.5rem;
+      }
     }
     @keyframes glow {
       from { text-shadow: 0 0 8px rgba(255, 215, 0, 0.3); }
@@ -207,7 +212,7 @@
   <div class="app-container"><!-- Header -->
    <header class="text-center py-4 flex-shrink-0">
     <div class="flex items-center justify-center gap-2">
-     <h1 id="mainTitle" class="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity" onclick="showTitleEditor()">🎰 วงล้อนำโชค 🎰</h1><button onclick="showTitleEditor()" class="text-yellow-400/60 hover:text-yellow-400 transition-colors" aria-label="แก้ไขชื่อวงล้อ">
+     <h1 id="mainTitle" class="text-3xl md:text-5xl lg:text-6xl font-extrabold bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity drop-shadow-lg" onclick="showTitleEditor()">🎰 วงล้อนำโชค 🎰</h1><button onclick="showTitleEditor()" class="text-yellow-400/60 hover:text-yellow-400 transition-colors" aria-label="แก้ไขชื่อวงล้อ">
       <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /> <path d="m15 5 4 4" />
       </svg></button>
     </div><!-- Title Editor Modal -->
@@ -219,10 +224,10 @@
      </div>
     </div>
    </header><!-- Main Content -->
-   <main class="flex-1 flex flex-col lg:flex-row gap-6 p-4 md:p-6 overflow-auto"><!-- Left: Wheel -->
-    <section class="flex-1 flex items-center justify-center min-h-[350px]">
-     <div class="wheel-wrapper">
-      <canvas id="wheelCanvas" width="340" height="340"></canvas><button id="spinBtn" class="spin-button">หมุน!</button>
+   <main class="flex-1 flex flex-col lg:flex-row gap-4 p-3 md:p-4 overflow-auto"><!-- Left: Wheel -->
+    <section class="flex-1 flex items-center justify-center min-h-[300px] lg:min-h-[500px]">
+     <div class="wheel-wrapper w-full max-w-[90vmin] lg:max-w-[600px] aspect-square flex items-center justify-center">
+      <canvas id="wheelCanvas" class="w-full h-full max-w-full max-h-full"></canvas><button id="spinBtn" class="spin-button">หมุน!</button>
       <div class="pointer">
        <svg width="50" height="40" viewbox="0 0 50 40"><polygon points="0,20 45,5 45,35" fill="#ffd700" stroke="#ff8c00" stroke-width="2" /> <circle cx="40" cy="20" r="5" fill="#ef4444" />
        </svg>
@@ -244,11 +249,11 @@
   </div><!-- Result Overlay (hidden by default) -->
   <div id="resultOverlay" class="result-overlay hidden">
    <div class="result-card">
-    <div class="text-5xl mb-4">
+    <div class="text-6xl md:text-7xl mb-4">
      🎉
     </div>
-    <p id="resultTitle" class="text-yellow-400 text-xl font-bold mb-2">🎰 วงล้อนำโชค 🎰</p>
-    <p class="text-white/60 mb-2">🌟 ผลลัพธ์คือ 🌟</p>
+    <p id="resultTitle" class="text-yellow-400 text-xl md:text-2xl font-bold mb-3">🎰 วงล้อนำโชค 🎰</p>
+    <p class="text-white/60 text-lg md:text-xl mb-3">🌟 ผลลัพธ์คือ 🌟</p>
     <p id="winnerName" class="winner-text mb-6"></p>
     <div class="space-y-3"><button id="removeWinnerBtn" class="btn-danger w-full">🚫 ตัดออกจากวงล้อ</button> <button id="closeResultBtn" class="btn-primary w-full">👍 ตกลง</button>
     </div>
@@ -280,6 +285,17 @@
     const canvas = document.getElementById('wheelCanvas');
     const ctx = canvas.getContext('2d');
     const spinBtn = document.getElementById('spinBtn');
+
+    // === Resize Canvas for Responsive ===
+    function resizeCanvas() {
+      const wrapper = canvas.parentElement;
+      const size = Math.min(wrapper.clientWidth, wrapper.clientHeight, 600);
+      canvas.width = size;
+      canvas.height = size;
+      drawWheel();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('load', resizeCanvas);
     const namesArea = document.getElementById('namesArea');
     const countLabel = document.getElementById('countLabel');
     const mainTitle = document.getElementById('mainTitle');
@@ -343,15 +359,17 @@
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Text
+        // Text - scale font with canvas size
         ctx.save();
         ctx.translate(centerX, centerY);
         ctx.rotate(startAngle + sliceAngle / 2);
         ctx.textAlign = 'right';
         ctx.fillStyle = '#000';
-        ctx.font = 'bold 16px Prompt';
-        const displayName = name.length > 8 ? name.substring(0, 8) + '..' : name;
-        ctx.fillText(displayName, radius - 20, 5);
+        const fontSize = Math.max(14, Math.floor(radius * 0.1));
+        ctx.font = `bold ${fontSize}px Prompt`;
+        const maxChars = Math.max(6, Math.floor(radius / 20));
+        const displayName = name.length > maxChars ? name.substring(0, maxChars) + '..' : name;
+        ctx.fillText(displayName, radius - 15, 5);
         ctx.restore();
       });
 
@@ -364,9 +382,10 @@
 
       ctx.restore();
 
-      // Center circle
+      // Center circle - scale with canvas size
+      const centerRadius = Math.max(30, radius * 0.15);
       ctx.beginPath();
-      ctx.arc(centerX, centerY, 40, 0, Math.PI * 2);
+      ctx.arc(centerX, centerY, centerRadius, 0, Math.PI * 2);
       ctx.fillStyle = '#1a1a2e';
       ctx.fill();
       ctx.strokeStyle = '#ffd700';
@@ -583,7 +602,7 @@
         const delta = now - lastIdleTime;
         lastIdleTime = now;
         
-        // หมุนช้าๆ 5 องศาต่อวินาที
+        // �����มุนช้าๆ 5 องศาต่อวินาที
         currentRotation += (delta / 1000) * 5;
         drawWheel();
         
@@ -611,9 +630,10 @@
       config = window.elementSdk.config || defaultConfig;
     }
 
+    resizeCanvas();
     updateNames();
     onConfigChange(config);
     startIdleAnimation();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b89b5b246aa45c8',t:'MTc2NzUxODk0OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b89b97db21145c8',t:'MTc2NzUxOTEwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
