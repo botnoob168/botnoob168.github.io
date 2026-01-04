@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>วงล้อนำโชคv4</title>
+  <title>วงล้อนำโชค</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet">
@@ -36,14 +36,14 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 100px;
-      height: 100px;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
-      border: 5px solid #fff;
+      border: 6px solid #fff;
       color: #1a1a2e;
       font-weight: 800;
-      font-size: 1.4rem;
+      font-size: 1.6rem;
       cursor: pointer;
       box-shadow: 0 4px 20px rgba(255, 165, 0, 0.5);
       transition: all 0.2s;
@@ -70,15 +70,15 @@
     .pointer {
       position: absolute;
       top: 50%;
-      right: -15px;
+      right: -20px;
       transform: translateY(-50%);
       z-index: 20;
     }
     .card-panel {
       background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(10px);
-      border-radius: 16px;
-      padding: 16px;
+      border-radius: 20px;
+      padding: 20px;
       border: 1px solid rgba(255, 215, 0, 0.2);
     }
     .input-field {
@@ -210,9 +210,9 @@
  </head>
  <body class="h-full">
   <div class="app-container"><!-- Header -->
-   <header class="text-center py-4 flex-shrink-0">
+   <header class="text-center py-6 lg:py-8 flex-shrink-0">
     <div class="flex items-center justify-center gap-2">
-     <h1 id="mainTitle" class="text-3xl md:text-5xl lg:text-6xl font-extrabold bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity drop-shadow-lg" onclick="showTitleEditor()">🎰 วงล้อนำโชค 🎰</h1><button onclick="showTitleEditor()" class="text-yellow-400/60 hover:text-yellow-400 transition-colors" aria-label="แก้ไขชื่อวงล้อ">
+     <h1 id="mainTitle" class="text-4xl md:text-6xl lg:text-7xl font-extrabold bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity drop-shadow-lg" onclick="showTitleEditor()">🎰 วงล้อนำโชค 🎰</h1><button onclick="showTitleEditor()" class="text-yellow-400/60 hover:text-yellow-400 transition-colors" aria-label="แก้ไขชื่อวงล้อ">
       <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /> <path d="m15 5 4 4" />
       </svg></button>
     </div><!-- Title Editor Modal -->
@@ -224,19 +224,19 @@
      </div>
     </div>
    </header><!-- Main Content -->
-   <main class="flex-1 flex flex-col lg:flex-row gap-4 p-3 md:p-4 overflow-auto"><!-- Left: Wheel -->
-    <section class="flex-1 flex items-center justify-center min-h-[300px] lg:min-h-[500px]">
-     <div class="wheel-wrapper w-full max-w-[90vmin] lg:max-w-[600px] aspect-square flex items-center justify-center">
+   <main class="flex-1 flex flex-col lg:flex-row gap-6 p-4 md:p-6 lg:p-8 overflow-auto"><!-- Left: Wheel -->
+    <section class="flex-1 flex items-center justify-center min-h-[400px] lg:min-h-[600px] p-4">
+     <div class="wheel-wrapper w-full max-w-[85vmin] lg:max-w-[700px] xl:max-w-[800px] aspect-square flex items-center justify-center">
       <canvas id="wheelCanvas" class="w-full h-full max-w-full max-h-full"></canvas><button id="spinBtn" class="spin-button">หมุน!</button>
       <div class="pointer">
-       <svg width="50" height="40" viewbox="0 0 50 40"><polygon points="0,20 45,5 45,35" fill="#ffd700" stroke="#ff8c00" stroke-width="2" /> <circle cx="40" cy="20" r="5" fill="#ef4444" />
+       <svg width="60" height="50" viewbox="0 0 60 50"><polygon points="0,25 55,5 55,45" fill="#ffd700" stroke="#ff8c00" stroke-width="3" /> <circle cx="50" cy="25" r="6" fill="#ef4444" />
        </svg>
       </div>
      </div>
     </section><!-- Right: Controls -->
-    <aside class="w-full lg:w-72 xl:w-80 flex-shrink-0"><!-- Names Input -->
+    <aside class="w-full lg:w-80 xl:w-96 flex-shrink-0"><!-- Names Input -->
      <div class="card-panel h-full lg:h-auto">
-      <h2 class="text-yellow-400 font-bold text-lg mb-3 flex items-center gap-2">📝 รายชื่อในวงล้อ <span id="countLabel" class="text-sm text-white/50 font-normal">(4 รายการ)</span></h2><label for="namesArea" class="sr-only">พิมพ์ชื่อแต่ละบรรทัด</label> <textarea id="namesArea" class="input-field resize-none mb-3 text-base leading-relaxed h-32 sm:h-40 lg:h-64 xl:h-80" placeholder="พิมพ์ชื่อแต่ละบรรทัด เช่น:
+      <h2 class="text-yellow-400 font-bold text-lg mb-3 flex items-center gap-2">�� รายชื่อในวงล้อ <span id="countLabel" class="text-sm text-white/50 font-normal">(4 รายการ)</span></h2><label for="namesArea" class="sr-only">พิมพ์ชื่อแต่ละบรรทัด</label> <textarea id="namesArea" class="input-field resize-none mb-3 text-base leading-relaxed h-40 sm:h-48 lg:h-72 xl:h-96" placeholder="พิมพ์ชื่อแต่ละบรรทัด เช่น:
 สมชาย
 สมหญิง
 สมศักดิ์
@@ -257,7 +257,7 @@
     <p id="resultTitle" class="text-yellow-400 text-xl md:text-2xl font-bold mb-3">🎰 วงล้อนำโชค 🎰</p>
     <p class="text-white/60 text-lg md:text-xl mb-3">🌟 ผลลัพธ์คือ 🌟</p>
     <p id="winnerName" class="winner-text mb-6"></p>
-    <div class="space-y-3"><button id="removeWinnerBtn" class="btn-danger w-full">🚫 ตัดออกจากวงล้อ</button> <button id="closeResultBtn" class="btn-primary w-full">👍 ตกลง</button>
+    <div class="space-y-3"><button id="removeWinnerBtn" class="btn-danger w-full">🚫 ตัดออกจากวงล้อ</button> <button id="closeResultBtn" class="btn-primary w-full">👍 ตกล���</button>
     </div>
    </div>
   </div><!-- Toast Container -->
@@ -458,7 +458,7 @@
           
           // คำนวณผู้ชนะจากตำแหน่งลูกศร (ขวา = 0 องศา)
           const normalizedRotation = ((currentRotation % 360) + 360) % 360;
-          // ลูกศรอยู่ทางขวา (0 องศา) แต่วงล้อเริ่มวาดจาก -90 องศา (บน)
+          // ลูกศรอยู่ทางขว��� (0 องศา) แ���่วงล้อเริ่มวาดจาก -90 องศา (บน)
           // ดังนั้นต้องปรับ offset
           const pointerAngle = (360 - normalizedRotation + 90) % 360;
           const winnerIndex = Math.floor(pointerAngle / sliceAngle) % names.length;
@@ -541,7 +541,7 @@
       showToast('บันทึกชื่อวงล้อแล้ว!');
     }
 
-    // กด Enter เพื่อบันทึก, Escape เพื่อยกเลิก
+    // กด Enter เพื่อบันทึก, Escape เพื่อ��กเลิก
     titleInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -619,7 +619,7 @@
         const delta = now - lastIdleTime;
         lastIdleTime = now;
         
-        // หมุนช้าๆ 5 องศาต่อวินาที
+        // หมุนช้าๆ 5 องศาต่��วินาที
         currentRotation += (delta / 1000) * 5;
         drawWheel();
         
@@ -652,5 +652,5 @@
     onConfigChange(config);
     startIdleAnimation();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b89d01b61ea45c8',t:'MTc2NzUyMDAzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b89d68272f345c8',t:'MTc2NzUyMDI5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
