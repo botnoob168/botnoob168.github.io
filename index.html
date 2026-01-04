@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>วงล้อนำโชค1</title>
+  <title>วงล้อนำโชค11</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet">
@@ -222,9 +222,7 @@
   <div class="app-container"><!-- Header -->
    <header class="text-center py-3 md:py-5 flex-shrink-0">
     <div class="flex items-center justify-center gap-2">
-     <h1 id="mainTitle" class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity drop-shadow-lg" onclick="showTitleEditor()">🎰 วงล้อนำโชค 🎰</h1><button onclick="showTitleEditor()" class="text-yellow-400/60 hover:text-yellow-400 transition-colors" aria-label="แก้ไขชื่อวงล้อ">
-      <svg width="16" height="16" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /> <path d="m15 5 4 4" />
-      </svg></button>
+     <h1 id="mainTitle" class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity drop-shadow-lg" onclick="showTitleEditor()">🎰 วงล้อนำโชค 🎰</h1>
     </div><!-- Title Editor Modal -->
     <div id="titleEditorModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
      <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 w-full max-w-sm border border-yellow-500/30 shadow-2xl">
@@ -234,8 +232,17 @@
      </div>
     </div>
    </header><!-- Main Content -->
-   <main class="flex-1 flex flex-col lg:flex-row gap-3 md:gap-4 p-3 md:p-4 lg:p-6 overflow-auto"><!-- Left: Wheel -->
-    <section class="flex-1 flex items-center justify-center min-h-[250px] sm:min-h-[350px] lg:min-h-[400px]">
+   <main class="flex-1 flex flex-col lg:flex-row gap-3 md:gap-4 p-3 md:p-4 lg:p-6 overflow-auto"><!-- Left: History -->
+    <aside class="w-full lg:w-64 xl:w-72 flex-shrink-0 lg:self-center order-2 lg:order-1">
+     <div class="card-panel h-full lg:h-auto flex flex-col" id="historyPanel">
+      <h2 class="text-yellow-400 font-bold text-sm md:text-base mb-2 flex items-center gap-2 flex-shrink-0">📜 ประวัติการหมุน <span id="historyCount" class="text-xs md:text-sm text-white/50 font-normal">(0 ครั้ง)</span></h2>
+      <div id="historyList" class="flex-1 overflow-y-auto space-y-2 min-h-[120px] max-h-[300px] lg:max-h-none pr-1">
+       <p class="text-white/40 text-sm text-center py-8">ยังไม่มีประวัติ<br>
+        กดหมุนเลย! 🎰</p>
+      </div><button id="clearHistoryBtn" class="btn-danger w-full flex items-center justify-center gap-2 py-2 md:py-3 text-sm md:text-base mt-2"> 🗑️ ล้างประวัติ </button>
+     </div>
+    </aside><!-- Center: Wheel -->
+    <section class="flex-1 flex items-center justify-center min-h-[250px] sm:min-h-[350px] lg:min-h-[400px] order-1 lg:order-2">
      <div class="wheel-wrapper w-full max-w-[65vmin] sm:max-w-[55vmin] lg:max-w-[500px] xl:max-w-[550px] aspect-square flex items-center justify-center">
       <canvas id="wheelCanvas" class="w-full h-full max-w-full max-h-full"></canvas><button id="spinBtn" class="spin-button">หมุน!</button>
       <div class="pointer">
@@ -244,10 +251,10 @@
       </div>
      </div>
     </section><!-- Right: Controls -->
-    <aside class="w-full lg:w-72 xl:w-80 flex-shrink-0 lg:self-center"><!-- Names Input -->
+    <aside class="w-full lg:w-64 xl:w-72 flex-shrink-0 lg:self-center order-3"><!-- Names Input -->
      <div class="card-panel h-full lg:h-auto flex flex-col" id="controlPanel">
-      <h2 class="text-yellow-400 font-bold text-sm md:text-base mb-2 flex items-center gap-2 flex-shrink-0">📝 รายชื่อในวงล้อ <span id="countLabel" class="text-xs md:text-sm text-white/50 font-normal">(4 รายการ)</span></h2><label for="namesArea" class="sr-only">พิมพ์ชื่อแต่ละบรรทัด</label> <textarea id="namesArea" class="input-field resize-none mb-2 text-sm md:text-base leading-relaxed flex-1 min-h-[120px]" placeholder="พิมพ์ชื่อแต่ละบรรทัด เช่น:
-สมชาย
+      <h2 class="text-yellow-400 font-bold text-sm md:text-base mb-2 flex items-center gap-2 flex-shrink-0">📝 รายชื่อบนวงล้อ <span id="countLabel" class="text-xs md:text-sm text-white/50 font-normal">(4 รายการ)</span></h2><label for="namesArea" class="sr-only">พิมพ์ชื่อแต่ละบรรทัด</label> <textarea id="namesArea" class="input-field resize-none mb-2 text-sm md:text-base leading-relaxed flex-1 min-h-[120px]" placeholder="พิมพ์ชื่อแต่ละบรรทัด เช่น:
+สมช��ย
 สมหญิง
 สมศักดิ์
 
@@ -267,7 +274,7 @@
     <p id="resultTitle" class="text-yellow-400 text-xl md:text-2xl font-bold mb-3">🎰 วงล้อนำโชค 🎰</p>
     <p class="text-white/60 text-lg md:text-xl mb-3">🌟 ผลลัพธ์คือ 🌟</p>
     <p id="winnerName" class="winner-text mb-6"></p>
-    <div class="space-y-3"><button id="removeWinnerBtn" class="btn-danger w-full">🚫 ตั��ออกจากวงล้อ</button> <button id="closeResultBtn" class="btn-primary w-full">👍 ตกล���</button>
+    <div class="space-y-3"><button id="removeWinnerBtn" class="btn-danger w-full">🚫 ตัดออกจากวงล้อ</button> <button id="closeResultBtn" class="btn-primary w-full">✅ ตกลง</button>
     </div>
    </div>
   </div><!-- Toast Container -->
@@ -285,6 +292,7 @@
     let lastWinner = '';
     let idleAnimationId = null;
     let lastIdleTime = 0;
+    let spinHistory = [];
 
     // === Colors ===
     const COLORS = [
@@ -315,6 +323,9 @@
     const titleInput = document.getElementById('titleInput');
     
     const clearBtn = document.getElementById('clearBtn');
+    const historyList = document.getElementById('historyList');
+    const historyCount = document.getElementById('historyCount');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
     const resultOverlay = document.getElementById('resultOverlay');
     const resultTitle = document.getElementById('resultTitle');
     const winnerName = document.getElementById('winnerName');
@@ -433,7 +444,7 @@
     function spin() {
       if (spinning) return;
       if (names.length < 2) {
-        showToast('��้องมีอย่างน้อย 2 รายการ', 'error');
+        showToast('ต้องมีอย่างน้อย 2 รายการ', 'error');
         return;
       }
 
@@ -467,17 +478,18 @@
           spinning = false;
           spinBtn.disabled = false;
           
-          // คำนวณผู้ชนะจากตำแหน่งลูกศร (ขวา = 0 องศา)
+          // คำนวณผู้���นะจากตำแหน่งลูกศร (ขวา = 0 องศา)
           const normalizedRotation = ((currentRotation % 360) + 360) % 360;
-          // ลูกศรอยู่ทางขว��� (0 องศา) แ���่วงล้อเริ่มวาดจาก -90 องศา (บน)
+          // ลูกศรอยู่ทางขวา (0 องศา) แต่วงล้อเริ่มวาดจาก -90 องศา (บน)
           // ดังนั้นต้องปรับ offset
           const pointerAngle = (360 - normalizedRotation + 90) % 360;
           const winnerIndex = Math.floor(pointerAngle / sliceAngle) % names.length;
           
           lastWinner = names[winnerIndex];
+          addToHistory(lastWinner);
           showResult(lastWinner);
           createConfetti();
-          // เริ่มหมุนช้าๆ ใหม่
+          // เริ่มหมุนช้า��� ใหม่
           startIdleAnimation();
         }
       }
@@ -508,6 +520,42 @@
         showToast(`ลบ "${lastWinner}" แล้ว!`);
       }
       hideResult();
+    }
+
+    // === Add to History ===
+    function addToHistory(winner) {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+      spinHistory.unshift({ name: winner, time: timeStr, round: spinHistory.length + 1 });
+      renderHistory();
+    }
+
+    // === Render History ===
+    function renderHistory() {
+      historyCount.textContent = `(${spinHistory.length} ครั้ง)`;
+      
+      if (spinHistory.length === 0) {
+        historyList.innerHTML = '<p class="text-white/40 text-sm text-center py-8">ยังไม่มีประวัติ<br>กดหมุนเลย! 🎰</p>';
+        return;
+      }
+
+      historyList.innerHTML = spinHistory.map((item, i) => `
+        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors ${i === 0 ? 'ring-1 ring-yellow-500/50 bg-yellow-500/10' : ''}">
+          <span class="w-6 h-6 flex items-center justify-center rounded-full bg-yellow-500/20 text-yellow-400 text-xs font-bold">${spinHistory.length - i}</span>
+          <div class="flex-1 min-w-0">
+            <p class="text-white font-semibold text-sm truncate">${item.name}</p>
+            <p class="text-white/40 text-xs">${item.time}</p>
+          </div>
+          ${i === 0 ? '<span class="text-yellow-400 text-lg">🏆</span>' : ''}
+        </div>
+      `).join('');
+    }
+
+    // === Clear History ===
+    function clearHistory() {
+      spinHistory = [];
+      renderHistory();
+      showToast('ล้างประวัติแล้ว');
     }
 
     // === Create Confetti ===
@@ -552,7 +600,7 @@
       showToast('บันทึกชื่อวงล้อแล้ว!');
     }
 
-    // กด Enter เพื่อบันทึก, Escape เพื่อ��กเลิก
+    // กด Enter เพื่อ��ั���ทึก, Escape เพื่อ��กเลิก
     titleInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -575,7 +623,7 @@
       namesArea.value = '';
       countLabel.textContent = '(0/100 รายการ)';
       drawWheel();
-      showToast('ล้างทั้ง��มดแล้ว');
+      showToast('ล้างทั้งหมดแล้ว');
     }
 
     // === Config Change Handler ===
@@ -607,6 +655,7 @@
     namesArea.addEventListener('input', updateNames);
     
     clearBtn.addEventListener('click', clearAll);
+    clearHistoryBtn.addEventListener('click', clearHistory);
     closeResultBtn.addEventListener('click', hideResult);
     removeWinnerBtn.addEventListener('click', removeWinner);
 
@@ -630,7 +679,7 @@
         const delta = now - lastIdleTime;
         lastIdleTime = now;
         
-        // หมุนช้าๆ 5 องศาต่��วินาที
+        // หมุนช้าๆ 5 องศาต่อวินาที
         currentRotation += (delta / 1000) * 5;
         drawWheel();
         
@@ -649,18 +698,19 @@
 
     // === Match Panel Height to Wheel ===
     function matchPanelHeight() {
+      const controlPanel = document.getElementById('controlPanel');
+      const historyPanel = document.getElementById('historyPanel');
+      
       if (window.innerWidth >= 1024) {
         const wheelWrapper = document.querySelector('.wheel-wrapper');
-        const controlPanel = document.getElementById('controlPanel');
-        if (wheelWrapper && controlPanel) {
+        if (wheelWrapper && controlPanel && historyPanel) {
           const wheelHeight = wheelWrapper.offsetHeight;
           controlPanel.style.height = wheelHeight + 'px';
+          historyPanel.style.height = wheelHeight + 'px';
         }
       } else {
-        const controlPanel = document.getElementById('controlPanel');
-        if (controlPanel) {
-          controlPanel.style.height = 'auto';
-        }
+        if (controlPanel) controlPanel.style.height = 'auto';
+        if (historyPanel) historyPanel.style.height = 'auto';
       }
     }
 
@@ -686,5 +736,5 @@
       setTimeout(matchPanelHeight, 100);
     });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b89e8dd146e45c8',t:'MTc2NzUyMTA0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b89f476a2a345c8',t:'MTc2NzUyMTUxOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
