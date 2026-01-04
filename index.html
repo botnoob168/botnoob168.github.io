@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>วงล้อนำโชค11</title>
+  <title>วงล้อนำโชค111</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet">
@@ -293,6 +293,34 @@
     let idleAnimationId = null;
     let lastIdleTime = 0;
     let spinHistory = [];
+   // ===== SOUND EFFECTS =====
+const spinSound = new Audio(
+  'https://cdn.pixabay.com/download/audio/2022/03/15/audio_1c3e0c4d3a.mp3'
+); // เสียงหมุน
+
+const winSound = new Audio(
+  'https://cdn.pixabay.com/download/audio/2022/10/30/audio_946b8c6e7b.mp3'
+); // เสียงฉลอง
+
+spinSound.loop = true;
+spinSound.volume = 0.5;
+winSound.volume = 0.8;
+
+function playSpinSound() {
+  spinSound.currentTime = 0;
+  spinSound.play().catch(() => {});
+}
+
+function stopSpinSound() {
+  spinSound.pause();
+  spinSound.currentTime = 0;
+}
+
+function playWinSound() {
+  winSound.currentTime = 0;
+  winSound.play().catch(() => {});
+}
+
 
     // === Colors ===
     const COLORS = [
@@ -451,6 +479,7 @@
       stopIdleAnimation();
       spinning = true;
       spinBtn.disabled = true;
+     playSpinSound();
 
       const sliceAngle = 360 / names.length;
       // หมุนหลายรอบ
@@ -477,6 +506,8 @@
         } else {
           spinning = false;
           spinBtn.disabled = false;
+         stopSpinSound();
+playWinSound();
           
           // คำนวณผู้���นะจากตำแหน่งลูกศร (ขวา = 0 องศา)
           const normalizedRotation = ((currentRotation % 360) + 360) % 360;
@@ -505,9 +536,10 @@
     }
 
     // === Hide Result ===
-    function hideResult() {
-      resultOverlay.classList.add('hidden');
-    }
+function hideResult() {
+  stopSpinSound();
+  resultOverlay.classList.add('hidden');
+}
 
     // === Remove Winner ===
     function removeWinner() {
