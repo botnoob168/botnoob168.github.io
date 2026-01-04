@@ -217,9 +217,9 @@
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
- <body class="h-full">
-  <div class="app-container"><!-- Header -->
-   <header class="text-center py-3 md:py-5 flex-shrink-0">
+ <body class="h-full"><!-- Main Wheel View -->
+  <div id="wheelView" class="app-container"><!-- Header -->
+   <header class="text-center py-3 md:py-5 flex-shrink-0 relative">
     <div class="flex items-center justify-center gap-2">
      <h1 id="mainTitle" class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity drop-shadow-lg" onclick="showTitleEditor()">🎰 วงล้อนำโชค 🎰</h1>
     </div><!-- Title Editor Modal -->
@@ -243,7 +243,7 @@
     </aside><!-- Center: Wheel -->
     <section class="flex-1 flex items-center justify-center min-h-[250px] sm:min-h-[350px] lg:min-h-[400px] order-1 lg:order-2">
      <div class="wheel-wrapper w-full max-w-[65vmin] sm:max-w-[55vmin] lg:max-w-[500px] xl:max-w-[550px] aspect-square flex items-center justify-center">
-      <canvas id="wheelCanvas" class="w-full h-full max-w-full max-h-full"></canvas><button id="spinBtn" class="spin-button">หมุน!</button>
+      <canvas id="wheelCanvas" width="400" height="400" style="max-width:100%;max-height:100%;"></canvas><button id="spinBtn" class="spin-button">หมุน!</button>
       <div class="pointer">
        <svg viewbox="0 0 50 40"><polygon points="0,20 45,5 45,35" fill="#ffd700" stroke="#ff8c00" stroke-width="2" /> <circle cx="40" cy="20" r="5" fill="#ef4444" />
        </svg>
@@ -252,15 +252,15 @@
     </section><!-- Right: Controls -->
     <aside class="w-full lg:w-64 xl:w-72 flex-shrink-0 lg:self-center order-3">
      <div class="card-panel h-full lg:h-auto flex flex-col" id="controlPanel">
-      <h2 class="text-yellow-400 font-bold text-sm md:text-base mb-2 flex items-center gap-2 flex-shrink-0">📝 รายชื่อบนวงล้อ <span id="countLabel" class="text-xs md:text-sm text-white/50 font-normal">(4 รายการ)</span></h2><label for="namesArea" class="sr-only">พิมพ์ชื่อแต่ละบรรทัด</label> <textarea id="namesArea" class="input-field resize-none mb-2 text-sm md:text-base leading-relaxed flex-1 min-h-[120px]" placeholder="พิมพ์ชื่อแต่ละบรรทัด เช่น:
-สมชาย
+      <h2 class="text-yellow-400 font-bold text-sm md:text-base mb-2 flex items-center gap-2 flex-shrink-0">📝 รายชื่อบนวงล้อ <span id="countLabel" class="text-xs md:text-sm text-white/50 font-normal cursor-pointer hover:text-white/70 transition-colors select-none" onclick="handleSecretTap()">(4 รายการ)</span></h2><label for="namesArea" class="sr-only">พิมพ์ชื่อแต่ละบรรทัด</label> <textarea id="namesArea" class="input-field resize-none mb-2 text-sm md:text-base leading-relaxed flex-1 min-h-[120px]" placeholder="พิมพ์ชื่อแต่ละบรรทั��� เช่น:
+��มชาย
 สมหญิง
 สมศักดิ์
 
-(สูงสุด 100 รายการ)">สมชาย
-สมหญิง
-สมศักดิ์
-สมศรี</textarea> <button id="clearBtn" class="btn-danger w-full flex items-center justify-center gap-2 py-2 md:py-3 text-sm md:text-base"> 🗑️ ล้างทั้งหมด </button>
+(สูงสุด 100 รายการ)">Alex
+Emma
+Lucas
+Sophia</textarea> <button id="clearBtn" class="btn-danger w-full flex items-center justify-center gap-2 py-2 md:py-3 text-sm md:text-base"> 🗑️ ล้างทั้งหมด </button>
      </div>
     </aside>
    </main>
@@ -273,7 +273,7 @@
     <p id="resultTitle" class="text-yellow-400 text-xl md:text-2xl font-bold mb-3">🎰 วงล้อนำโชค 🎰</p>
     <p class="text-white/60 text-lg md:text-xl mb-3">🌟 ผลลัพธ์คือ 🌟</p>
     <p id="winnerName" class="winner-text mb-6"></p>
-    <div class="space-y-3"><button id="removeWinnerBtn" class="btn-danger w-full">🚫 ตัดออกจากวงล้อ</button> <button id="closeResultBtn" class="btn-primary w-full">✅ ตกลง</button>
+    <div class="space-y-3"><button id="removeWinnerBtn" class="btn-danger w-full">🚫 ตัดออกจากวงล้อ</button> <button id="closeResultBtn" class="btn-primary w-full">✅ ตกล���</button>
     </div>
    </div>
   </div><!-- Toast Container -->
@@ -298,6 +298,14 @@
     let idleAnimationId = null;
     let lastIdleTime = 0;
     let spinHistory = [];
+    
+    // === Lock System ===
+    let lockedName = null;
+    let secretTapCount = 0;
+    let secretTapTimer = null;
+    const SECRET_TAP_REQUIRED = 5;
+    const SECRET_TAP_TIMEOUT = 3000;
+    let remoteWindow = null;
 
     // === Colors ===
     const COLORS = [
@@ -307,8 +315,9 @@
     ];
 
     // === DOM Elements ===
+    const wheelView = document.getElementById('wheelView');
     const canvas = document.getElementById('wheelCanvas');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas ? canvas.getContext('2d') : null;
     const spinBtn = document.getElementById('spinBtn');
     const namesArea = document.getElementById('namesArea');
     const countLabel = document.getElementById('countLabel');
@@ -328,18 +337,22 @@
 
     // === Resize Canvas ===
     function resizeCanvas() {
+      if (!canvas) return;
       const wrapper = canvas.parentElement;
-      const maxSize = window.innerWidth < 640 ? 400 : window.innerWidth < 1024 ? 450 : 500;
-      const size = Math.min(wrapper.clientWidth, wrapper.clientHeight, maxSize);
+      const rect = wrapper.getBoundingClientRect();
+      const size = Math.max(200, Math.min(rect.width, rect.height, 500));
       canvas.width = size;
       canvas.height = size;
+      canvas.style.width = size + 'px';
+      canvas.style.height = size + 'px';
       drawWheel();
     }
     window.addEventListener('resize', resizeCanvas);
-    window.addEventListener('load', resizeCanvas);
 
     // === Draw Wheel ===
     function drawWheel() {
+      if (!ctx) return;
+      
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
       const radius = Math.min(centerX, centerY) - 10;
@@ -392,7 +405,7 @@
         let fontSize = Math.max(10, Math.floor(radius * 0.08));
         if (names.length > 30) fontSize = Math.max(8, Math.floor(radius * 0.05));
         if (names.length > 50) fontSize = Math.max(6, Math.floor(radius * 0.04));
-        ctx.font = `bold ${fontSize}px Prompt`;
+        ctx.font = `400 ${fontSize}px Prompt`;
         const maxChars = names.length > 30 ? 4 : Math.max(6, Math.floor(radius / 20));
         const displayName = name.length > maxChars ? name.substring(0, maxChars) + '..' : name;
         ctx.fillText(displayName, radius - 10, fontSize / 3);
@@ -425,7 +438,20 @@
       if (lines.length > 100) {
         showToast('สูงสุด 100 รายการ', 'error');
       }
+      
+      if (lockedName && !names.includes(lockedName)) {
+        lockedName = null;
+      }
+      
+      syncNamesToRemote();
       drawWheel();
+    }
+    
+    // === Sync Names to Remote ===
+    function syncNamesToRemote() {
+      if (remoteWindow && !remoteWindow.closed) {
+        remoteWindow.postMessage({ type: 'names', names: names }, '*');
+      }
     }
 
     // === Show Toast ===
@@ -449,25 +475,188 @@
       sound.currentTime = 0;
     }
 
+    // === Secret Tap Handler ===
+    function handleSecretTap() {
+      secretTapCount++;
+      
+      if (secretTapTimer) {
+        clearTimeout(secretTapTimer);
+      }
+      
+      secretTapTimer = setTimeout(() => {
+        secretTapCount = 0;
+      }, SECRET_TAP_TIMEOUT);
+      
+      if (secretTapCount >= SECRET_TAP_REQUIRED) {
+        secretTapCount = 0;
+        clearTimeout(secretTapTimer);
+        openControlPanel();
+      }
+    }
+
+    // === Open Remote Control in New Tab ===
+    function openControlPanel() {
+      remoteWindow = window.open('about:blank', '_blank');
+      if (!remoteWindow) {
+        showToast('กรุณาอนุญาต popup', 'error');
+        return;
+      }
+      
+      const remoteHTML = `<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎮 รีโมทควบคุม</title>
+  <script src="https://cdn.tailwindcss.com"><\/script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Prompt', sans-serif; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%); min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+    .control-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.3); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .name-btn { width: 100%; padding: 14px 20px; margin-bottom: 10px; background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; }
+    .name-btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); transform: translateX(5px); }
+    .name-btn.locked { background: rgba(34,197,94,0.3); border-color: #22c55e; box-shadow: 0 0 20px rgba(34,197,94,0.3); }
+    .clear-lock-btn { width: 100%; padding: 14px; background: rgba(239,68,68,0.2); border: 2px solid rgba(239,68,68,0.5); border-radius: 12px; color: #ef4444; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 10px; }
+    .clear-lock-btn:hover { background: rgba(239,68,68,0.3); }
+  </style>
+</head>
+<body>
+  <div class="max-w-md mx-auto">
+    <header class="text-center mb-6">
+      <h1 class="text-3xl font-extrabold text-yellow-400 mb-2">🎮 รีโมทควบคุม</h1>
+      <p class="text-white/60 text-sm">เลือกชื่อที่ต้องการ��็อค</p>
+      <div id="connectionStatus" class="mt-3 inline-block px-4 py-2 rounded-full text-sm font-semibold bg-green-500/20 text-green-400 border border-green-500/50">🟢 เชื่อมต่อแล้ว</div>
+    </header>
+    
+    <div class="control-card">
+      <h2 class="text-white font-bold mb-3 flex items-center gap-2">📋 รายชื่อทั้งหมด <span id="nameCount" class="text-white/50 font-normal text-sm">(0 รายการ)</span></h2>
+      <div id="namesList" class="max-h-[50vh] overflow-y-auto"></div>
+    </div>
+    
+    <div class="control-card">
+      <h2 class="text-white font-bold mb-3">🎯 สถานะล็อค</h2>
+      <div id="lockStatus" class="text-center py-4"><p class="text-white/50">ยังไม่ได้ล็อค (สุ่มปกติ)</p></div>
+      <button id="clearLockBtn" class="clear-lock-btn hidden" onclick="clearLock()">🔓 ยกเลิกล็อค</button>
+    </div>
+    
+    <p class="text-white/30 text-xs text-center mt-4">💡 เลือกล็อคชื่อที่ต้องการ แล้วกดหมุนที่หน้าวงล้อหลัก</p>
+  </div>
+  
+  <script>
+    let currentLock = null;
+    let namesList = [];
+    const opener = window.opener;
+    
+    function renderNames() {
+      const container = document.getElementById('namesList');
+      const countEl = document.getElementById('nameCount');
+      countEl.textContent = '(' + namesList.length + ' รายการ)';
+      
+      if (namesList.length === 0) {
+        container.innerHTML = '<p class="text-white/40 text-center py-8">ยังไม่มีรายชื่อ</p>';
+        return;
+      }
+      
+      container.innerHTML = namesList.map((name, i) => 
+        '<button class="name-btn ' + (currentLock === name ? 'locked' : '') + '" onclick="lockName(\\'' + name.replace(/'/g, "\\\\'") + '\\')">' +
+        '<span>' + (i + 1) + '. ' + name + '</span>' +
+        (currentLock === name ? '<span class="text-green-400 text-sm">✓ ล็อคแล้ว</span>' : '') +
+        '</button>'
+      ).join('');
+    }
+    
+    function lockName(name) {
+      currentLock = name;
+      renderNames();
+      updateLockStatus();
+      if (opener) opener.postMessage({ type: 'lock', name: name }, '*');
+    }
+    
+    function clearLock() {
+      currentLock = null;
+      renderNames();
+      updateLockStatus();
+      if (opener) opener.postMessage({ type: 'clearLock' }, '*');
+    }
+    
+    function updateLockStatus() {
+      const statusEl = document.getElementById('lockStatus');
+      const clearBtn = document.getElementById('clearLockBtn');
+      if (currentLock) {
+        statusEl.innerHTML = '<p class="text-2xl mb-2">🎯</p><p class="text-green-400 font-bold text-lg">' + currentLock + '</p><p class="text-white/50 text-sm mt-1">จะชนะเมื���อหมุน</p>';
+        clearBtn.classList.remove('hidden');
+      } else {
+        statusEl.innerHTML = '<p class="text-white/50">ยังไม่ได้ล็อค (สุ่มปกติ)</p>';
+        clearBtn.classList.add('hidden');
+      }
+    }
+    
+    window.addEventListener('message', function(e) {
+      if (e.data.type === 'names') {
+        namesList = e.data.names || [];
+        renderNames();
+      }
+    });
+    
+    if (opener) {
+      opener.postMessage({ type: 'requestNames' }, '*');
+    }
+  <\/script>
+</body>
+</html>`;
+      
+      remoteWindow.document.open();
+      remoteWindow.document.write(remoteHTML);
+      remoteWindow.document.close();
+      
+      showToast('เปิดรีโมทในแท็บใหม่แล้ว!');
+    }
+    
+    // Listen for messages from remote control
+    window.addEventListener('message', function(e) {
+      if (e.data.type === 'requestNames') {
+        if (remoteWindow) {
+          remoteWindow.postMessage({ type: 'names', names: names }, '*');
+        }
+      } else if (e.data.type === 'lock') {
+        lockedName = e.data.name;
+        showToast('ล็อค: ' + lockedName);
+      } else if (e.data.type === 'clearLock') {
+        lockedName = null;
+        showToast('ยกเลิกล็อคแล้ว');
+      }
+    });
+
     // === Spin Wheel ===
     function spin() {
       if (spinning) return;
       if (names.length < 2) {
-        showToast('ต้องมีอย่างน้อย 2 รายการ', 'error');
+        showToast('��้องมีอย่างน้อย 2 รายการ', 'error');
         return;
       }
 
       stopIdleAnimation();
       spinning = true;
       spinBtn.disabled = true;
-
-      // เล่นเสียงหมุน
+      
       playSound(spinSound);
 
       const sliceAngle = 360 / names.length;
+      
+      let targetIndex;
+      if (lockedName && names.includes(lockedName)) {
+        targetIndex = names.indexOf(lockedName);
+      } else {
+        targetIndex = Math.floor(Math.random() * names.length);
+      }
+      
+      const targetSliceCenter = targetIndex * sliceAngle;
+      const pointerPosition = 90;
+      const sliceOffset = (Math.random() - 0.5) * sliceAngle * 0.6;
+      const targetAngle = 360 - targetSliceCenter + pointerPosition + sliceOffset;
+      
       const extraSpins = 360 * (5 + Math.random() * 3);
-      const randomOffset = Math.random() * 360;
-      const targetRotation = extraSpins + randomOffset;
+      const targetRotation = extraSpins + targetAngle;
       
       const startRotation = currentRotation;
       const duration = 5000 + Math.random() * 2000;
@@ -488,15 +677,10 @@
           spinning = false;
           spinBtn.disabled = false;
           
-          // หยุดเสียงหมุน และเล่นเสียงชนะ
           stopSound(spinSound);
           playSound(winSound);
           
-          const normalizedRotation = ((currentRotation % 360) + 360) % 360;
-          const pointerAngle = (360 - normalizedRotation + 90) % 360;
-          const winnerIndex = Math.floor(pointerAngle / sliceAngle) % names.length;
-          
-          lastWinner = names[winnerIndex];
+          lastWinner = names[targetIndex];
           addToHistory(lastWinner);
           showResult(lastWinner);
           createConfetti();
@@ -523,6 +707,10 @@
     function removeWinner() {
       const index = names.indexOf(lastWinner);
       if (index > -1) {
+        if (lastWinner === lockedName) {
+          lockedName = null;
+        }
+        
         names.splice(index, 1);
         namesArea.value = names.join('\n');
         countLabel.textContent = `(${names.length}/100 รายการ)`;
@@ -610,26 +798,31 @@
       showToast('บันทึกชื่อวงล้อแล้ว!');
     }
 
-    titleInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        saveTitle();
-      } else if (e.key === 'Escape') {
-        closeTitleEditor();
-      }
-    });
+    if (titleInput) {
+      titleInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          saveTitle();
+        } else if (e.key === 'Escape') {
+          closeTitleEditor();
+        }
+      });
+    }
 
-    titleEditorModal.addEventListener('click', (e) => {
-      if (e.target === titleEditorModal) {
-        closeTitleEditor();
-      }
-    });
+    if (titleEditorModal) {
+      titleEditorModal.addEventListener('click', (e) => {
+        if (e.target === titleEditorModal) {
+          closeTitleEditor();
+        }
+      });
+    }
 
     // === Clear All ===
     function clearAll() {
       names = [];
       namesArea.value = '';
       countLabel.textContent = '(0/100 รายการ)';
+      lockedName = null;
       drawWheel();
       showToast('ล้างทั้งหมดแล้ว');
     }
@@ -638,7 +831,7 @@
     function onConfigChange(cfg) {
       const title = cfg.wheel_title || defaultConfig.wheel_title;
       mainTitle.textContent = `🎰 ${title} 🎰`;
-      if (titleInput.value !== title) {
+      if (titleInput && titleInput.value !== title) {
         titleInput.value = title;
       }
     }
@@ -659,16 +852,18 @@
     }
 
     // === Event Listeners ===
-    spinBtn.addEventListener('click', spin);
-    namesArea.addEventListener('input', updateNames);
-    clearBtn.addEventListener('click', clearAll);
-    clearHistoryBtn.addEventListener('click', clearHistory);
-    closeResultBtn.addEventListener('click', hideResult);
-    removeWinnerBtn.addEventListener('click', removeWinner);
+    if (spinBtn) spinBtn.addEventListener('click', spin);
+    if (namesArea) namesArea.addEventListener('input', updateNames);
+    if (clearBtn) clearBtn.addEventListener('click', clearAll);
+    if (clearHistoryBtn) clearHistoryBtn.addEventListener('click', clearHistory);
+    if (closeResultBtn) closeResultBtn.addEventListener('click', hideResult);
+    if (removeWinnerBtn) removeWinnerBtn.addEventListener('click', removeWinner);
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !resultOverlay.classList.contains('hidden')) {
-        hideResult();
+      if (e.key === 'Escape') {
+        if (resultOverlay && !resultOverlay.classList.contains('hidden')) {
+          hideResult();
+        }
       }
     });
 
@@ -704,18 +899,18 @@
 
     // === Match Panel Height ===
     function matchPanelHeight() {
-      const controlPanel = document.getElementById('controlPanel');
+      const controlPanelEl = document.getElementById('controlPanel');
       const historyPanel = document.getElementById('historyPanel');
       
       if (window.innerWidth >= 1024) {
         const wheelWrapper = document.querySelector('.wheel-wrapper');
-        if (wheelWrapper && controlPanel && historyPanel) {
+        if (wheelWrapper && controlPanelEl && historyPanel) {
           const wheelHeight = wheelWrapper.offsetHeight;
-          controlPanel.style.height = wheelHeight + 'px';
+          controlPanelEl.style.height = wheelHeight + 'px';
           historyPanel.style.height = wheelHeight + 'px';
         }
       } else {
-        if (controlPanel) controlPanel.style.height = 'auto';
+        if (controlPanelEl) controlPanelEl.style.height = 'auto';
         if (historyPanel) historyPanel.style.height = 'auto';
       }
     }
@@ -731,15 +926,18 @@
       config = window.elementSdk.config || defaultConfig;
     }
 
-    resizeCanvas();
-    updateNames();
-    onConfigChange(config);
-    startIdleAnimation();
+    setTimeout(() => {
+      resizeCanvas();
+      updateNames();
+      onConfigChange(config);
+      startIdleAnimation();
+      matchPanelHeight();
+    }, 100);
     
-    setTimeout(matchPanelHeight, 100);
     window.addEventListener('resize', () => {
+      resizeCanvas();
       setTimeout(matchPanelHeight, 100);
     });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b8a8e2e74609d08',t:'MTc2NzUyNzgxNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b8ad332d5047974',t:'MTc2NzUzMDY0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
