@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>วงล้อนำโชคคค</title>
+  <title>วงล้อนำโชคจ้า</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800&amp;display=swap" rel="stylesheet">
@@ -238,9 +238,9 @@
       </div>
      </div>
     </section><!-- Right: Controls -->
-    <aside class="w-full lg:w-72 xl:w-80 flex-shrink-0"><!-- Names Input -->
-     <div class="card-panel h-full lg:h-auto">
-      <h2 class="text-yellow-400 font-bold text-sm md:text-base mb-2 flex items-center gap-2">📝 รายชื่อในวงล้อ <span id="countLabel" class="text-xs md:text-sm text-white/50 font-normal">(4 รายการ)</span></h2><label for="namesArea" class="sr-only">พิมพ์ชื่อแต่ละบรรทัด</label> <textarea id="namesArea" class="input-field resize-none mb-2 text-sm md:text-base leading-relaxed h-28 sm:h-36 lg:h-56 xl:h-64" placeholder="พิมพ์ชื่อแต่ละบรรทัด เช่น:
+    <aside class="w-full lg:w-72 xl:w-80 flex-shrink-0 lg:self-center"><!-- Names Input -->
+     <div class="card-panel h-full lg:h-auto flex flex-col" id="controlPanel">
+      <h2 class="text-yellow-400 font-bold text-sm md:text-base mb-2 flex items-center gap-2 flex-shrink-0">📝 รายชื่อในวงล้อ <span id="countLabel" class="text-xs md:text-sm text-white/50 font-normal">(4 รายการ)</span></h2><label for="namesArea" class="sr-only">พิมพ์ชื่อแต่ละบรรทัด</label> <textarea id="namesArea" class="input-field resize-none mb-2 text-sm md:text-base leading-relaxed flex-1 min-h-[120px]" placeholder="พิมพ์ชื่อแต่ละบรรทัด เช่น:
 สมชาย
 สมหญิง
 สมศักดิ์
@@ -641,6 +641,23 @@
       }
     }
 
+    // === Match Panel Height to Wheel ===
+    function matchPanelHeight() {
+      if (window.innerWidth >= 1024) {
+        const wheelWrapper = document.querySelector('.wheel-wrapper');
+        const controlPanel = document.getElementById('controlPanel');
+        if (wheelWrapper && controlPanel) {
+          const wheelHeight = wheelWrapper.offsetHeight;
+          controlPanel.style.height = wheelHeight + 'px';
+        }
+      } else {
+        const controlPanel = document.getElementById('controlPanel');
+        if (controlPanel) {
+          controlPanel.style.height = 'auto';
+        }
+      }
+    }
+
     // === Initialize ===
     if (window.elementSdk) {
       window.elementSdk.init({
@@ -656,6 +673,12 @@
     updateNames();
     onConfigChange(config);
     startIdleAnimation();
+    
+    // Match panel height after layout settles
+    setTimeout(matchPanelHeight, 100);
+    window.addEventListener('resize', () => {
+      setTimeout(matchPanelHeight, 100);
+    });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b89d978d39845c8',t:'MTc2NzUyMDQxMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b89debf94d545c8',t:'MTc2NzUyMDYzMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
