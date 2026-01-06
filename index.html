@@ -1,112 +1,163 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ฟุดฟิดช็อป Links</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Kanit', sans-serif;
-            background: linear-gradient(135deg, #1a0b2e 0%, #090919 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: white;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ฟุดฟิดช็อป</title>
 
-        .container {
-            width: 100%;
-            max-width: 450px;
-            padding: 20px;
-            text-align: center;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-        .profile-section {
-            margin-bottom: 30px;
-        }
+<style>
+* { box-sizing: border-box; }
 
-        .profile-img {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            border: 3px solid #7b2ff7;
-            margin-bottom: 15px;
-            object-fit: cover;
-        }
+body {
+    margin: 0;
+    font-family: 'Kanit', sans-serif;
+    background: linear-gradient(135deg, #1a0b2e, #090919);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+}
 
-        h1 { margin: 10px 0; font-size: 24px; color: #fff; }
-        p { color: #ccc; font-size: 14px; margin-bottom: 30px; }
+.container {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+    text-align: center;
+}
 
-        .link-button {
-            display: flex;
-            align-items: center;
-            background: white;
-            color: black;
-            text-decoration: none;
-            padding: 15px 25px;
-            margin-bottom: 15px;
-            border-radius: 50px;
-            font-weight: 500;
-            font-size: 18px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
+/* ===== Profile ===== */
+.profile-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 3px solid #7b2ff7;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(0.8);
+    animation: logoIn 0.8s ease forwards;
+}
 
-        .link-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(123, 47, 247, 0.4);
-        }
+@keyframes logoIn {
+    to { opacity: 1; transform: scale(1); }
+}
 
-        .link-button i {
-            font-size: 24px;
-            margin-right: 15px;
-            width: 30px;
-            text-align: center;
-        }
+h1 {
+    margin: 15px 0 5px;
+    font-size: 24px;
+}
 
-        .fa-facebook { color: #1877F2; }
-        .fa-tiktok { color: #000000; }
-        .fa-youtube { color: #FF0000; }
-        .fa-globe { color: #7b2ff7; }
+.status {
+    display: inline-block;
+    margin-bottom: 25px;
+    font-size: 13px;
+    color: #7CFF9B;
+}
 
-        .btn-text { flex-grow: 1; text-align: center; margin-right: 30px; }
-    </style>
+/* ===== Buttons ===== */
+.link-button {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    color: #000;
+    text-decoration: none;
+    padding: 15px 25px;
+    margin-bottom: 15px;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(0,0,0,.3);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: btnIn 0.6s ease forwards;
+}
+
+.link-button:nth-child(2){ animation-delay:.2s; }
+.link-button:nth-child(3){ animation-delay:.35s; }
+.link-button:nth-child(4){ animation-delay:.5s; }
+.link-button:nth-child(5){ animation-delay:.65s; }
+
+@keyframes btnIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.link-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(123,47,247,.5);
+}
+
+.link-button:active {
+    transform: scale(.97);
+}
+
+/* Highlight main button */
+.main {
+    border: 2px solid #7b2ff7;
+    box-shadow: 0 0 20px rgba(123,47,247,.6);
+    position: relative;
+}
+
+.main::after {
+    content: "แนะนำ";
+    position: absolute;
+    right: 18px;
+    top: -10px;
+    background: #7b2ff7;
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+
+.link-button i {
+    font-size: 24px;
+    width: 30px;
+}
+
+.btn-text {
+    flex-grow: 1;
+    text-align: center;
+    margin-right: 30px;
+}
+
+/* Icon colors */
+.fa-globe { color:#7b2ff7; }
+.fa-facebook { color:#1877F2; }
+.fa-tiktok { color:#000; }
+.fa-youtube { color:#FF0000; }
+</style>
 </head>
+
 <body>
+<div class="container">
 
-    <div class="container">
-        <div class="profile-section">
-            <img src="https://img5.pic.in.th/file/secure-sv1/49889.png" alt="ฟุดฟิดช็อป" class="profile-img">
-            <h1>ฟุดฟิดช็อป</h1>
-            <p>บริการจำหน่ายสินค้าและบริการ สามารถสั่งซื้อได้ที่เว็บไซต์หรือทัก DM</p>
-        </div>
+    <img src="https://img5.pic.in.th/file/secure-sv1/49889.png" class="profile-img" alt="ฟุดฟิดช็อป">
+    <h1>ฟุดฟิดช็อป</h1>
+    <div class="status">● ออนไลน์ตอนนี้</div>
 
-        <a href="https://zanco.osnvc.xyz/" class="link-button" target="_blank">
-            <i class="fas fa-globe"></i>
-            <span class="btn-text">เว็บไซต์ซื้อสินค้า</span>
-        </a>
+    <a href="https://zanco.osnvc.xyz/" class="link-button main" target="_blank">
+        <i class="fas fa-globe"></i>
+        <span class="btn-text">เว็บไซต์ซื้อสินค้า</span>
+    </a>
 
-        <a href="https://www.facebook.com/share/1AUZbkzfAB/" class="link-button" target="_blank">
-            <i class="fab fa-facebook"></i>
-            <span class="btn-text">ติดต่อสอบถาม</span>
-        </a>
+    <a href="https://www.facebook.com/share/1AUZbkzfAB/" class="link-button" target="_blank">
+        <i class="fab fa-facebook"></i>
+        <span class="btn-text">ติดต่อสอบถาม</span>
+    </a>
 
-        <a href="https://www.tiktok.com/@zancostudio?_r=1&_t=ZS-92p10yAH5SW" class="link-button" target="_blank">
-            <i class="fab fa-tiktok"></i>
-            <span class="btn-text">TikTok</span>
-        </a>
+    <a href="https://www.tiktok.com/@zancostudio" class="link-button" target="_blank">
+        <i class="fab fa-tiktok"></i>
+        <span class="btn-text">TikTok</span>
+    </a>
 
-        <a href="https://youtube.com/@benzshopv1?si=naSEN3a_REgAipwQ" class="link-button" target="_blank">
-            <i class="fab fa-youtube"></i>
-            <span class="btn-text">YouTube</span>
-        </a>
-    </div>
+    <a href="https://youtube.com/@benzshopv1" class="link-button" target="_blank">
+        <i class="fab fa-youtube"></i>
+        <span class="btn-text">YouTube</span>
+    </a>
 
+</div>
 </body>
 </html>
