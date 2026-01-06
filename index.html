@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ฟิตช็อป</title>
+  <title>Link Hub</title>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="/_sdk/element_sdk.js"></script>
@@ -50,8 +50,8 @@
     }
     
     .avatar {
-      width: 88px;
-      height: 88px;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.15);
       backdrop-filter: blur(10px);
@@ -84,11 +84,40 @@
       font-weight: 300;
     }
     
+    .promo-banner {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 16px;
+      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: 
+        0 0 25px rgba(255, 107, 107, 0.6),
+        0 0 50px rgba(255, 107, 107, 0.3),
+        0 4px 16px rgba(0, 0, 0, 0.2);
+      animation: fadeInDown 0.8s ease-out 0.3s backwards, promoPulse 3s ease-in-out infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: 500;
+      font-size: 15px;
+    }
+    
+    .promo-icon {
+      font-size: 18px;
+      animation: bounce 1s ease-in-out infinite;
+    }
+    
+    .promo-text {
+      flex: 1;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
     .links-container {
       display: flex;
       flex-direction: column;
       gap: 14px;
-      margin-bottom: 32px;
     }
     
     .link-button {
@@ -115,19 +144,19 @@
     }
     
     .link-button:nth-child(1) {
-      animation-delay: 0.1s;
+      animation-delay: 0.4s;
     }
     
     .link-button:nth-child(2) {
-      animation-delay: 0.2s;
+      animation-delay: 0.5s;
     }
     
     .link-button:nth-child(3) {
-      animation-delay: 0.3s;
+      animation-delay: 0.6s;
     }
     
     .link-button:nth-child(4) {
-      animation-delay: 0.4s;
+      animation-delay: 0.7s;
     }
     
     .link-button:hover {
@@ -149,15 +178,6 @@
       transform: translateY(0);
     }
     
-    .footer {
-      text-align: center;
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 14px;
-      padding: 16px;
-      font-weight: 300;
-      animation: fadeIn 1s ease-out 0.6s backwards;
-    }
-    
     /* Animation Keyframes */
     @keyframes fadeInUp {
       from {
@@ -176,6 +196,17 @@
       }
       to {
         opacity: 1;
+      }
+    }
+    
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
     }
     
@@ -205,9 +236,33 @@
       }
     }
     
+    @keyframes promoPulse {
+      0%, 100% {
+        box-shadow: 
+          0 0 25px rgba(255, 107, 107, 0.6),
+          0 0 50px rgba(255, 107, 107, 0.3),
+          0 4px 16px rgba(0, 0, 0, 0.2);
+      }
+      50% {
+        box-shadow: 
+          0 0 35px rgba(255, 107, 107, 0.8),
+          0 0 70px rgba(255, 107, 107, 0.5),
+          0 4px 16px rgba(0, 0, 0, 0.2);
+      }
+    }
+    
     @media (max-width: 640px) {
       .main-container {
         padding: 24px 16px;
+      }
+      
+      .promo-banner {
+        font-size: 13px;
+        padding: 10px 16px;
+      }
+      
+      .promo-icon {
+        font-size: 16px;
       }
       
       .profile-name {
@@ -236,23 +291,22 @@
      </div>
      <h1 id="profile-name" class="profile-name">ฟุดฟิดช็อป</h1>
      <p id="profile-bio" class="profile-bio">บริการจำหน่าย ไฟล์/โปรแกรม สามารถสั่งซื้อได้ที่เว็บไซต์หรือทัก DM</p>
+    </div><!-- Promotion Banner -->
+    <div class="promo-banner" id="promo-banner"><span class="promo-icon">🎉</span> <span id="promo-text" class="promo-text">🔥 รับสมัครตัวแทนจำหน่ายโปรแกรม ติดต่อด้านล่างเลย</span> <span class="promo-icon">🎉</span>
     </div><!-- Links Container -->
-    <div class="links-container"><a href="https://github.com" target="_blank" rel="noopener noreferrer" class="link-button" id="link1"> <span id="link1-text">🛒 เว็บไซต์ซื้อสินค้า</span> </a> <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="link-button" id="link2"> <span id="link2-text">💬 ติดต่อสอบถาม</span> </a> <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="link-button" id="link3"> <span id="link3-text"><i class="fab fa-tiktok"></i> TikTok</span> </a> <a href="https://portfolio.com" target="_blank" rel="noopener noreferrer" class="link-button" id="link4"> <span id="link4-text"><i class="fab fa-youtube"></i> YouTube</span> </a>
-    </div><!-- Footer -->
-    <div class="footer">
-   
+    <div class="links-container"><a href="https://tassanawut.bearshop.online/" target="_blank" rel="noopener noreferrer" class="link-button" id="link1"> <span id="link1-text">🛒 เว็บไซต์ซื้อสินค้า</span> </a> <a href="https://www.facebook.com/tassanawut.senmad?rdid=1ElE7HYj2glw4ckI&amp;share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1Bpy8j1ESG%2F" target="_blank" rel="noopener noreferrer" class="link-button" id="link2"> <span id="link2-text"><i class="fab fa-facebook"></i> Facebook</span> </a> <a href="https://www.instagram.com/fit.kkkkkk_?igsh=MWJoeWtiOGoxYWV5Mg==" target="_blank" rel="noopener noreferrer" class="link-button" id="link3"> <span id="link3-text"><i class="fab fa-instagram"></i> Instagram</span> </a> <a href="https://www.tiktok.com/@fit_4532?_r=1&amp;_t=ZS-92qAA1BLZPJ" target="_blank" rel="noopener noreferrer" class="link-button" id="link4"> <span id="link4-text"><i class="fab fa-tiktok"></i> TikTok</span> </a>
     </div>
    </div>
   </div>
   <script>
     const defaultConfig = {
+      promo_text: '🔥 รับสมัครตัวแทนจำหน่ายโปรแกรม ติดต่อด้านล่างเลย',
       profile_name: 'ฟุดฟิดช็อป',
       profile_bio: 'บริการจำหน่าย ไฟล์/โปรแกรม สามารถสั่งซื้อได้ที่เว็บไซต์หรือทัก DM',
-      link1_text: '<i class="fas fa-globe"></i> เว็บไซต์ซื้อสินค้า',
-      link2_text: '<i class="fas fa-comments"></i> ติดต่อสอบถาม',
-      link3_text: '<i class="fab fa-tiktok"></i> TikTok',
-      link4_text: '<i class="fab fa-youtube"></i> YouTube',
-      footer_text: 'Made with ❤️ by กุนขแมร์',
+      link1_text: '🛒 เว็บไซต์ซื้อสินค้า',
+      link2_text: '<i class="fab fa-facebook"></i> Facebook',
+      link3_text: '<i class="fab fa-instagram"></i> Instagram',
+      link4_text: '<i class="fab fa-tiktok"></i> TikTok',
       background_color: '#1a1a2e',
       button_color: 'rgba(255, 255, 255, 0.98)',
       text_color: '#5a4ba6',
@@ -284,32 +338,31 @@
       
       document.getElementById('profile-name').style.color = textColor;
       document.getElementById('profile-bio').style.color = secondaryTextColor;
-      document.getElementById('footer-text').style.color = secondaryTextColor;
       
       // Update text content
+      document.getElementById('promo-text').textContent = config.promo_text || defaultConfig.promo_text;
       document.getElementById('profile-name').textContent = config.profile_name || defaultConfig.profile_name;
       document.getElementById('profile-bio').textContent = config.profile_bio || defaultConfig.profile_bio;
       document.getElementById('link1-text').innerHTML = config.link1_text || defaultConfig.link1_text;
       document.getElementById('link2-text').innerHTML = config.link2_text || defaultConfig.link2_text;
       document.getElementById('link3-text').innerHTML = config.link3_text || defaultConfig.link3_text;
       document.getElementById('link4-text').innerHTML = config.link4_text || defaultConfig.link4_text;
-      document.getElementById('footer-text').innerHTML = config.footer_text || defaultConfig.footer_text;
       
       // Update font sizes
+      document.getElementById('promo-text').style.fontSize = `${baseSize * 0.94}px`;
       document.getElementById('profile-name').style.fontSize = `${baseSize * 1.75}px`;
       document.getElementById('profile-bio').style.fontSize = `${baseSize * 0.94}px`;
       document.querySelectorAll('.link-button').forEach(btn => {
         btn.style.fontSize = `${baseSize}px`;
       });
-      document.getElementById('footer-text').style.fontSize = `${baseSize * 0.875}px`;
       
       // Update font family
+      document.getElementById('promo-text').style.fontFamily = `${customFont}, ${baseFontStack}`;
       document.getElementById('profile-name').style.fontFamily = `${customFont}, ${baseFontStack}`;
       document.getElementById('profile-bio').style.fontFamily = `${customFont}, ${baseFontStack}`;
       document.querySelectorAll('.link-button').forEach(btn => {
         btn.style.fontFamily = `${customFont}, ${baseFontStack}`;
       });
-      document.getElementById('footer-text').style.fontFamily = `${customFont}, ${baseFontStack}`;
     }
 
     if (window.elementSdk) {
@@ -371,16 +424,16 @@
           }
         }),
         mapToEditPanelValues: (config) => new Map([
+          ['promo_text', config.promo_text || defaultConfig.promo_text],
           ['profile_name', config.profile_name || defaultConfig.profile_name],
           ['profile_bio', config.profile_bio || defaultConfig.profile_bio],
           ['link1_text', config.link1_text || defaultConfig.link1_text],
           ['link2_text', config.link2_text || defaultConfig.link2_text],
           ['link3_text', config.link3_text || defaultConfig.link3_text],
-          ['link4_text', config.link4_text || defaultConfig.link4_text],
-          ['footer_text', config.footer_text || defaultConfig.footer_text]
+          ['link4_text', config.link4_text || defaultConfig.link4_text]
         ])
       });
     }
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b99912382e1ce66',t:'MTc2NzY4NTIyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b99e768065cce85',t:'MTc2NzY4ODc1Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
