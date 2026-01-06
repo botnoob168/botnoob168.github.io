@@ -103,9 +103,13 @@
       font-weight: 500;
       text-align: center;
       transition: all 0.3s ease;
-      border: 2px solid rgba(255, 255, 255, 0.5);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-      animation: fadeInUp 0.6s ease-out backwards;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 
+        0 0 20px rgba(138, 121, 255, 0.6),
+        0 0 40px rgba(138, 121, 255, 0.4),
+        0 0 60px rgba(138, 121, 255, 0.2),
+        0 4px 16px rgba(0, 0, 0, 0.1);
+      animation: fadeInUp 0.6s ease-out backwards, neonPulse 2s ease-in-out infinite;
       position: relative;
       overflow: hidden;
     }
@@ -128,9 +132,13 @@
     
     .link-button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 0 30px rgba(255, 255, 255, 0.4);
+      box-shadow: 
+        0 0 30px rgba(138, 121, 255, 0.9),
+        0 0 60px rgba(138, 121, 255, 0.7),
+        0 0 90px rgba(138, 121, 255, 0.5),
+        0 8px 24px rgba(0, 0, 0, 0.15);
       background: #ffffff;
-      border-color: rgba(255, 255, 255, 0.8);
+      border-color: rgba(138, 121, 255, 0.9);
     }
     
     .link-button:hover span {
@@ -180,6 +188,23 @@
       }
     }
     
+    @keyframes neonPulse {
+      0%, 100% {
+        box-shadow: 
+          0 0 20px rgba(138, 121, 255, 0.6),
+          0 0 40px rgba(138, 121, 255, 0.4),
+          0 0 60px rgba(138, 121, 255, 0.2),
+          0 4px 16px rgba(0, 0, 0, 0.1);
+      }
+      50% {
+        box-shadow: 
+          0 0 25px rgba(138, 121, 255, 0.8),
+          0 0 50px rgba(138, 121, 255, 0.5),
+          0 0 75px rgba(138, 121, 255, 0.3),
+          0 4px 16px rgba(0, 0, 0, 0.1);
+      }
+    }
+    
     @media (max-width: 640px) {
       .main-container {
         padding: 24px 16px;
@@ -210,12 +235,12 @@
      <div class="avatar"><img src="https://img5.pic.in.th/file/secure-sv1/49889.png" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.alt='Logo failed to load';">
      </div>
      <h1 id="profile-name" class="profile-name">ฟุดฟิดช็อป</h1>
-     <p id="profile-bio" class="profile-bio">บริการจำหน่าย ไฟล์/โปรแกรม สามารถสั่งซื้��ได้ที่เ��็บไซต์หรือทัก DM</p>
+     <p id="profile-bio" class="profile-bio">บริการจำหน่าย ไฟล์/โปรแกรม สามารถสั่งซื้อได้ที่เว็บไซต์หรือทัก DM</p>
     </div><!-- Links Container -->
-    <div class="links-container"><a href="https://github.com" target="_blank" rel="noopener noreferrer" class="link-button" id="link1"> <span id="link1-text">🛒 เว็บไซต์ซื้อสินค้า</span> </a> <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="link-button" id="link2"> <span id="link2-text">💬 �����ิดต่อสอบถาม</span> </a> <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="link-button" id="link3"> <span id="link3-text"><i class="fab fa-tiktok"></i> TikTok</span> </a> <a href="https://portfolio.com" target="_blank" rel="noopener noreferrer" class="link-button" id="link4"> <span id="link4-text"><i class="fab fa-youtube"></i> YouTube</span> </a>
+    <div class="links-container"><a href="https://github.com" target="_blank" rel="noopener noreferrer" class="link-button" id="link1"> <span id="link1-text">🛒 เว็บไซต์ซื้อสินค้า</span> </a> <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="link-button" id="link2"> <span id="link2-text">💬 ติดต่อสอบถาม</span> </a> <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="link-button" id="link3"> <span id="link3-text"><i class="fab fa-tiktok"></i> TikTok</span> </a> <a href="https://portfolio.com" target="_blank" rel="noopener noreferrer" class="link-button" id="link4"> <span id="link4-text"><i class="fab fa-youtube"></i> YouTube</span> </a>
     </div><!-- Footer -->
     <div class="footer">
-     <p id="footer-text">Made with ���� by กุนขแมร์</p>
+     <p id="footer-text">Made with ❤️ by กุนขแมร์</p>
     </div>
    </div>
   </div>
@@ -357,5 +382,5 @@
       });
     }
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b998dd96629ce66',t:'MTc2NzY4NTA4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b99912382e1ce66',t:'MTc2NzY4NTIyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
